@@ -52,6 +52,7 @@ namespace Nos3
         // Private data
         int16_t _sc;  // Which spacecraft number to parse out of 42 data
         int16_t _gps; // Which GPS number to parse out of 42 data
+        int16_t _leap_seconds; // Current number of leap seconds
     };
 }
 
