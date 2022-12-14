@@ -173,8 +173,9 @@ static void NAV_AppInit(void)
 static void NAV_ProcessCommandPacket(uint8 CmdCode)
 {
 
-    uint8_t *DataBuffer;
+    uint8_t DataBuffer[NAV_BUFFER_SIZE] = {0};
     int32 DataLen;
+    GPSSerialiation GPSData;
 
 	/* increase the command counter for successful command */
 	NAV_AppData.hk.cmd_count++;
@@ -184,21 +185,16 @@ static void NAV_ProcessCommandPacket(uint8 CmdCode)
 		/* NOOP Command 			*/
 		case NAV_NOOP_CC:
 			CFE_EVS_SendEvent(NAV_CMD_NOOP_EID, CFE_EVS_INFORMATION, "NAV NOOP command");
-			break;
+			break; 
 
 		/* Request NAV data 		*/
 		case NAV_REQ_DATA_CC:
 
             CFE_EVS_SendEvent(NAV_CMD_REQ_DATA_EID, CFE_EVS_DEBUG,"Request NAV GPS Data");
 
-            /* todo - fix the 1024 hard coded number */
-            DataBuffer = (uint8_t *)malloc((1024) * sizeof(uint8_t));
-
             /* Read the GPS data from the UART */
             NAV_ReadAvailableData(DataBuffer, &DataLen);
-
-            GPSSerialiation GPSData = NAV_ParseOEM615Bestxyza(DataBuffer, DataLen);
-            //GPSSerialiation *GPSData = (GPSSerialiation *)DataBuffer; /* todo - poor man's serialization until nos engine serialization is exposed on C interface */
+            GPSData = NAV_ParseOEM615Bestxyza(DataBuffer, DataLen);
             memcpy(&NAV_AppData.hk.gps_data, &GPSData, sizeof(GPSSerialiation));
 
             //CFE_EVS_SendEvent(NAV_CMD_REQ_DATA_EID, CFE_EVS_INFORMATION,
@@ -208,9 +204,6 @@ static void NAV_ProcessCommandPacket(uint8 CmdCode)
             //    (unsigned long)GPSData.weeks, (unsigned long)GPSData.seconds_into_week, GPSData.fractions,
             //    GPSData.ECEF_X, GPSData.ECEF_Y, GPSData.ECEF_Z,
             //    GPSData.vel_x, GPSData.vel_y, GPSData.vel_z);
-
-            /* Cleanup the data buffer once finished with the data */
-            free(DataBuffer);
 
 			/* publish the HK message which includes NAV data */
 			NAV_ReportHousekeeping();
@@ -259,7 +252,12 @@ static void NAV_ReadAvailableData(uint8 DataBuffer[], int32 *DataLen)
 
     /* check how many bytes are waiting on the uart */
     *DataLen = uart_bytes_available(NAV_UART.handle);
-    //OS_printf("NAV_ReadAvailableData(): gps messages waiting: %ld bytes\n", (long int)*DataLen);
+    //OS_printf("NAV_ReadAvailableData(): gps bytes waiting: %d \n", DataLen);
+
+    if (*DataLen > NAV_BUFFER_SIZE)
+    {
+        *DataLen = NAV_BUFFER_SIZE;
+    }
 
     /* declare an out buffer to hold that data */
     if (*DataLen > 0)
