@@ -37,7 +37,8 @@ namespace Nos3
         SimIDataProvider(config), _file_loc(0),
         _absolute_start_time(config.get("common.absolute-start-time", 552110400.0)),
         _sim_microseconds_per_tick(config.get("common.sim-microseconds-per-tick", 1000000)),
-        _data_file(config.get("simulator.hardware-model.data-provider.filename", "gps_data.42"))
+        _data_file(config.get("simulator.hardware-model.data-provider.filename", "gps_data.42")),
+        _leap_seconds(config.get("simulator.hardware-model.data-provider.leap-seconds", 37))
     {
         sim_logger->info("GPSSimDataFileProvider::GPSSimDataFileProvider:  Configuring GpsSimDataFileProvider.");
 
@@ -83,7 +84,7 @@ namespace Nos3
 		filebuf.open(_data_file);
 		filebuf.seekg(_file_loc);
 
-		double abs_time = _absolute_start_time + (double(_time_bus->get_time() * _sim_microseconds_per_tick)) / 1000000.0;
+		double abs_time = _absolute_start_time + (double(_time_bus->get_time() * _sim_microseconds_per_tick)) / 1000000.0 + 32.184 + _leap_seconds; // Need TT
 
 		while (j2000 < abs_time) {
 
@@ -107,7 +108,7 @@ namespace Nos3
 		filebuf.close();
 
         GPSSimDataPoint* data_point =
-            new GPSSimDataPoint(j2000, gps_week, gps_sec_week, gps_frac_sec, ECEF, ECEF_vel /* be careful... not initialized */, ECI, ECI_vel);
+            new GPSSimDataPoint(j2000, _leap_seconds, gps_week, gps_sec_week, gps_frac_sec, ECEF, ECEF_vel /* be careful... not initialized */, ECI, ECI_vel);
         sim_logger->trace("GPSSimDataFileProvider::get_gps_data: %s", data_point->to_string().c_str());
 		return boost::shared_ptr<GPSSimDataPoint>(data_point);
     }

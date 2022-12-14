@@ -32,14 +32,15 @@ namespace Nos3
      * Constructors
      *************************************************************************/
 
-    GPSSimDataPoint::GPSSimDataPoint(double abs_time, int16_t gps_week, int32_t gps_sec_week, double gps_frac_sec, 
+    GPSSimDataPoint::GPSSimDataPoint(double abs_time, int16_t leap_seconds, int16_t gps_week, int32_t gps_sec_week, double gps_frac_sec, 
         const std::vector<double>& ECEF, const std::vector<double>& ECEF_vel, const std::vector<double>& ECI, const std::vector<double>& ECI_vel) : 
-        _not_parsed(false), _abs_time(abs_time), _gps_week(gps_week), _gps_sec_week(gps_sec_week), _gps_frac_sec(gps_frac_sec), _ECEF(ECEF), _ECEF_vel(ECEF_vel), _ECI(ECI), _ECI_vel(ECI_vel)
+        _not_parsed(false), _abs_time(abs_time), _leap_seconds(leap_seconds), _gps_week(gps_week), _gps_sec_week(gps_sec_week), _gps_frac_sec(gps_frac_sec), 
+        _ECEF(ECEF), _ECEF_vel(ECEF_vel), _ECI(ECI), _ECI_vel(ECI_vel)
     {
     }
 
-    GPSSimDataPoint::GPSSimDataPoint(int16_t spacecraft, int16_t gps, const boost::shared_ptr<Sim42DataPoint> dp) : 
-        _sc(spacecraft), _gps(gps), _dp(*dp), _not_parsed(true) 
+    GPSSimDataPoint::GPSSimDataPoint(int16_t spacecraft, int16_t gps, int16_t leap_seconds, const boost::shared_ptr<Sim42DataPoint> dp) : 
+        _sc(spacecraft), _gps(gps), _leap_seconds(leap_seconds), _dp(*dp), _not_parsed(true) 
     {
         _ECEF.resize(3); _ECEF_vel.resize(3); _ECI.resize(3); _ECI_vel.resize(3);
         sim_logger->trace("GPSSimDataPoint::GPSSimDataPoint:  Created instance using _sc=%d, _gps=%d, _dp=%s", 
@@ -135,7 +136,7 @@ namespace Nos3
         
         double JD;
         SimCoordinateTransformations::GpsTimeToJD(_gps_rollover, _gps_week, ((double)_gps_sec_week) + _gps_frac_sec, JD);
-        _abs_time = SimCoordinateTransformations::JDToAbsTime(JD);
+        _abs_time = SimCoordinateTransformations::JDToAbsTime(JD) - 32.184 - _leap_seconds;
         
         sim_logger->debug("GPSSimDataPoint::do_parsing:  Parsed data point:\n%s", to_string().c_str());
 
@@ -154,6 +155,7 @@ namespace Nos3
         ss << std::fixed << std::setprecision(4) << std::setfill(' ');
         ss << "GPS Data Point: " << std::endl;
         ss << "  Absolute Time                    : " << std::setw(15) << _abs_time << std::endl;
+        ss << "  Leap Seconds                     : " << _leap_seconds << std::endl;
         ss << "  GPS Rollover, Week, Second, Fractional Second: "
            << std::setw(6) << _gps_rollover << ","
            << std::setw(6) << _gps_week << ","
@@ -194,6 +196,7 @@ namespace Nos3
         ss << "GPS Data Point: ";
         ss << std::setprecision(std::numeric_limits<double>::digits10); // Full double precision
         ss << " AbsTime: " << _abs_time;
+        ss << " Leap Seconds: " << _leap_seconds;
         ss << std::setprecision(std::numeric_limits<int32_t>::digits10); // Full int32_t precision
         ss << " GPS Time: "
            << _gps_rollover << "/"

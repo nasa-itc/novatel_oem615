@@ -60,6 +60,7 @@ namespace Nos3
         const int64_t                           _sim_microseconds_per_tick;
         std::string _data_file;
         mutable int _file_loc;
+        const int16_t _leap_seconds; // Current number of leap seconds
 
     };
 }

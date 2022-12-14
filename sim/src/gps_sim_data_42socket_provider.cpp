@@ -37,6 +37,7 @@ namespace Nos3
             config.get("simulator.hardware-model.data-provider.port", 4242));
         _sc = config.get("simulator.hardware-model.data-provider.spacecraft", 0);
         _gps = config.get("simulator.hardware-model.data-provider.GPS", 0);
+        _leap_seconds = config.get("simulator.hardware-model.data-provider.leap-seconds", 37);
     }
 
     /*************************************************************************
@@ -48,7 +49,7 @@ namespace Nos3
         const boost::shared_ptr<Sim42DataPoint> dp42 =
             boost::dynamic_pointer_cast<Sim42DataPoint>(SimData42SocketProvider::get_data_point());
 
-        SimIDataPoint *dp = new GPSSimDataPoint(_sc, _gps, dp42);
+        SimIDataPoint *dp = new GPSSimDataPoint(_sc, _gps, _leap_seconds, dp42);
 
         if (sim_logger->is_level_enabled(ItcLogger::LOGGER_TRACE)) {
             sim_logger->trace("GPSSimDataFileProvider::get_data_point: %s", dp->to_string().c_str()); // log data in a man readable format

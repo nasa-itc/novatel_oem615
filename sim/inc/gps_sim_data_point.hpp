@@ -61,12 +61,12 @@ namespace Nos3
         /** \brief Constructor explicit data values.
          *  Sets all the data values.
          */
-        GPSSimDataPoint(double abs_time, int16_t gps_week, int32_t gps_sec_week, double gps_frac_sec, 
+        GPSSimDataPoint(double abs_time, int16_t leap_seconds, int16_t gps_week, int32_t gps_sec_week, double gps_frac_sec, 
             const std::vector<double>& ECEF, const std::vector<double>& ECEF_vel, const std::vector<double>& ECI, const std::vector<double>& ECI_vel); 
         /** \brief Constructor from a 42 data point
          *  Just sets the data point... parsing done on demand later.  This is for efficiency so if no accessors are called, no parsing is done.
          */
-        GPSSimDataPoint(int16_t spacecraft, int16_t gps, const boost::shared_ptr<Sim42DataPoint> dp);
+        GPSSimDataPoint(int16_t spacecraft, int16_t gps, int16_t leap_seconds, const boost::shared_ptr<Sim42DataPoint> dp);
         //@}
 
         /// @name Accessors
@@ -101,6 +101,7 @@ namespace Nos3
         Sim42DataPoint _dp;
         int16_t _sc;
         int16_t _gps;
+        int16_t _leap_seconds;
         // mutable below so parsing can be on demand:
         mutable bool _not_parsed;
         mutable double _abs_time;
