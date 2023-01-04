@@ -20,6 +20,7 @@
 
 #define NAV_PIPE_DEPTH 8
 #define NAV_PIPE_NAME  "NAV_CMD_PIPE"
+#define NAV_BUFFER_SIZE 1024
 
 /**
 **  \brief NAV App Global Data Structure
