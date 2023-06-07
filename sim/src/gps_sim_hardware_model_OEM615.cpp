@@ -820,7 +820,7 @@ namespace Nos3
         get_ascii_header_string("RANGECMPA", data_point, header);
         ss << header;
         ss << fake_range_data.size() << ",";
-        for (int i = 0; i < fake_range_data.size() - 1; i++) {
+        for (unsigned int i = 0; i < fake_range_data.size() - 1; i++) {
             ss << fake_range_data[i] << ",";
         }
         ss << fake_range_data[fake_range_data.size() - 1]; // last line has no comma
@@ -841,9 +841,9 @@ namespace Nos3
         get_binary_header_bytes(140/*msg*/, 4 + 24 * fake_range_data.size(), data_point, out); // RANGECMP header
 
         std::vector<uint8_t> line;
-        for (int i = 0; i < fake_range_data.size() - 1; i++) {
+        for (unsigned int i = 0; i < fake_range_data.size() - 1; i++) {
             hexstring_to_uint8vector(fake_range_data[i], line);
-            for (int j = 0; j < line.size(); j++) {
+            for (unsigned int j = 0; j < line.size(); j++) {
                 out.push_back(line[j]);
             }
             line.clear();
