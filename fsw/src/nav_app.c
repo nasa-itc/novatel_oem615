@@ -30,15 +30,6 @@
 *************************************************************************/
 NAV_AppData_t     NAV_AppData;
 
-static CFE_EVS_BinFilter_t  NAV_EventFilters[] =
-       {  /* Event ID                mask   */
-          {NAV_INIT_EID,             0x0000},
-          {NAV_CMD_NOOP_EID,         0x0000},
-          {NAV_CMD_REQ_DATA_EID,     0x0000},
-          {NAV_CMD_RST_COUNTERS_EID, 0x0000},
-          {NAV_CMD_ERR_EID,          0x0000},
-       };
-
 /************************************************************************
 ** Forward declaration
 *************************************************************************/
@@ -127,7 +118,7 @@ static void NAV_AppInit(void)
     CFE_ES_RegisterApp() ;
 
     /* Register the events */
-    CFE_EVS_Register(NAV_EventFilters, sizeof(NAV_EventFilters)/sizeof(CFE_EVS_BinFilter_t), CFE_EVS_BINARY_FILTER);
+    CFE_EVS_Register(NULL, 0, CFE_EVS_BINARY_FILTER);
 
     /* Create NAV command pipe */
     status = CFE_SB_CreatePipe(&NAV_AppData.CmdPipe, NAV_PIPE_DEPTH, NAV_PIPE_NAME);
