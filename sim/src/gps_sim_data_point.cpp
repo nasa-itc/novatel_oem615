@@ -34,13 +34,13 @@ namespace Nos3
 
     GPSSimDataPoint::GPSSimDataPoint(double abs_time, int16_t leap_seconds, int16_t gps_week, int32_t gps_sec_week, double gps_frac_sec, 
         const std::vector<double>& ECEF, const std::vector<double>& ECEF_vel, const std::vector<double>& ECI, const std::vector<double>& ECI_vel) : 
-        _not_parsed(false), _abs_time(abs_time), _leap_seconds(leap_seconds), _gps_week(gps_week), _gps_sec_week(gps_sec_week), _gps_frac_sec(gps_frac_sec), 
+        _leap_seconds(leap_seconds), _not_parsed(false), _abs_time(abs_time), _gps_week(gps_week), _gps_sec_week(gps_sec_week), _gps_frac_sec(gps_frac_sec), 
         _ECEF(ECEF), _ECEF_vel(ECEF_vel), _ECI(ECI), _ECI_vel(ECI_vel)
     {
     }
 
     GPSSimDataPoint::GPSSimDataPoint(int16_t spacecraft, int16_t gps, int16_t leap_seconds, const boost::shared_ptr<Sim42DataPoint> dp) : 
-        _sc(spacecraft), _gps(gps), _leap_seconds(leap_seconds), _dp(*dp), _not_parsed(true) 
+        _dp(*dp), _sc(spacecraft), _gps(gps), _leap_seconds(leap_seconds), _not_parsed(true) 
     {
         _ECEF.resize(3); _ECEF_vel.resize(3); _ECI.resize(3); _ECI_vel.resize(3);
         sim_logger->trace("GPSSimDataPoint::GPSSimDataPoint:  Created instance using _sc=%d, _gps=%d, _dp=%s", 
@@ -62,7 +62,7 @@ namespace Nos3
         std::vector<std::string> lines = _dp.get_lines();
         
         try {
-            for (int i = 0; i < lines.size(); i++) {
+            for (unsigned int i = 0; i < lines.size(); i++) {
                 if (lines[i].compare(0, MSsize, MatchString.str()) == 0) { // e.g. SC[0].AC.GPS[0]
                     sim_logger->trace("GPSSimDataPoint::do_parsing:  Found a string with the correct prefix = %s.  String:  %s", MatchString.str().c_str(), lines[i].c_str());
                     // GPS. Rollover, Week, Sec, PosN, VelN, PosW, VelW, Lng, Lat, Alt

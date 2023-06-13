@@ -109,7 +109,7 @@ namespace Nos3
         mutable int16_t _gps_week; // Unambiguous GPS Week
         mutable int32_t _gps_sec_week; // Integer seconds elapsed since the start of the GPS week
         mutable double _gps_frac_sec; // Fractions of a second beyond the integer seconds_of_week
-        mutable std::vector<double> _ECEF, _ECI, _ECEF_vel, _ECI_vel; // m, m, m/s, m/s
+        mutable std::vector<double> _ECEF, _ECEF_vel, _ECI, _ECI_vel; // m, m/s, m, m/s
         mutable double _gps_lat, _gps_lng, _gps_alt; // degrees, degrees, m above WGS-84 ellipsoid
 
     };
