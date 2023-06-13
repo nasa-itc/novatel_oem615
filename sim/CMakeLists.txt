@@ -35,8 +35,3 @@ add_library(gps_sim SHARED ${gps_sim_src} ${gps_sim_inc})
 set_target_properties(gps_sim PROPERTIES COMPILE_FLAGS "" LINK_FLAGS "")
 target_link_libraries(gps_sim ${gps_sim_libs})
 install(TARGETS gps_sim LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
-
-add_executable(nos3-gps-simulator src/gps_simulator.cpp)
-set_target_properties(nos3-gps-simulator PROPERTIES COMPILE_FLAGS "" LINK_FLAGS "")
-target_link_libraries(nos3-gps-simulator ${gps_sim_libs})
-install(TARGETS nos3-gps-simulator RUNTIME DESTINATION bin)
