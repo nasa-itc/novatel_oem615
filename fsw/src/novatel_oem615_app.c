@@ -522,8 +522,11 @@ void NOVATEL_OEM615_ReportHousekeeping(void)
         else
         {
             NOVATEL_OEM615_IncrementDeviceErrorCount();
+            // This spams the NOS3 FSW window when uncommented because there usually isn't any data available to be read, and that returns an error.
+            /*
             CFE_EVS_SendEvent(NOVATEL_OEM615_REQ_HK_ERR_EID, CFE_EVS_ERROR, 
                     "NOVATEL_OEM615: Request device HK reported error %d", status);
+            */
         }
     }
     /* Intentionally do not report errors if disabled */
