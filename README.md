@@ -19,11 +19,23 @@ The protocol, commands, and responses of the component are captured below.
 The protocol in use is Universal Synchronous/Asynchronous Receiver/Transmitter (USART). The novatel_oem615 operates on the usart_1 bus on the spacecraft under handle/node-port 1.
 
 ## Commands
-There commands for the novatel_oem615 include LOG, LOGALL, UNLOG, and SERIALCONFIG, as well as the generic commands expected of all NOS3 components (NOOP, RESET_COUNTERS, ENABLE, DISABLE, CONFIG).
+The commands for the novatel_oem615 include LOG, LOGALL, UNLOG, and SERIALCONFIG, as well as generic commands expected of all NOS3 components (NOOP, Request HK, Request Data, RESET_COUNTERS, ENABLE, DISABLE). Note that RESET_COUNTERS, ENABLE, and DISABLE do not communicate with the sim.
 
 ## Response
 Response formats are as follows:
-* TODO
+* Generic Commands (Hex)
+  - uint16, 0xDEAD
+  - uint8, command code
+  - uint32, payload
+  - uint16, 0xBEEF
+* Novatel Commands (ASCII)
+  - LOG COM [log type] ONTIME [period options]
+    * [log types] = [BESTXYZA, GPGGAA, RANGECMPA, BESTXYZB, RANGECMPB]
+    * [period options] = [ONCE, 0.05, 0.1, 0.2, 0.25, 0.5]
+  - UNLOG COM [log type]
+    * [log types] = [BESTXYZA, GPGGAA, RANGECMPA, BESTXYZB, RANGECMPB]
+  - UNLOGALL
+  - SERIALCONFIG
 
 # Configuration
 The various configuration parameters available for each portion of the component are captured below.
@@ -33,27 +45,34 @@ Refer to the file [fsw/platform_inc/novatel_oem615_platform_cfg.h](fsw/platform_
 configuration settings, as well as a summary on overriding parameters in mission-specific repositories.
 
 ## Simulation
-The default configuration returns data that is X * 0.001, Y * 0.002, and Z * 0.003 the request count after conversions:
 ```
 <simulator>
-    <name>novatel_oem615_sim</name>
+    <name>gps</name>
     <active>true</active>
-    <library>libnovatel_oem615_sim.so</library>
+    <library>libgps_sim.so</library>
     <hardware-model>
-        <type>NOVATEL_OEM615</type>
+        <type>OEM615</type>
         <connections>
-            <connection><type>command</type>
-                <bus-name>command</bus-name>
-                <node-name>novatel_oem615-sim-command-node</node-name>
-            </connection>
+            <!-- <connection><type>command</type><bus-name>command</bus-name><node-name>gps-command</node-name></connection> -->
             <connection><type>usart</type>
                 <bus-name>usart_1</bus-name>
                 <node-port>1</node-port>
             </connection>
         </connections>
-        <data-provider>
-            <type>NOVATEL_OEM615_PROVIDER</type>
-        </data-provider>
+        <data-provider>               
+            <type>GPS42SOCKET</type>
+            <hostname>localhost</hostname>
+            <port>4245</port>
+            <max-connection-attempts>5</max-connection-attempts>
+            <retry-wait-seconds>5</retry-wait-seconds>
+            <spacecraft>0</spacecraft>
+            <GPS>0</GPS>
+            <leap-seconds>37</leap-seconds>
+        </data-provider>               
+        <!-- <data-provider>               
+            <type>GPSFILE</type>
+            <filename>gps_data.42</filename>
+        </data-provider> -->
     </hardware-model>
 </simulator>
 ```
@@ -61,14 +80,16 @@ The default configuration returns data that is X * 0.001, Y * 0.002, and Z * 0.0
 ## 42
 Optionally the 42 data provider can be configured in the `nos3-simulator.xml`:
 ```
-        <data-provider>
-            <type>NOVATEL_OEM615_42_PROVIDER</type>
+        <data-provider>               
+            <type>GPS42SOCKET</type>
             <hostname>localhost</hostname>
             <port>4245</port>
             <max-connection-attempts>5</max-connection-attempts>
             <retry-wait-seconds>5</retry-wait-seconds>
             <spacecraft>0</spacecraft>
-        </data-provider>
+            <GPS>0</GPS>
+            <leap-seconds>37</leap-seconds>
+        </data-provider>      
 ```
 
 ## Releases

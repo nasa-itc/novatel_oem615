@@ -21,8 +21,10 @@
 #define NOVATEL_OEM615_RESET_COUNTERS_CC       1
 #define NOVATEL_OEM615_ENABLE_CC               2
 #define NOVATEL_OEM615_DISABLE_CC              3
-#define NOVATEL_OEM615_CONFIG_CC               4
-
+#define NOVATEL_OEM615_LOG_CC                  4
+#define NOVATEL_OEM615_UNLOG_CC                5
+#define NOVATEL_OEM615_UNLOGALL_CC             6
+#define NOVATEL_OEM615_SERIALCONFIG_CC         7
 
 /* 
 ** Telemetry Request Command Codes
@@ -52,6 +54,20 @@ typedef struct
 
 } NOVATEL_OEM615_Config_cmd_t;
 
+typedef struct
+{
+    uint8    CmdHeader[CFE_SB_CMD_HDR_SIZE];
+    uint8    LogType;
+    uint8    PeriodOption;
+
+} NOVATEL_OEM615_Log_cmd_t;
+
+typedef struct
+{
+    uint8    CmdHeader[CFE_SB_CMD_HDR_SIZE];
+    uint8    LogType;
+
+} NOVATEL_OEM615_Unlog_cmd_t;
 
 /*
 ** NOVATEL_OEM615 device telemetry definition
