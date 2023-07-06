@@ -242,7 +242,7 @@ static void NAV_ReadAvailableData(uint8 DataBuffer[], int32 *DataLen)
     int32 i = 0;
 
     /* check how many bytes are waiting on the uart */
-    *DataLen = uart_bytes_available(NAV_UART.handle);
+    *DataLen = uart_bytes_available(&NAV_UART);
     //OS_printf("NAV_ReadAvailableData(): gps bytes waiting: %d \n", DataLen);
 
     if (*DataLen > NAV_BUFFER_SIZE)
@@ -254,7 +254,7 @@ static void NAV_ReadAvailableData(uint8 DataBuffer[], int32 *DataLen)
     if (*DataLen > 0)
     {
         /* grab the bytes */
-        uart_read_port(NAV_UART.handle, DataBuffer, *DataLen);
+        uart_read_port(&NAV_UART, DataBuffer, *DataLen);
     }
     else
     {
