@@ -113,9 +113,9 @@ void NOVATEL_OEM615_IncrementDeviceErrorCount(void);
 void NOVATEL_OEM615_IncrementCommandCount(void);
 void NOVATEL_OEM615_IncrementCommandErrorCount(void);
 int32 NOVATEL_OEM615_SafeCommandDeviceCustom(uint8_t cmd_code, int8_t log_type, int8_t period_option);
-int32 NOVATEL_OEM615_SafeRequestHK(int32_t handle, NOVATEL_OEM615_Device_HK_tlm_t* data);
-int32 NOVATEL_OEM615_SafeRequestData(int32_t handle, NOVATEL_OEM615_Device_Data_tlm_t* data);
-int32 NOVATEL_OEM615_ChildProcessRequestData(int32_t handle, NOVATEL_OEM615_Device_Data_tlm_t* data);
+int32 NOVATEL_OEM615_SafeRequestHK(NOVATEL_OEM615_Device_HK_tlm_t* data);
+int32 NOVATEL_OEM615_SafeRequestData(NOVATEL_OEM615_Device_Data_tlm_t* data);
+int32 NOVATEL_OEM615_ChildProcessRequestData(NOVATEL_OEM615_Device_Data_tlm_t* data);
 int32 NOVATEL_OEM615_VerifyCmdLength(CFE_SB_MsgPtr_t msg, uint16 expected_length);
 
 #endif /* _NOVATEL_OEM615_APP_H_ */

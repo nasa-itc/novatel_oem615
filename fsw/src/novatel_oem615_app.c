@@ -514,7 +514,7 @@ void NOVATEL_OEM615_ReportHousekeeping(void)
     /* Check that device is enabled */
     if (NOVATEL_OEM615_GetDeviceEnabledStatus() == NOVATEL_OEM615_DEVICE_ENABLED)
     {
-        status = NOVATEL_OEM615_SafeRequestHK(NOVATEL_OEM615_AppData.Novatel_oem615Uart.handle, (NOVATEL_OEM615_Device_HK_tlm_t*) &NOVATEL_OEM615_AppData.HkTelemetryPkt.DeviceHK);
+        status = NOVATEL_OEM615_SafeRequestHK((NOVATEL_OEM615_Device_HK_tlm_t*) &NOVATEL_OEM615_AppData.HkTelemetryPkt.DeviceHK);
         if (status == OS_SUCCESS)
         {
             NOVATEL_OEM615_IncrementDeviceCount();
@@ -548,7 +548,7 @@ void NOVATEL_OEM615_ReportDeviceTelemetry(void)
     /* Check that device is enabled */
     if (NOVATEL_OEM615_GetDeviceEnabledStatus() == NOVATEL_OEM615_DEVICE_ENABLED)
     {
-        status = NOVATEL_OEM615_SafeRequestData(NOVATEL_OEM615_AppData.Novatel_oem615Uart.handle, (NOVATEL_OEM615_Device_Data_tlm_t*) &NOVATEL_OEM615_AppData.DevicePkt.Novatel_oem615);
+        status = NOVATEL_OEM615_SafeRequestData((NOVATEL_OEM615_Device_Data_tlm_t*) &NOVATEL_OEM615_AppData.DevicePkt.Novatel_oem615);
         if (status == OS_SUCCESS)
         {
             NOVATEL_OEM615_IncrementDeviceCount();
@@ -614,7 +614,7 @@ void NOVATEL_OEM615_Disable(void)
     if (NOVATEL_OEM615_GetDeviceEnabledStatus() == NOVATEL_OEM615_DEVICE_ENABLED)
     {
         /* Open device specific protocols */
-        status = uart_close_port(NOVATEL_OEM615_AppData.Novatel_oem615Uart.handle);
+        status = uart_close_port(&NOVATEL_OEM615_AppData.Novatel_oem615Uart);
         if (status == OS_SUCCESS)
         {
             NOVATEL_OEM615_IncrementDeviceCount();
@@ -676,7 +676,7 @@ int32 NOVATEL_OEM615_SafeCommandDeviceCustom(uint8_t cmd_code, int8_t log_type, 
     uint32 status;
     if (OS_MutSemTake(NOVATEL_OEM615_AppData.HkDataMutex) == OS_SUCCESS)
     {
-        status = NOVATEL_OEM615_CommandDeviceCustom(NOVATEL_OEM615_AppData.Novatel_oem615Uart.handle, cmd_code, log_type, period_option);
+        status = NOVATEL_OEM615_CommandDeviceCustom(&NOVATEL_OEM615_AppData.Novatel_oem615Uart, cmd_code, log_type, period_option);
 
         OS_MutSemGive(NOVATEL_OEM615_AppData.HkDataMutex);
     }
@@ -690,13 +690,13 @@ int32 NOVATEL_OEM615_SafeCommandDeviceCustom(uint8_t cmd_code, int8_t log_type, 
 /*
 ** Safely request HK
 */
-int32 NOVATEL_OEM615_SafeRequestHK(int32_t handle, NOVATEL_OEM615_Device_HK_tlm_t* data)
+int32 NOVATEL_OEM615_SafeRequestHK(NOVATEL_OEM615_Device_HK_tlm_t* data)
 {
     uint32 status;
 
     if (OS_MutSemTake(NOVATEL_OEM615_AppData.HkDataMutex) == OS_SUCCESS)
     {
-        status = NOVATEL_OEM615_RequestHK(handle, data);
+        status = NOVATEL_OEM615_RequestHK(&NOVATEL_OEM615_AppData.Novatel_oem615Uart, data);
 
         OS_MutSemGive(NOVATEL_OEM615_AppData.HkDataMutex);
     }
@@ -712,13 +712,13 @@ int32 NOVATEL_OEM615_SafeRequestHK(int32_t handle, NOVATEL_OEM615_Device_HK_tlm_
 /*
 ** Safely request data
 */
-int32 NOVATEL_OEM615_SafeRequestData(int32_t handle, NOVATEL_OEM615_Device_Data_tlm_t* data)
+int32 NOVATEL_OEM615_SafeRequestData(NOVATEL_OEM615_Device_Data_tlm_t* data)
 {
     uint32 status;
 
     if (OS_MutSemTake(NOVATEL_OEM615_AppData.HkDataMutex) == OS_SUCCESS)
     {
-        status = NOVATEL_OEM615_RequestData(handle, data);
+        status = NOVATEL_OEM615_RequestData(&NOVATEL_OEM615_AppData.Novatel_oem615Uart, data);
 
         OS_MutSemGive(NOVATEL_OEM615_AppData.HkDataMutex);
     }
@@ -731,13 +731,13 @@ int32 NOVATEL_OEM615_SafeRequestData(int32_t handle, NOVATEL_OEM615_Device_Data_
     return status;
 }
 
-int32 NOVATEL_OEM615_ChildProcessRequestData(int32_t handle, NOVATEL_OEM615_Device_Data_tlm_t* data)
+int32 NOVATEL_OEM615_ChildProcessRequestData(NOVATEL_OEM615_Device_Data_tlm_t* data)
 {
     uint32 status;
 
     if (OS_MutSemTake(NOVATEL_OEM615_AppData.HkDataMutex) == OS_SUCCESS)
     {
-        status = NOVATEL_OEM615_ChildProcessReadData(handle, data);
+        status = NOVATEL_OEM615_ChildProcessReadData(&NOVATEL_OEM615_AppData.Novatel_oem615Uart, data);
 
         OS_MutSemGive(NOVATEL_OEM615_AppData.HkDataMutex);
     }

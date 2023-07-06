@@ -17,7 +17,7 @@ static char* saveptr;
 ** Command to device
 ** Note that confirming the echoed response is specific to this implementation
 */
-int32_t NOVATEL_OEM615_CommandDevice(int32_t handle, uint8_t cmd_code, uint32_t payload)
+int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd_code, uint32_t payload)
 {
     int32_t status = OS_SUCCESS;
     int32_t bytes = 0;
@@ -38,11 +38,11 @@ int32_t NOVATEL_OEM615_CommandDevice(int32_t handle, uint8_t cmd_code, uint32_t 
     write_data[8] = NOVATEL_OEM615_DEVICE_TRAILER_1;
 
     // Flush any prior data 
-    status = uart_flush(handle);
+    status = uart_flush(uart_device);
     if (status == UART_SUCCESS)
     {
         // Write data 
-        bytes = uart_write_port(handle, write_data, NOVATEL_OEM615_DEVICE_CMD_SIZE);
+        bytes = uart_write_port(uart_device, write_data, NOVATEL_OEM615_DEVICE_CMD_SIZE);
         #ifdef NOVATEL_OEM615_CFG_DEBUG
             OS_printf("  NOVATEL_OEM615_CommandDevice[%d] = ", bytes);
             for (uint32_t i = 0; i < NOVATEL_OEM615_DEVICE_CMD_SIZE; i++)
@@ -60,10 +60,10 @@ int32_t NOVATEL_OEM615_CommandDevice(int32_t handle, uint8_t cmd_code, uint32_t 
         } // uart_write 
         else
         {
-            int32_t bytes_available = uart_bytes_available(handle);
+            int32_t bytes_available = uart_bytes_available(uart_device);
             if (bytes_available > 0)
             {
-                bytes = uart_read_port(handle, read_data, NOVATEL_OEM615_DEVICE_CMD_SIZE);
+                bytes = uart_read_port(uart_device, read_data, NOVATEL_OEM615_DEVICE_CMD_SIZE);
                 if (bytes != NOVATEL_OEM615_DEVICE_CMD_SIZE)
                 {
                     #ifdef NOVATEL_OEM615_CFG_DEBUG
@@ -107,7 +107,7 @@ int32_t NOVATEL_OEM615_CommandDevice(int32_t handle, uint8_t cmd_code, uint32_t 
     return status;
 }
 
-int32_t NOVATEL_OEM615_CommandDeviceCustom(int32_t handle, uint8_t cmd_code, int8_t log_type, int8_t period_option)
+int32_t NOVATEL_OEM615_CommandDeviceCustom(uart_info_t* uart_device, uint8_t cmd_code, int8_t log_type, int8_t period_option)
 {
     int32_t status = OS_SUCCESS;
     int32_t command_length = 0;
@@ -224,11 +224,11 @@ int32_t NOVATEL_OEM615_CommandDeviceCustom(int32_t handle, uint8_t cmd_code, int
     // Flush any prior data 
     if (status == OS_SUCCESS)
     {
-        status = uart_flush(handle);
+        status = uart_flush(uart_device);
         if (status == OS_SUCCESS)
         {
             // Write data 
-            int32_t bytes = uart_write_port(handle, write_data, command_length);
+            int32_t bytes = uart_write_port(uart_device, write_data, command_length);
             free(write_data);
         } // uart_flush
         else
@@ -245,17 +245,17 @@ int32_t NOVATEL_OEM615_CommandDeviceCustom(int32_t handle, uint8_t cmd_code, int
 /*
 ** Request housekeeping command
 */
-int32_t NOVATEL_OEM615_RequestHK(int32_t handle, NOVATEL_OEM615_Device_HK_tlm_t* data)
+int32_t NOVATEL_OEM615_RequestHK(uart_info_t* uart_device, NOVATEL_OEM615_Device_HK_tlm_t* data)
 {
     int32_t status = OS_SUCCESS;
     uint8_t read_data[NOVATEL_OEM615_DEVICE_HK_SIZE] = {0};
 
     /* Command device to send HK */
-    status = NOVATEL_OEM615_CommandDevice(handle, NOVATEL_OEM615_DEVICE_REQ_HK_CMD, 0);
+    status = NOVATEL_OEM615_CommandDevice(uart_device, NOVATEL_OEM615_DEVICE_REQ_HK_CMD, 0);
     if (status == OS_SUCCESS)
     {
         /* Read HK data */
-        status = NOVATEL_OEM615_ReadHK(handle, read_data, sizeof(read_data));
+        status = NOVATEL_OEM615_ReadHK(uart_device, read_data, sizeof(read_data));
         if (status == OS_SUCCESS)
         {
             #ifdef NOVATEL_OEM615_CFG_DEBUG
@@ -325,7 +325,7 @@ int32_t NOVATEL_OEM615_RequestHK(int32_t handle, NOVATEL_OEM615_Device_HK_tlm_t*
 /* 
 ** Read HK from device
 */
-int32_t NOVATEL_OEM615_ReadHK(int32_t handle, uint8_t* read_data, uint8_t data_length)
+int32_t NOVATEL_OEM615_ReadHK(uart_info_t* uart_device, uint8_t* read_data, uint8_t data_length)
 {
     int32_t status = OS_ERROR;
     int32_t bytes = 0;
@@ -340,12 +340,12 @@ int32_t NOVATEL_OEM615_ReadHK(int32_t handle, uint8_t* read_data, uint8_t data_l
     else
     {
         /* check how many bytes are waiting on the uart */
-        bytes_available = uart_bytes_available(handle);
+        bytes_available = uart_bytes_available(uart_device);
         if (bytes_available > 0)
         {
             uint8_t* temp_read_data = (uint8_t*)calloc(bytes_available, sizeof(uint8_t));
             /* Read all existing data on uart port */
-            bytes = uart_read_port(handle, temp_read_data, bytes_available);
+            bytes = uart_read_port(uart_device, temp_read_data, bytes_available);
             if (bytes != bytes_available)
             {
                 free(temp_read_data);
@@ -395,23 +395,23 @@ int32_t NOVATEL_OEM615_ReadHK(int32_t handle, uint8_t* read_data, uint8_t data_l
 /*
 ** Request data command
 */
-int32_t NOVATEL_OEM615_RequestData(int32_t handle, NOVATEL_OEM615_Device_Data_tlm_t* data)
+int32_t NOVATEL_OEM615_RequestData(uart_info_t* uart_device, NOVATEL_OEM615_Device_Data_tlm_t* data)
 {
     int32_t status = OS_SUCCESS;
     int32_t bytes = 0;
     int32_t bytes_available = 0;
     char *token;
 
-    status = NOVATEL_OEM615_CommandDevice(handle, NOVATEL_OEM615_DEVICE_REQ_DATA_CMD, 0);
+    status = NOVATEL_OEM615_CommandDevice(uart_device, NOVATEL_OEM615_DEVICE_REQ_DATA_CMD, 0);
     if (status == OS_SUCCESS)
     {
         /* check how many bytes are waiting on the uart */
-        bytes_available = uart_bytes_available(handle);
+        bytes_available = uart_bytes_available(uart_device);
         if (bytes_available > 0)
         {
             uint8_t* temp_read_data = (uint8_t*)calloc(bytes_available, sizeof(uint8_t));
             /* Read all existing data on uart port */
-            bytes = uart_read_port(handle, temp_read_data, bytes_available);
+            bytes = uart_read_port(uart_device, temp_read_data, bytes_available);
             if (bytes != bytes_available)
             {
                 #ifdef NOVATEL_OEM615_CFG_DEBUG
@@ -471,7 +471,7 @@ int32_t NOVATEL_OEM615_RequestData(int32_t handle, NOVATEL_OEM615_Device_Data_tl
 /*
 ** Request data command for child task
 */
-int32_t NOVATEL_OEM615_ChildProcessReadData(int32_t handle, NOVATEL_OEM615_Device_Data_tlm_t* data)
+int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t* uart_device, NOVATEL_OEM615_Device_Data_tlm_t* data)
 {
     int32_t status = OS_SUCCESS;
     int32_t bytes = 0;
@@ -479,12 +479,12 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(int32_t handle, NOVATEL_OEM615_Devic
     char *token;
 
     /* check how many bytes are waiting on the uart */
-    bytes_available = uart_bytes_available(handle);
+    bytes_available = uart_bytes_available(uart_device);
     if (bytes_available > 0)
     {
         uint8_t* temp_read_data = (uint8_t*)calloc(bytes_available, sizeof(uint8_t));
         /* Read all existing data on uart port */
-        bytes = uart_read_port(handle, temp_read_data, bytes_available);
+        bytes = uart_read_port(uart_device, temp_read_data, bytes_available);
         if (bytes != bytes_available)
         {
             #ifdef NOVATEL_OEM615_CFG_DEBUG

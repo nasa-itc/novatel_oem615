@@ -48,7 +48,7 @@ void NOVATEL_OEM615_ProcessData(void)
     int32 status = CFE_SUCCESS;
     if (NOVATEL_OEM615_GetDeviceEnabledStatus() == NOVATEL_OEM615_DEVICE_ENABLED)
     {
-        status = NOVATEL_OEM615_ChildProcessRequestData(NOVATEL_OEM615_AppData.Novatel_oem615Uart.handle, (NOVATEL_OEM615_Device_Data_tlm_t*) &NOVATEL_OEM615_AppData.DevicePkt.Novatel_oem615);
+        status = NOVATEL_OEM615_ChildProcessRequestData((NOVATEL_OEM615_Device_Data_tlm_t*) &NOVATEL_OEM615_AppData.DevicePkt.Novatel_oem615);
         if (status == OS_SUCCESS)
         {
             NOVATEL_OEM615_IncrementDeviceCount();
