@@ -27,6 +27,12 @@
 
 #include <gps_sim_hardware_model_common.hpp>
 
+/*
+** Defines
+*/
+#define NOVATEL_OEM615_SIM_SUCCESS 0
+#define NOVATEL_OEM615_SIM_ERROR   1
+
 namespace Nos3
 {
     /** \brief Class for a NovAtel OEM615 GPS simulation hardware model.
@@ -50,8 +56,10 @@ namespace Nos3
 
     private:
         // Private helper methods
+        void create_novatel_oem615_hk(std::vector<uint8_t>& out_data); 
+        void create_novatel_oem615_data(std::vector<uint8_t>& out_data); 
         void uart_read_callback(const uint8_t *buf, size_t len);
-        std::vector<uint8_t> determine_response_for_request(const std::vector<uint8_t>& in_data);
+        std::uint8_t determine_response_for_request(const std::vector<uint8_t>& in_data, std::vector<uint8_t>& out_data);
         void send_periodic_data(NosEngine::Common::SimTime time);
 
         void string_to_uint8vector(const std::string& in, std::vector<uint8_t>& outvector);
@@ -83,6 +91,13 @@ namespace Nos3
         std::map<std::string, get_log_data_func> _get_log_data_map; // message, function to call to generate data for that message
         std::map<std::string, boost::tuple<double, double>> _periodic_logs; // message, (last absolute time function was called, period (seconds) to call function)
 
+        SimIDataProvider*                                   _novatel_oem615_dp; /* Only needed if the sim has a data provider */
+
+        /* Internal state data */
+        std::uint8_t                                        _enabled;
+        std::uint32_t                                       _count;
+        std::uint32_t                                       _config;
+        std::uint32_t                                       _status;
     };
 }
 
