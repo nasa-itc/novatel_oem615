@@ -16,28 +16,15 @@
 */
 void NOVATEL_OEM615_ChildTask(void)
 {
-    int32  result;
-    uint32 read_timeout = NOVATEL_OEM615_READ_TIMEOUT;
+    CFE_EVS_SendEvent(NOVATEL_OEM615_CHILDTASKINIT_INF_EID, CFE_EVS_EventType_INFORMATION, "NOVATEL_OEM615: child task started, runStatus = %d", NOVATEL_OEM615_AppData.RunStatus);
 
-    result = CFE_ES_RegisterChildTask();
-    if (result != CFE_SUCCESS)
-    {
-        CFE_EVS_SendEvent(NOVATEL_OEM615_CHILDTASKINIT_ERR_EID, CFE_EVS_ERROR, "NOVATEL_OEM615: reg child task error %d", result);
-        CFE_ES_ExitChildTask();
-        return;
-    }
-    else
-    {
-        CFE_EVS_SendEvent(NOVATEL_OEM615_CHILDTASKINIT_INF_EID, CFE_EVS_INFORMATION, "NOVATEL_OEM615: child task started, runStatus = %d", NOVATEL_OEM615_AppData.RunStatus);
-    }
-
-    while (NOVATEL_OEM615_GetRunStatus() == CFE_ES_APP_RUN)
+    while (NOVATEL_OEM615_GetRunStatus() == CFE_ES_RunStatus_APP_RUN)
     {
         NOVATEL_OEM615_ProcessData();
     }
 
     /* This call allows cFE to clean-up system resources */
-    CFE_EVS_SendEvent(NOVATEL_OEM615_CHILDTASKEXIT_INF_EID, CFE_EVS_INFORMATION,
+    CFE_EVS_SendEvent(NOVATEL_OEM615_CHILDTASKEXIT_INF_EID, CFE_EVS_EventType_INFORMATION,
         "NOVATEL_OEM615 child task exit complete");
     CFE_ES_ExitChildTask();
 }
@@ -53,14 +40,14 @@ void NOVATEL_OEM615_ProcessData(void)
         {
             NOVATEL_OEM615_IncrementDeviceCount();
 
-            CFE_SB_TimeStampMsg((CFE_SB_Msg_t *) &NOVATEL_OEM615_AppData.DevicePkt);
-            CFE_SB_SendMsg((CFE_SB_Msg_t *) &NOVATEL_OEM615_AppData.DevicePkt);
+            CFE_SB_TimeStampMsg((CFE_MSG_Message_t *) &NOVATEL_OEM615_AppData.DevicePkt);
+            CFE_SB_TransmitMsg((CFE_MSG_Message_t *) &NOVATEL_OEM615_AppData.DevicePkt, true);
         }
         else
         {
             NOVATEL_OEM615_IncrementDeviceErrorCount();
             // This spams the NOS3 FSW window when uncommented.
-            //CFE_EVS_SendEvent(NOVATEL_OEM615_UART_READ_ERR_EID, CFE_EVS_ERROR, 
+            //CFE_EVS_SendEvent(NOVATEL_OEM615_UART_READ_ERR_EID, CFE_EVS_EventType_ERROR, 
             //    "(ChildTask) NOVATEL_OEM615_ProcessData: Device read error.  NOVATEL_OEM615_ChildProcessRequestData returned %d.", status);
         }
     }
