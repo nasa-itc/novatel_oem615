@@ -20,7 +20,7 @@ NOVATEL_OEM615_AppData_t NOVATEL_OEM615_AppData;
 /*
 ** Application entry point and main process loop
 */
-void NOVATEL_OEM615_AppMain(void)
+void NOVATEL_AppMain(void)
 {
     int32 status = OS_SUCCESS;
     uint32 local_run = CFE_ES_RunStatus_APP_RUN;

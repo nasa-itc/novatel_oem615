@@ -89,10 +89,10 @@ extern NOVATEL_OEM615_AppData_t NOVATEL_OEM615_AppData; /* NOVATEL_OEM615 App Da
 **
 ** Local function prototypes.
 **
-** Note: Except for the entry point (NOVATEL_OEM615_AppMain), these
+** Note: Except for the entry point (NOVATEL_AppMain), these
 **       functions are not called from any other source module.
 */
-void  NOVATEL_OEM615_AppMain(void);
+void  NOVATEL_AppMain(void);
 int32 NOVATEL_OEM615_AppInit(void);
 void  NOVATEL_OEM615_ProcessCommandPacket(void);
 void  NOVATEL_OEM615_ProcessGroundCommand(void);
