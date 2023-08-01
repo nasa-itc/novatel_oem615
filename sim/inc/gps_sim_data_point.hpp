@@ -98,13 +98,14 @@ namespace Nos3
         //@}
 
         // Private data
-        Sim42DataPoint _dp;
+        mutable Sim42DataPoint _dp;
         int16_t _sc;
         int16_t _gps;
         int16_t _leap_seconds;
         // mutable below so parsing can be on demand:
         mutable bool _not_parsed;
         mutable double _abs_time;
+        mutable bool _gps_valid;
         mutable int16_t _gps_rollover;
         mutable int16_t _gps_week; // Unambiguous GPS Week
         mutable int32_t _gps_sec_week; // Integer seconds elapsed since the start of the GPS week
