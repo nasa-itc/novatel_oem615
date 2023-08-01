@@ -59,7 +59,7 @@ typedef struct
     uint32_t  DeviceConfig;
     uint32_t  DeviceStatus;
 
-} OS_PACK NOVATEL_OEM615_Device_HK_tlm_t;
+} __attribute__((packed)) NOVATEL_OEM615_Device_HK_tlm_t;
 #define NOVATEL_OEM615_DEVICE_HK_LNGTH sizeof ( NOVATEL_OEM615_Device_HK_tlm_t )
 #define NOVATEL_OEM615_DEVICE_HK_SIZE NOVATEL_OEM615_DEVICE_HK_LNGTH + NOVATEL_OEM615_DEVICE_HDR_TRL_LEN
 
@@ -79,7 +79,7 @@ typedef struct
     double VelY;
     double VelZ;
 
-} OS_PACK NOVATEL_OEM615_Device_Data_tlm_t;
+} __attribute__((packed)) NOVATEL_OEM615_Device_Data_tlm_t;
 #define NOVATEL_OEM615_DEVICE_DATA_LNGTH sizeof ( NOVATEL_OEM615_Device_Data_tlm_t )
 #define NOVATEL_OEM615_DEVICE_DATA_SIZE NOVATEL_OEM615_DEVICE_DATA_LNGTH + NOVATEL_OEM615_DEVICE_HDR_TRL_LEN
 

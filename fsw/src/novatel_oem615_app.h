@@ -59,23 +59,21 @@ typedef struct
     /*
     ** Operational data  - not reported in housekeeping
     */
-    CFE_SB_MsgPtr_t MsgPtr;             /* Pointer to msg received on software bus */
-    CFE_SB_PipeId_t CmdPipe;            /* Pipe Id for HK command pipe */
-    uint32 RunStatus;                   /* App run status for controlling the application state */
-    uint32 HkDataMutex;                 /* Locks all data */
+    CFE_MSG_Message_t * MsgPtr;                 /* Pointer to msg received on software bus */
+    CFE_SB_PipeId_t CmdPipe;                    /* Pipe Id for HK command pipe */
+    uint32 RunStatus;                           /* App run status for controlling the application state */
+    uint32 HkDataMutex;                         /* Locks all data */
 
     /*
 	** Device data 
 	*/
-	uint32 DeviceID;		            /* Device ID provided by CFS on initialization */
+	uint32 DeviceID;		                    /* Device ID provided by CFS on initialization */
     NOVATEL_OEM615_Device_tlm_t DevicePkt;      /* Device specific data packet */
 
     /* 
     ** Device protocol
-    ** TODO: Make specific to your application
     */ 
     uart_info_t Novatel_oem615Uart;             /* Hardware protocol definition */
-    //uint32      DeviceMutex;                    /* Locks device data and protocol */
 
 } NOVATEL_OEM615_AppData_t;
 
@@ -91,10 +89,10 @@ extern NOVATEL_OEM615_AppData_t NOVATEL_OEM615_AppData; /* NOVATEL_OEM615 App Da
 **
 ** Local function prototypes.
 **
-** Note: Except for the entry point (NOVATEL_OEM615_AppMain), these
+** Note: Except for the entry point (NOVATEL_AppMain), these
 **       functions are not called from any other source module.
 */
-void  NOVATEL_OEM615_AppMain(void);
+void  NOVATEL_AppMain(void);
 int32 NOVATEL_OEM615_AppInit(void);
 void  NOVATEL_OEM615_ProcessCommandPacket(void);
 void  NOVATEL_OEM615_ProcessGroundCommand(void);
@@ -116,6 +114,6 @@ int32 NOVATEL_OEM615_SafeCommandDeviceCustom(uint8_t cmd_code, int8_t log_type, 
 int32 NOVATEL_OEM615_SafeRequestHK(NOVATEL_OEM615_Device_HK_tlm_t* data);
 int32 NOVATEL_OEM615_SafeRequestData(NOVATEL_OEM615_Device_Data_tlm_t* data);
 int32 NOVATEL_OEM615_ChildProcessRequestData(NOVATEL_OEM615_Device_Data_tlm_t* data);
-int32 NOVATEL_OEM615_VerifyCmdLength(CFE_SB_MsgPtr_t msg, uint16 expected_length);
+int32 NOVATEL_OEM615_VerifyCmdLength(CFE_MSG_Message_t * msg, uint16 expected_length);
 
 #endif /* _NOVATEL_OEM615_APP_H_ */

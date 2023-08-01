@@ -115,8 +115,8 @@ int main(void)
    */
    UTF_ES_InitAppRecords();
    UTF_ES_AddAppRecord("NAV",0);  
-   CFE_ES_RegisterApp();
-   CFE_EVS_Register(NULL, 0, CFE_EVS_BINARY_FILTER);
+   CFE_ES_RegisterApp;
+   CFE_EVS_Register(NULL, 0, CFE_EVS_EventFilter_BINARY);
      
     printf("*** NAV UNIT TEST COMMAND PIPE TESTS START ***\n\n");
    
@@ -173,13 +173,13 @@ void Test_NAVCmdPipe (void)
     
     /*
     ** Re-Initialize ES application data otherwise our earlier
-    ** tests will cause CFE_ES_RunLoop to not return TRUE and
+    ** tests will cause CFE_ES_RunLoop to not return true and
     ** NAV will exit right away
     */
     UTF_ES_InitAppRecords();
     UTF_ES_AddAppRecord("NAV",0);  
-    CFE_ES_RegisterApp();
-    CFE_EVS_Register(NULL, 0, CFE_EVS_BINARY_FILTER);
+    CFE_ES_RegisterApp;
+    CFE_EVS_Register(NULL, 0, CFE_EVS_EventFilter_BINARY);
     
     /*
     ** Set up to read in script through command pipe
