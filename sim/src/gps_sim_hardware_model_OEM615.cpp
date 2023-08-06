@@ -42,7 +42,9 @@ namespace Nos3
     GPSSimHardwareModelOEM615::GPSSimHardwareModelOEM615(const boost::property_tree::ptree& config)
         : GPSSimHardwareModelCommon(config)
     {
-
+        _enabled = 0;
+        _status = 0;
+        _count = 0;
         std::string connection_string = config.get("common.nos-connection-string", "tcp://127.0.0.1:12001");
 
         // Set up the time node which is **required** for this model
@@ -90,8 +92,8 @@ namespace Nos3
         _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("BESTXYZA", &GPSSimHardwareModelOEM615::get_bestxyza_response));
         _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("GPGGAA", &GPSSimHardwareModelOEM615::get_gpggaa_response));
         _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("RANGECMPA", &GPSSimHardwareModelOEM615::get_rangecmpa_response));
-        _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("BESTXYZA", &GPSSimHardwareModelOEM615::get_bestxyzb_response));
-        _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("RANGECMPA", &GPSSimHardwareModelOEM615::get_rangecmpb_response));
+        _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("BESTXYZB", &GPSSimHardwareModelOEM615::get_bestxyzb_response));
+        _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("RANGECMPB", &GPSSimHardwareModelOEM615::get_rangecmpb_response));
         // TODO - The following two lines are a hack for now to set the configuration of the sim to be the same as the configuration that is saved
         // in the firmware of the STF-1 NovAtel OEM615 - Remove me and make me a configuration option and/or out of band commanding option
         _periodic_logs.insert(std::map<std::string, boost::tuple<double, double>>::value_type("RANGECMPA", boost::tuple<double, double>(_absolute_start_time + 10.0, 1.0)));
@@ -106,7 +108,7 @@ namespace Nos3
     /*************************************************************************
      * Private helper methods
      *************************************************************************/
-
+/*
     void GPSSimHardwareModelOEM615::uart_read_callback(const uint8_t *buf, size_t len)
     {
         // Get the data out of the message bytes - Hardware independent
@@ -124,10 +126,138 @@ namespace Nos3
 
         _uart_connection->write(&out_data[0], out_data.size());
     }
+*/
 
-    std::vector<uint8_t> GPSSimHardwareModelOEM615::determine_response_for_request(const std::vector<uint8_t>& in_data)
+    void GPSSimHardwareModelOEM615::uart_read_callback(const uint8_t *buf, size_t len)
     {
-        std::vector<uint8_t> out_data;
+        std::vector<uint8_t> out_data; 
+        std::uint8_t valid = NOVATEL_OEM615_SIM_SUCCESS;
+
+        // Retrieve data and log in man readable format
+        std::vector<uint8_t> in_data(buf, buf + len);
+        sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  REQUEST %s",
+            SimIHardwareModel::uint8_vector_to_hex_string(in_data).c_str());
+
+        // Check simulator is enabled
+        if (_enabled != NOVATEL_OEM615_SIM_SUCCESS)
+        {
+            sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  Novatel_oem615 sim disabled!");
+            valid = NOVATEL_OEM615_SIM_ERROR;
+        }
+        else
+        {
+            // Check if generic command using dead header / beef trailer (NOOP, Request HK, Request Data)
+            if (in_data.size() == 9 && ((in_data[0] == 0xDE) && (in_data[1] ==0xAD)))
+            {
+                // Check trailer - 0xBEEF
+                if ((in_data[7] != 0xBE) || (in_data[8] !=0xEF))
+                {
+                    sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  Trailer incorrect!");
+                    valid = NOVATEL_OEM615_SIM_ERROR;
+                }
+                else
+                {
+                    // Increment count as valid command format received
+                    _count++;
+                }
+                if (valid == NOVATEL_OEM615_SIM_SUCCESS)
+                {   
+                    // Process command
+                    switch (in_data[2])
+                    {
+                        case 0:
+                            // NOOP
+                            sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  NOOP command received!");
+                            break;
+
+                        case 1:
+                            // Request HK
+                            sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  Send HK command received!");
+                            create_novatel_oem615_hk(out_data);
+                            break;
+
+                        case 2:
+                            // Request data
+                            sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  Send data command received!");
+                            create_novatel_oem615_data(out_data);
+                            break;
+
+                        default:
+                            // Unused command code
+                            valid = NOVATEL_OEM615_SIM_ERROR;
+                            sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  Unused command %d received!", in_data[2]);
+                            break;
+                    }
+                }
+            }
+            // Otherwise, check for NOVATEL_OEM615 specific command
+            else
+            {
+
+                // Get the hardware response for the request - Hardware and algorithm dependent
+                valid = determine_response_for_request(in_data, out_data);
+            }
+        }
+
+        // Increment count and echo command since format valid
+        if (valid == NOVATEL_OEM615_SIM_SUCCESS)
+        {
+            _count++;
+            _uart_connection->write(&in_data[0], in_data.size());
+
+            // Send response if existing
+            if (out_data.size() > 0)
+            {
+                sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  REPLY %s",
+                    SimIHardwareModel::uint8_vector_to_hex_string(out_data).c_str());
+                _uart_connection->write(&out_data[0], out_data.size());
+            }
+        }
+    }
+
+    // Custom function to prepare the Novatel_oem615 HK telemetry 
+    void GPSSimHardwareModelOEM615::create_novatel_oem615_hk(std::vector<uint8_t>& out_data)
+    {
+        // Prepare data size 
+        out_data.resize(16, 0x00);
+
+        // Streaming data header - 0xDEAD 
+        out_data[0] = 0xDE;
+        out_data[1] = 0xAD;
+        
+        // Sequence count 
+        out_data[2] = (_count >> 24) & 0x000000FF; 
+        out_data[3] = (_count >> 16) & 0x000000FF; 
+        out_data[4] = (_count >>  8) & 0x000000FF; 
+        out_data[5] =  _count & 0x000000FF;
+        
+        // Configuration 
+        out_data[6] = (_config >> 24) & 0x000000FF; 
+        out_data[7] = (_config >> 16) & 0x000000FF; 
+        out_data[8] = (_config >>  8) & 0x000000FF; 
+        out_data[9] =  _config & 0x000000FF;
+
+        // Device Status 
+        out_data[10] = (_status >> 24) & 0x000000FF; 
+        out_data[11] = (_status >> 16) & 0x000000FF; 
+        out_data[12] = (_status >>  8) & 0x000000FF; 
+        out_data[13] =  _status & 0x000000FF;
+
+        // Streaming data trailer - 0xBEEF 
+        out_data[14] = 0xBE;
+        out_data[15] = 0xEF;
+    }
+
+    void GPSSimHardwareModelOEM615::create_novatel_oem615_data(std::vector<uint8_t>& out_data)
+    {
+        boost::shared_ptr<GPSSimDataPoint> data_point = boost::dynamic_pointer_cast<GPSSimDataPoint>(_sim_data_provider->get_data_point());
+        get_bestxyza_response(*data_point, out_data);
+    }
+
+
+    std::uint8_t GPSSimHardwareModelOEM615::determine_response_for_request(const std::vector<uint8_t>& in_data, std::vector<uint8_t>& out_data)
+    {
+        std::uint8_t valid = NOVATEL_OEM615_SIM_ERROR;
 
         // 2.  Ask the data provider for the GPS data to return - Hardware independent, BUT data provider dependent
         const boost::shared_ptr<GPSSimDataPoint> data_point =
@@ -154,7 +284,10 @@ namespace Nos3
             }
             std::vector<std::string> words;
             boost::split(words, in_ascii, boost::is_any_of(", "), boost::token_compress_on);
+            std::string nullchar = {'\0'}; // remove the null character that was causing rightmost word comparisons to fail to match
             for (size_t i = 0; i < words.size(); i++) {
+                boost::trim_right_if(words[i], boost::is_any_of(nullchar));
+                boost::trim_right_if(words[i], boost::is_any_of(" "));
                 boost::to_upper(words[i]);
             }
             if (words.size() > 0) {
@@ -189,6 +322,7 @@ namespace Nos3
                                                 search->first, boost::tuple<double, double>(data_point->get_abs_time(), period)));
                                         if (ret.second) {
                                             string_to_uint8vector("<OK", out_data);
+                                            valid = NOVATEL_OEM615_SIM_SUCCESS;
                                         } else {
                                             string_to_uint8vector("<TRIGGER ALREADY EXISTS; NOT VALID FOR THIS LOG", out_data);
                                         }
@@ -197,11 +331,13 @@ namespace Nos3
                                             "Invalid period specified for ONTIME log.  Period:  %s", words[4].c_str());
                                         string_to_uint8vector("<REQUESTED RATE IS INVALID", out_data);
                                     }
-                                } else if ((words.size() == 3) || (words[3].compare("ONCE") == 0)) {
+                                //} else if ((words.size() == 3) || (words[3].compare("ONCE") == 0)) { (LOG COM [LOG_TYPE] ONCE is 4 words)
+                                } else if ((words.size() == 4) || (words[3].compare("ONCE") == 0)) {
                                     sim_logger->debug("GPSSimHardwareModelOEM615::determine_response_for_request:  LOG of type:  %s requested with ONCE (or no) trigger",
                                         log_type.c_str());
                                     get_log_data_func f = search->second;
                                     (this->*f)(*data_point, out_data);
+                                    valid = NOVATEL_OEM615_SIM_SUCCESS;
                                 } else {
                                     sim_logger->warning("GPSSimHardwareModelOEM615::determine_response_for_request:  "
                                         "Invalid trigger or not enough arguments provided.  Trigger:  %s,  number of args:  %d",
@@ -221,6 +357,7 @@ namespace Nos3
                     } else if (command.compare("UNLOGALL") == 0) { // Requesting to unlog all output
                         _periodic_logs.clear();
                         string_to_uint8vector("<OK", out_data);
+                        valid = NOVATEL_OEM615_SIM_SUCCESS;
                     } else if (command.compare("UNLOG") == 0) { // Requesting to unlog output
                         if ((words.size() < 2) || (words[1].compare(0, 3, "COM") != 0)) {
                             words.insert(words.begin() + 1, "NO_PORTS");
@@ -229,6 +366,7 @@ namespace Nos3
                             std::string log_type = words[2];
                             _periodic_logs.erase(log_type);
                             string_to_uint8vector("<OK", out_data);
+                            valid = NOVATEL_OEM615_SIM_SUCCESS;
                         } else {
                             sim_logger->warning("GPSSimHardwareModelOEM615::determine_response_for_request:  UNLOG requested, but no log specified");
                             string_to_uint8vector("<INVALID MESSAGE ID", out_data);
@@ -236,6 +374,7 @@ namespace Nos3
                     } else if (command.compare("SERIALCONFIG") == 0) { // Request to set the serial port configuration... nothing needs done by the sim
                         sim_logger->warning("GPSSimHardwareModelOEM615::determine_response_for_request:  SERIALCONFIG requested... nothing to do.");
                         string_to_uint8vector("<OK", out_data);
+                        valid = NOVATEL_OEM615_SIM_SUCCESS;
                     } else {
                         sim_logger->debug("GPSSimHardwareModelOEM615::determine_response_for_request:  Unsupported abbreviated ASCII command");
                         string_to_uint8vector("<INVALID MESSAGE ID", out_data);
@@ -247,8 +386,7 @@ namespace Nos3
                 string_to_uint8vector("<INVALID MESSAGE ID", out_data);
             }
         }
-
-        return out_data;
+        return valid;
     }
 
     void GPSSimHardwareModelOEM615::send_periodic_data(NosEngine::Common::SimTime time)
@@ -717,7 +855,7 @@ namespace Nos3
         std::string sentence;
         sentence.append("#").append(ss.str());
 
-        sim_logger->debug("GPSSimHardwareModelOEM615::get_bestxyza_string:  RESPONSE:  %s", sentence.c_str());
+        sim_logger->debug("GPSSimHardwareModelOEM615::get_bestxyza_string:  RESPONSE:  (BYTES=%d) %s", sentence.length(), sentence.c_str());
         string_to_uint8vector(sentence, out_data);
     }
 
@@ -820,7 +958,7 @@ namespace Nos3
         get_ascii_header_string("RANGECMPA", data_point, header);
         ss << header;
         ss << fake_range_data.size() << ",";
-        for (int i = 0; i < fake_range_data.size() - 1; i++) {
+        for (unsigned int i = 0; i < fake_range_data.size() - 1; i++) {
             ss << fake_range_data[i] << ",";
         }
         ss << fake_range_data[fake_range_data.size() - 1]; // last line has no comma
@@ -841,9 +979,9 @@ namespace Nos3
         get_binary_header_bytes(140/*msg*/, 4 + 24 * fake_range_data.size(), data_point, out); // RANGECMP header
 
         std::vector<uint8_t> line;
-        for (int i = 0; i < fake_range_data.size() - 1; i++) {
+        for (unsigned int i = 0; i < fake_range_data.size() - 1; i++) {
             hexstring_to_uint8vector(fake_range_data[i], line);
-            for (int j = 0; j < line.size(); j++) {
+            for (unsigned int j = 0; j < line.size(); j++) {
                 out.push_back(line[j]);
             }
             line.clear();

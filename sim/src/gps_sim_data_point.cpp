@@ -34,13 +34,13 @@ namespace Nos3
 
     GPSSimDataPoint::GPSSimDataPoint(double abs_time, int16_t leap_seconds, int16_t gps_week, int32_t gps_sec_week, double gps_frac_sec, 
         const std::vector<double>& ECEF, const std::vector<double>& ECEF_vel, const std::vector<double>& ECI, const std::vector<double>& ECI_vel) : 
-        _not_parsed(false), _abs_time(abs_time), _leap_seconds(leap_seconds), _gps_week(gps_week), _gps_sec_week(gps_sec_week), _gps_frac_sec(gps_frac_sec), 
+        _leap_seconds(leap_seconds), _not_parsed(false), _abs_time(abs_time), _gps_week(gps_week), _gps_sec_week(gps_sec_week), _gps_frac_sec(gps_frac_sec), 
         _ECEF(ECEF), _ECEF_vel(ECEF_vel), _ECI(ECI), _ECI_vel(ECI_vel)
     {
     }
 
     GPSSimDataPoint::GPSSimDataPoint(int16_t spacecraft, int16_t gps, int16_t leap_seconds, const boost::shared_ptr<Sim42DataPoint> dp) : 
-        _sc(spacecraft), _gps(gps), _leap_seconds(leap_seconds), _dp(*dp), _not_parsed(true) 
+        _dp(*dp), _sc(spacecraft), _gps(gps), _leap_seconds(leap_seconds), _not_parsed(true) 
     {
         _ECEF.resize(3); _ECEF_vel.resize(3); _ECI.resize(3); _ECI_vel.resize(3);
         sim_logger->trace("GPSSimDataPoint::GPSSimDataPoint:  Created instance using _sc=%d, _gps=%d, _dp=%s", 
@@ -53,83 +53,43 @@ namespace Nos3
 
     void GPSSimDataPoint::do_parsing(void) const
     {
-        std::ostringstream MatchString;
-        MatchString << "SC[" << _sc << "].AC.GPS[" << _gps << "].";
-        size_t MSsize = MatchString.str().size();
-
-        _not_parsed = false;
-        
-        std::vector<std::string> lines = _dp.get_lines();
-        
         try {
-            for (int i = 0; i < lines.size(); i++) {
-                if (lines[i].compare(0, MSsize, MatchString.str()) == 0) { // e.g. SC[0].AC.GPS[0]
-                    sim_logger->trace("GPSSimDataPoint::do_parsing:  Found a string with the correct prefix = %s.  String:  %s", MatchString.str().c_str(), lines[i].c_str());
-                    // GPS. Rollover, Week, Sec, PosN, VelN, PosW, VelW, Lng, Lat, Alt
-                    if (lines[i].compare(MSsize, 9, "Rollover ") == 0) {
-                        size_t found = lines[i].find_first_of("=");
-                        _gps_rollover = std::stoi(lines[i].substr(found+1, lines[i].size() - found - 1));
-                        sim_logger->trace("GPSSimDataPoint::do_parsing:  Parsed Rollover.  = found at %d, rhs=%s, _gps_rollover=%d", 
-                            found, lines[i].substr(found+1, lines[i].size() - found - 1).c_str(), _gps_rollover);
-                    } else
-                    if (lines[i].compare(MSsize, 5, "Week ") == 0) {
-                        size_t found = lines[i].find_first_of("=");
-                        _gps_week = std::stoi(lines[i].substr(found+1, lines[i].size() - found - 1));
-                        sim_logger->trace("GPSSimDataPoint::do_parsing:  Parsed Week.  = found at %d, rhs=%s, _gps_week=%d", 
-                            found, lines[i].substr(found+1, lines[i].size() - found - 1).c_str(), _gps_week);
-                    } else
-                    if (lines[i].compare(MSsize, 4, "Sec ") == 0) {
-                        size_t found = lines[i].find_first_of("=");
-                        double seconds = std::stod(lines[i].substr(found+1, lines[i].size() - found - 1));
-                        _gps_sec_week = (int32_t)seconds;
-                        _gps_frac_sec = seconds - (double)_gps_sec_week;
-                        sim_logger->trace("GPSSimDataPoint::do_parsing:  Parsed Sec.  = found at %d, rhs=%s, seconds=%f, _gps_sec_week=%d, _gps_frac_sec=%f", 
-                            found, lines[i].substr(found+1, lines[i].size() - found - 1).c_str(), seconds, _gps_sec_week, _gps_frac_sec);
-                    } else
-                    if (lines[i].compare(MSsize, 5, "PosN ") == 0) {
-                        size_t found = lines[i].find_first_of("=");
-                        parse_double_vector(lines[i].substr(found+1, lines[i].size() - found - 1), _ECI);
-                        sim_logger->trace("GPSSimDataPoint::do_parsing:  Parsed PosN.  = found at %d, rhs=%s, _ECI=%f/%f/%f", 
-                            found, lines[i].substr(found+1, lines[i].size() - found - 1).c_str(), _ECI[0], _ECI[1], _ECI[2]);
-                    } else
-                    if (lines[i].compare(MSsize, 5, "VelN ") == 0) {
-                        size_t found = lines[i].find_first_of("=");
-                        parse_double_vector(lines[i].substr(found+1, lines[i].size() - found - 1), _ECI_vel);
-                        sim_logger->trace("GPSSimDataPoint::do_parsing:  Parsed VelN.  = found at %d, rhs=%s, _ECI_vel=%f/%f/%f", 
-                            found, lines[i].substr(found+1, lines[i].size() - found - 1).c_str(), _ECI_vel[0], _ECI_vel[1], _ECI_vel[2]);
-                    } else
-                    if (lines[i].compare(MSsize, 5, "PosW ") == 0) {
-                        size_t found = lines[i].find_first_of("=");
-                        parse_double_vector(lines[i].substr(found+1, lines[i].size() - found - 1), _ECEF);
-                        sim_logger->trace("GPSSimDataPoint::do_parsing:  Parsed PosW.  = found at %d, rhs=%s, _ECEF=%f/%f/%f", 
-                            found, lines[i].substr(found+1, lines[i].size() - found - 1).c_str(), _ECEF[0], _ECEF[1], _ECEF[2]);
-                    } else
-                    if (lines[i].compare(MSsize, 5, "VelW ") == 0) {
-                        size_t found = lines[i].find_first_of("=");
-                        parse_double_vector(lines[i].substr(found+1, lines[i].size() - found - 1), _ECEF_vel);
-                        sim_logger->trace("GPSSimDataPoint::do_parsing:  Parsed VelW.  = found at %d, rhs=%s, _ECEF_vel=%f/%f/%f", 
-                            found, lines[i].substr(found+1, lines[i].size() - found - 1).c_str(), _ECEF_vel[0], _ECEF_vel[1], _ECEF_vel[2]);
-                    } else
-                    if (lines[i].compare(MSsize, 4, "Lng ") == 0) {
-                        size_t found = lines[i].find_first_of("=");
-                        _gps_lng = std::stod(lines[i].substr(found+1, lines[i].size() - found - 1)) * 180.0 / M_PI;
-                        sim_logger->trace("GPSSimDataPoint::do_parsing:  Parsed Lng.  = found at %d, rhs=%s, _gps_lng=%f", 
-                            found, lines[i].substr(found+1, lines[i].size() - found - 1).c_str(), _gps_lng);
-                    } else
-                    if (lines[i].compare(MSsize, 4, "Lat ") == 0) {
-                        size_t found = lines[i].find_first_of("=");
-                        _gps_lat = std::stod(lines[i].substr(found+1, lines[i].size() - found - 1)) * 180.0 / M_PI;
-                        sim_logger->trace("GPSSimDataPoint::do_parsing:  Parsed Lat.  = found at %d, rhs=%s, _gps_lat=%f", 
-                            found, lines[i].substr(found+1, lines[i].size() - found - 1).c_str(), _gps_lat);
-                    } else
-                    if (lines[i].compare(MSsize, 4, "Alt ") == 0) {
-                        size_t found = lines[i].find_first_of("=");
-                        _gps_alt = std::stod(lines[i].substr(found+1, lines[i].size() - found - 1));
-                        sim_logger->trace("GPSSimDataPoint::do_parsing:  Parsed Alt.  = found at %d, rhs=%s, _gps_alt=%f", 
-                            found, lines[i].substr(found+1, lines[i].size() - found - 1).c_str(), _gps_alt);
-                    }
-                }
-            }
+            std::string valid_key;
+            valid_key.append("SC[").append(std::to_string(_sc)).append("].AC.GPS[").append(std::to_string(_gps)).append("].");
+            std::string rollover_key(valid_key), week_key(valid_key), sec_key(valid_key), posn_key(valid_key), veln_key(valid_key), posw_key(valid_key), velw_key(valid_key), lng_key(valid_key), lat_key(valid_key), alt_key(valid_key);
+            valid_key.append("Valid");
+            rollover_key.append("Rollover");
+            week_key.append("Week");
+            sec_key.append("Sec");
+            posn_key.append("PosN");
+            veln_key.append("VelN");
+            posw_key.append("PosW");
+            velw_key.append("VelW");
+            lng_key.append("Lng");
+            lat_key.append("Lat");
+            alt_key.append("Alt");
+
+            _gps_valid = (_dp.get_value_for_key(valid_key) == "1");
+            _gps_rollover = strtol(_dp.get_value_for_key(rollover_key).c_str(), NULL, 10);
+            _gps_week = strtol(_dp.get_value_for_key(week_key).c_str(), NULL, 10);
+            double seconds = strtod(_dp.get_value_for_key(sec_key).c_str(), NULL);
+            _gps_sec_week = (int32_t)seconds;
+            _gps_frac_sec = seconds - (double)_gps_sec_week;
+            parse_double_vector(_dp.get_value_for_key(posn_key), _ECI);
+            parse_double_vector(_dp.get_value_for_key(veln_key), _ECI_vel);
+            parse_double_vector(_dp.get_value_for_key(posw_key), _ECEF);
+            parse_double_vector(_dp.get_value_for_key(velw_key), _ECEF_vel);
+            _gps_lng = strtod(_dp.get_value_for_key(lng_key).c_str(), NULL);
+            _gps_lat = strtod(_dp.get_value_for_key(lat_key).c_str(), NULL);
+            _gps_alt = strtod(_dp.get_value_for_key(alt_key).c_str(), NULL);
+
+            sim_logger->trace("GPSSimDataPoint::do_parsing:  Valid=%s, Rollover=%d, Week=%d, Seconds=%d, FracSeconds=%f, ECI=%f, %f, %f, ECI_vel=%f, %f, %f",
+                _gps_valid?"TRUE ":"FALSE", _gps_rollover, _gps_week, _gps_sec_week, _gps_frac_sec, _ECI[0], _ECI[1], _ECI[2], _ECI_vel[0], _ECI_vel[1], _ECI_vel[2]);
+            sim_logger->trace("GPSSimDataPoint::do_parsing: ECEF=%f, %f, %f, ECEF_vel=%f, %f, %f, Lat=%f, Lng=%f, Alt=%f",
+                _ECEF[0], _ECEF[1], _ECEF[2], _ECEF_vel[0], _ECEF_vel[1], _ECEF_vel[2], _gps_lat, _gps_lng, _gps_alt);
+
+            _not_parsed = false;
+
         } catch(const std::exception& e) {
             sim_logger->error("GPSSimDataPoint::do_parsing:  Parsing exception:  %s", e.what());
         }

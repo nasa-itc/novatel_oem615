@@ -34,10 +34,11 @@ namespace Nos3
      *************************************************************************/
 
     GPSSimDataFileProvider::GPSSimDataFileProvider(const boost::property_tree::ptree& config) :
-        SimIDataProvider(config), _file_loc(0),
+        SimIDataProvider(config), 
         _absolute_start_time(config.get("common.absolute-start-time", 552110400.0)),
         _sim_microseconds_per_tick(config.get("common.sim-microseconds-per-tick", 1000000)),
         _data_file(config.get("simulator.hardware-model.data-provider.filename", "gps_data.42")),
+        _file_loc(0),
         _leap_seconds(config.get("simulator.hardware-model.data-provider.leap-seconds", 37))
     {
         sim_logger->info("GPSSimDataFileProvider::GPSSimDataFileProvider:  Configuring GpsSimDataFileProvider.");
@@ -64,7 +65,7 @@ namespace Nos3
      *************************************************************************/
     boost::shared_ptr<GPSSimDataPoint> GPSSimDataFileProvider::get_gps_data() const
     {
-		int i, j;
+		int i;
         double j2000 = 0.0;
         int32_t gps_week;
         int32_t gps_sec_week;
