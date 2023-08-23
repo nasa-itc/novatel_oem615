@@ -364,7 +364,6 @@ int32_t NOVATEL_OEM615_ReadHK(uart_info_t* uart_device, uint8_t* read_data, uint
                     (temp_read_data[i+data_length-2] == NOVATEL_OEM615_DEVICE_TRAILER_0) && 
                     (temp_read_data[i+data_length-1] == NOVATEL_OEM615_DEVICE_TRAILER_1) )
                     {
-                        OS_printf(" HK HEADER + TRAILER FOUND \n");
                         for (int j=0;j<data_length;j++)
                         {
                             read_data[j] = read_data[i+j];
