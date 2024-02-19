@@ -31,7 +31,7 @@ void NOVATEL_OEM615_ChildTask(void)
 
 void NOVATEL_OEM615_ProcessData(void)
 {
-    const uint32 sleeptime = NOVATEL_OEM615_READ_TIMEOUT;
+    const uint32 sleeptime = NOVATEL_OEM615_CFG_READ_TIMEOUT;
     int32 status = CFE_SUCCESS;
     if (NOVATEL_OEM615_GetDeviceEnabledStatus() == NOVATEL_OEM615_DEVICE_ENABLED)
     {

@@ -10,9 +10,6 @@
 
 #include "novatel_oem615_app.h"
 
-#define NOVATEL_OEM615_READ_TIMEOUT            1
-#define NOVATEL_OEM615_UART_BUFFER_SIZE        1024
-
 void NOVATEL_OEM615_ChildTask(void);
 void NOVATEL_OEM615_ProcessData(void);
 
