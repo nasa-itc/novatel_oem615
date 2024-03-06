@@ -340,7 +340,7 @@ namespace Nos3
                                     valid = NOVATEL_OEM615_SIM_SUCCESS;
                                 } else {
                                     sim_logger->warning("GPSSimHardwareModelOEM615::determine_response_for_request:  "
-                                        "Invalid trigger or not enough arguments provided.  Trigger:  %s,  number of args:  %d",
+                                        "Invalid trigger or not enough arguments provided.  Trigger:  %s,  number of args:  %ld",
                                         words[3].c_str(), words.size());
                                     string_to_uint8vector("<INVALID MESSAGE ID", out_data);
                                 }
@@ -855,7 +855,7 @@ namespace Nos3
         std::string sentence;
         sentence.append("#").append(ss.str());
 
-        sim_logger->debug("GPSSimHardwareModelOEM615::get_bestxyza_string:  RESPONSE:  (BYTES=%d) %s", sentence.length(), sentence.c_str());
+        sim_logger->debug("GPSSimHardwareModelOEM615::get_bestxyza_string:  RESPONSE:  (BYTES=%ld) %s", sentence.length(), sentence.c_str());
         string_to_uint8vector(sentence, out_data);
     }
 
