@@ -228,7 +228,7 @@ int32_t NOVATEL_OEM615_CommandDeviceCustom(uart_info_t* uart_device, uint8_t cmd
         if (status == OS_SUCCESS)
         {
             // Write data 
-            int32_t bytes = uart_write_port(uart_device, write_data, command_length);
+            uart_write_port(uart_device, write_data, command_length);
             free(write_data);
         } // uart_flush
         else
@@ -356,7 +356,6 @@ int32_t NOVATEL_OEM615_ReadHK(uart_info_t* uart_device, uint8_t* read_data, uint
             else
             {
                 /* search uart data for header+trailer signifying start of HK gps packet */
-                int j = 0;
                 for (int i=0;i<(bytes-data_length);i++)
                 {
                     if ((temp_read_data[i]  == NOVATEL_OEM615_DEVICE_HDR_0)     && 
@@ -364,7 +363,6 @@ int32_t NOVATEL_OEM615_ReadHK(uart_info_t* uart_device, uint8_t* read_data, uint
                     (temp_read_data[i+data_length-2] == NOVATEL_OEM615_DEVICE_TRAILER_0) && 
                     (temp_read_data[i+data_length-1] == NOVATEL_OEM615_DEVICE_TRAILER_1) )
                     {
-                        OS_printf(" HK HEADER + TRAILER FOUND \n");
                         for (int j=0;j<data_length;j++)
                         {
                             read_data[j] = read_data[i+j];
