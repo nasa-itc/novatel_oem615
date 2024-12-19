@@ -114,7 +114,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
         case CMD_NOOP:
             if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
             {
-                status = NOVATEL_OEM615_CommandDevice(&Novatel_oem615Uart, NOVATEL_OEM615_DEVICE_NOOP_CMD, 0);
+                status = NOVATEL_OEM615_CommandDevice(&Novatel_oem615Uart, NOVATEL_OEM615_DEVICE_CFG_CMD, 0);
                 if (status == OS_SUCCESS)
                 {
                     OS_printf("NOOP command success\n");
