@@ -25,7 +25,7 @@
 
 #include "hwlib.h"
 #include "device_cfg.h"
-#include "novatel_oem615_device.h"
+#include "../shared/novatel_oem615_device.h"
 
 #if TGTNAME == cpu1
     #include "nos_link.h"
