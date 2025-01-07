@@ -29,13 +29,13 @@ void print_help(void)
         "help                               - Display help                    \n"
         "exit                               - Exit app                        \n"
         "noop                               - No operation command to device  \n"
-        "  n                                - ^                               \n"
+        "n                                  - ^                               \n"
         "hk                                 - Request device housekeeping     \n"
-        "  h                                - ^                               \n"
-        "novatel_oem615                             - Request novatel_oem615 data             \n"
-        "  s                                - ^                               \n"
+        "h                                  - ^                               \n"
+        "novatel_oem615                     - Request novatel_oem615 data     \n"
+        "s                                  - ^                               \n"
         "cfg #                              - Send configuration #            \n"
-        "  c #                              - ^                               \n"
+        "c #                                - ^                               \n"
         "\n"
     );
 }
@@ -66,6 +66,7 @@ int get_command(const char* str)
     {
         status = CMD_NOOP;
     }
+
     else if(strcmp(lcmd, "hk") == 0) 
     {
         status = CMD_HK;
@@ -132,11 +133,9 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
                 status = NOVATEL_OEM615_RequestHK(&Novatel_oem615Uart, &Novatel_oem615HK);
                 if (status == OS_SUCCESS)
                 {
-                    OS_printf("NOVATEL_OEM615_RequestHK command success\n");
-                }
-                else
-                {
-                    OS_printf("NOVATEL_OEM615_RequestHK command failed!\n");
+                    OS_printf("NovatelHk.DeviceCounter = %d \n", Novatel_oem615HK.DeviceCounter);
+                    OS_printf("NovatelHK.DviceConfig = %d \n", Novatel_oem615HK.DeviceConfig);
+                    OS_printf("NovatelHK.DeviceStatus = %d \n", Novatel_oem615HK.DeviceStatus);
                 }
             }
             break;
@@ -148,6 +147,11 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
                 if (status == OS_SUCCESS)
                 {
                     OS_printf("NOVATEL_OEM615_RequestData command success\n");
+                    // TODO - Fix print statements, error says Novatel_oem615Data has no DeviceCounter attribute but its declaration is similar to HK so not sure why
+                    // OS_printf("NovatelData.DeviceCounter = %d \n", Novatel_oem615Data.DeviceDataZ);
+                    // OS_printf("NovatelData.DeviceDataX = %d \n", Novatel_oem615Data.DeviceDataX);
+                    // OS_printf("NovatelData.DeviceDataY = %d \n", Novatel_oem615Data.DeviceDataY);
+                    // OS_printf("NovatelData.DeviceDataZ = %d \n", Novatel_oem615Data.DeviceDataZ);
                 }
                 else
                 {
