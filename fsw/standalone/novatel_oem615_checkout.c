@@ -15,9 +15,23 @@
 /*
 ** Global Variables
 */
-uart_info_t Novatel_oem615Uart;
-NOVATEL_OEM615_Device_HK_tlm_t Novatel_oem615HK;
-NOVATEL_OEM615_Device_Data_tlm_t Novatel_oem615Data;
+uart_info_t Novatel_oem615Uart;             /* Hardware protocol definition */
+NOVATEL_OEM615_Device_HK_tlm_t Novatel_oem615HK;    /* NOVATEL_OEM615 Housekeeping Telemetry Packet */
+NOVATEL_OEM615_Device_Data_tlm_t Novatel_oem615Data; 
+
+/*
+** Operational data  - not reported in housekeeping
+*/
+CFE_MSG_Message_t * MsgPtr;                 /* Pointer to msg received on software bus */
+CFE_SB_PipeId_t CmdPipe;                    /* Pipe Id for HK command pipe */
+uint32 RunStatus;                           /* App run status for controlling the application state */
+uint32 HkDataMutex;                         /* Locks all data */
+
+/*
+** Device data 
+*/
+uint32 DeviceID;		                    /* Device ID provided by CFS on initialization */
+NOVATEL_OEM615_Device_tlm_t Novatel_oem615Device;      /* Device specific data packet */
 
 /*
 ** Component Functions
@@ -66,7 +80,6 @@ int get_command(const char* str)
     {
         status = CMD_NOOP;
     }
-
     else if(strcmp(lcmd, "hk") == 0) 
     {
         status = CMD_HK;
@@ -192,18 +205,91 @@ int main(int argc, char *argv[])
     int num_input_tokens;
     int cmd;    
     char* token_ptr;
-    uint8_t run_status = OS_SUCCESS;
+    uint8_t run_status = CFE_ES_RunStatus_APP_RUN;
 
     /* Initialize HWLIB */
     #ifdef _NOS_ENGINE_LINK_
         nos_init_link();
     #endif
 
+    /* Register the events */
+    CFE_EVS_Register(NULL, 0, CFE_EVS_EventFilter_BINARY);
+
+    /* Create the Software Bus command pipe */
+    status = CFE_SB_CreatePipe(&CmdPipe, NOVATEL_OEM615_PIPE_DEPTH, "NAV_CMD_PIPE")
+    {
+        CFE_EVS_SendEvent(NOVATEL_OEM615_PIPE_ERR_EID, CFE_EVS_EventType_ERROR,
+            "Error Creating SB Pipe,RC=0x%08X",(unsigned int) status);
+       return status;
+    }
+
+    /*
+    ** Subscribe to ground commands
+    */
+    status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId(NOVATEL_OEM615_CMD_MID), CmdPipe);
+    if (status != CFE_SUCCESS)
+    {
+        CFE_EVS_SendEvent(NOVATEL_OEM615_SUB_CMD_ERR_EID, CFE_EVS_EventType_ERROR,
+            "Error Subscribing to HK Gnd Cmds, MID=0x%04X, RC=0x%08X",
+            NOVATEL_OEM615_CMD_MID, (unsigned int) status);
+        return status;
+    }
+
+    /*
+    ** Subscribe to housekeeping (hk) message requests
+    */
+    status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId(NOVATEL_OEM615_REQ_HK_MID), CmdPipe);
+    if (status != CFE_SUCCESS)
+    {
+        CFE_EVS_SendEvent(NOVATEL_OEM615_SUB_REQ_HK_ERR_EID, CFE_EVS_EventType_ERROR,
+            "Error Subscribing to HK Request, MID=0x%04X, RC=0x%08X",
+            NOVATEL_OEM615_REQ_HK_MID, (unsigned int) status);
+        return status;
+    }
+
+    /* 
+    ** Initialize the published HK message - this HK message will contain the 
+    ** telemetry that has been defined in the NOVATEL_OEM615_HkTelemetryPkt for this app.
+    */
+    CFE_MSG_Init(CFE_MSG_PTR(Novatel_oem615HK.TlmHeader),
+                   CFE_SB_ValueToMsgId(NOVATEL_OEM615_HK_TLM_MID),
+                   NOVATEL_OEM615_HK_TLM_LNGTH);
+
+    /*
+    ** Initialize the device packet message
+    ** This packet is specific to your application
+    */
+    CFE_MSG_Init(CFE_MSG_PTR(Novatel_oem615Device.TlmHeader),
+                   CFE_SB_ValueToMsgId(NOVATEL_OEM615_DEVICE_TLM_MID),
+                   NOVATEL_OEM615_DEVICE_TLM_LNGTH);
+
+
     /* Open device specific protocols */
     Novatel_oem615Uart.deviceString = NOVATEL_OEM615_CFG_STRING;
     Novatel_oem615Uart.handle = NOVATEL_OEM615_CFG_HANDLE;
     Novatel_oem615Uart.isOpen = PORT_CLOSED;
     Novatel_oem615Uart.baud = NOVATEL_OEM615_CFG_BAUDRATE_HZ;
+    Novatel_oem615Uart.access_option = uart_access_flag_RDWR;
+
+    /*
+    ** Initialize application data
+    ** Note that counters are excluded as they were reset in the previous code block
+    */
+    Novatel_oem615HK.DeviceEnabled = NOVATEL_OEM615_DEVICE_DISABLED;
+    Novatel_oem615HK.DeviceHK.DeviceCounter = 0;
+    Novatel_oem615HK.DeviceHK.DeviceConfig = 0;
+    Novatel_oem615HK.DeviceHK.DeviceStatus = 0;
+
+
+    /* Create hk data mutex */
+    status = OS_MutSemCreate(&HkDataMutex, NOVATEL_OEM615_HK_MUTEX_NAME, 0);
+    if (status != OS_SUCCESS)
+    {
+        CFE_EVS_SendEvent(NOVATEL_OEM615_CREATE_MUTEX_ERR_EID, CFE_EVS_EventType_ERROR, "NOVATEL_OEM615: Create hk mutex error %d", status);
+        return status;
+    }
+
+
     status = uart_init_port(&Novatel_oem615Uart);
     if (status == OS_SUCCESS)
     {
@@ -213,6 +299,40 @@ int main(int argc, char *argv[])
     {
         printf("UART device %s failed to initialize! \n", Novatel_oem615Uart.deviceString);
         run_status = OS_ERROR;
+    }
+
+    /* 
+    ** Create device task
+    */
+    status = CFE_ES_CreateChildTask(&DeviceID,
+                                    NOVATEL_OEM615_CHILD_TASK_NAME,
+                                    NOVATEL_OEM615_ChildTask, 0,
+                                    NOVATEL_OEM615_CHILD_TASK_STACK_SIZE,
+                                    NOVATEL_OEM615_CHILD_TASK_PRIORITY, 0);
+    if (status != CFE_SUCCESS)
+    {
+        CFE_EVS_SendEvent(NOVATEL_OEM615_CHILDTASKINIT_ERR_EID, CFE_EVS_EventType_ERROR, "NOVATEL_OEM615: Create device task error %d", status);
+        return status;
+    }
+
+    /* 
+    ** Always reset all counters during application initialization 
+    */
+    NOVATEL_OEM615_ResetCounters();
+
+    /* 
+     ** Send an information event that the app has initialized. 
+     ** This is useful for debugging the loading of individual applications.
+     */
+    status = CFE_EVS_SendEvent(NOVATEL_OEM615_STARTUP_INF_EID, CFE_EVS_EventType_INFORMATION,
+               "NOVATEL_OEM615 App Initialized. Version %d.%d.%d.%d",
+                NOVATEL_OEM615_MAJOR_VERSION,
+                NOVATEL_OEM615_MINOR_VERSION, 
+                NOVATEL_OEM615_REVISION, 
+                NOVATEL_OEM615_MISSION_REV);	
+    if (status != CFE_SUCCESS)
+    {
+        CFE_ES_WriteToSysLog("NOVATEL_OEM615: Error sending initialization event: 0x%08X\n", (unsigned int) status);
     }
 
     /* Main loop */
