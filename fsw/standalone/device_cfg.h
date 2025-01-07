@@ -6,10 +6,11 @@
 */
 #define NOVATEL_OEM615_CFG
 /* Note: NOS3 uart requires matching handle and bus number */
-#define NOVATEL_OEM615_CFG_STRING           "/dev/usart_16"
-#define NOVATEL_OEM615_CFG_HANDLE           16 
+#define NOVATEL_OEM615_CFG_STRING           "usart_1"
+#define NOVATEL_OEM615_CFG_HANDLE           1
 #define NOVATEL_OEM615_CFG_BAUDRATE_HZ      115200
-#define NOVATEL_OEM615_CFG_MS_TIMEOUT       250
+#define NOVATEL_OEM615_CFG_MS_TIMEOUT       50
+#define NOVATEL_OEM615_CFG_READ_TIMEOUT     250 
 #define NOVATEL_OEM615_CFG_DEBUG
 #define NOVATEL_OEM615_DEVICE_CFG_CMD          0x03
 

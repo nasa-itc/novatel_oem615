@@ -20,20 +20,6 @@ NOVATEL_OEM615_Device_HK_tlm_t Novatel_oem615HK;    /* NOVATEL_OEM615 Housekeepi
 NOVATEL_OEM615_Device_Data_tlm_t Novatel_oem615Data; 
 
 /*
-** Operational data  - not reported in housekeeping
-*/
-CFE_MSG_Message_t * MsgPtr;                 /* Pointer to msg received on software bus */
-CFE_SB_PipeId_t CmdPipe;                    /* Pipe Id for HK command pipe */
-uint32 RunStatus;                           /* App run status for controlling the application state */
-uint32 HkDataMutex;                         /* Locks all data */
-
-/*
-** Device data 
-*/
-uint32 DeviceID;		                    /* Device ID provided by CFS on initialization */
-NOVATEL_OEM615_Device_tlm_t Novatel_oem615Device;      /* Device specific data packet */
-
-/*
 ** Component Functions
 */
 void print_help(void) 
@@ -159,12 +145,33 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
                 status = NOVATEL_OEM615_RequestData(&Novatel_oem615Uart, &Novatel_oem615Data);
                 if (status == OS_SUCCESS)
                 {
+                    //uint8_t read_data[NOVATEL_OEM615_DEVICE_DATA_SIZE];
                     OS_printf("NOVATEL_OEM615_RequestData command success\n");
+                    /*
                     // TODO - Fix print statements, error says Novatel_oem615Data has no DeviceCounter attribute but its declaration is similar to HK so not sure why
                     // OS_printf("NovatelData.DeviceCounter = %d \n", Novatel_oem615Data.DeviceDataZ);
                     // OS_printf("NovatelData.DeviceDataX = %d \n", Novatel_oem615Data.DeviceDataX);
                     // OS_printf("NovatelData.DeviceDataY = %d \n", Novatel_oem615Data.DeviceDataY);
                     // OS_printf("NovatelData.DeviceDataZ = %d \n", Novatel_oem615Data.DeviceDataZ);
+                    if ((read_data[0]  == NOVATEL_OEM615_DEVICE_HDR_0)     && 
+                        (read_data[1]  == NOVATEL_OEM615_DEVICE_HDR_1)     && 
+                        (read_data[12] == NOVATEL_OEM615_DEVICE_TRAILER_0) && 
+                        (read_data[13] == NOVATEL_OEM615_DEVICE_TRAILER_1) )
+                    {
+                        Novatel_oem615Data.DeviceCounter  = read_data[2] << 24;
+                        Novatel_oem615Data.DeviceCounter |= read_data[3] << 16;
+                        Novatel_oem615Data.DeviceCounter |= read_data[4] << 8;
+                        Novatel_oem615Data.DeviceCounter |= read_data[5];
+
+                        Novatel_oem615Data.DeviceDataX  = read_data[6] << 8;
+                        Novatel_oem615Data.DeviceDataX |= read_data[7];
+
+                        Novatel_oem615Data.DeviceDataY  = read_data[8] << 8;
+                        Novatel_oem615Data.DeviceDataY |= read_data[9];
+                        
+                        Novatel_oem615Data.DeviceDataZ  = read_data[10] << 8;
+                        Novatel_oem615Data.DeviceDataZ |= read_data[11];
+                    }*/
                 }
                 else
                 {
@@ -205,64 +212,13 @@ int main(int argc, char *argv[])
     int num_input_tokens;
     int cmd;    
     char* token_ptr;
-    uint8_t run_status = CFE_ES_RunStatus_APP_RUN;
+    uint8_t run_status = OS_SUCCESS;
+
 
     /* Initialize HWLIB */
     #ifdef _NOS_ENGINE_LINK_
         nos_init_link();
     #endif
-
-    /* Register the events */
-    CFE_EVS_Register(NULL, 0, CFE_EVS_EventFilter_BINARY);
-
-    /* Create the Software Bus command pipe */
-    status = CFE_SB_CreatePipe(&CmdPipe, NOVATEL_OEM615_PIPE_DEPTH, "NAV_CMD_PIPE")
-    {
-        CFE_EVS_SendEvent(NOVATEL_OEM615_PIPE_ERR_EID, CFE_EVS_EventType_ERROR,
-            "Error Creating SB Pipe,RC=0x%08X",(unsigned int) status);
-       return status;
-    }
-
-    /*
-    ** Subscribe to ground commands
-    */
-    status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId(NOVATEL_OEM615_CMD_MID), CmdPipe);
-    if (status != CFE_SUCCESS)
-    {
-        CFE_EVS_SendEvent(NOVATEL_OEM615_SUB_CMD_ERR_EID, CFE_EVS_EventType_ERROR,
-            "Error Subscribing to HK Gnd Cmds, MID=0x%04X, RC=0x%08X",
-            NOVATEL_OEM615_CMD_MID, (unsigned int) status);
-        return status;
-    }
-
-    /*
-    ** Subscribe to housekeeping (hk) message requests
-    */
-    status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId(NOVATEL_OEM615_REQ_HK_MID), CmdPipe);
-    if (status != CFE_SUCCESS)
-    {
-        CFE_EVS_SendEvent(NOVATEL_OEM615_SUB_REQ_HK_ERR_EID, CFE_EVS_EventType_ERROR,
-            "Error Subscribing to HK Request, MID=0x%04X, RC=0x%08X",
-            NOVATEL_OEM615_REQ_HK_MID, (unsigned int) status);
-        return status;
-    }
-
-    /* 
-    ** Initialize the published HK message - this HK message will contain the 
-    ** telemetry that has been defined in the NOVATEL_OEM615_HkTelemetryPkt for this app.
-    */
-    CFE_MSG_Init(CFE_MSG_PTR(Novatel_oem615HK.TlmHeader),
-                   CFE_SB_ValueToMsgId(NOVATEL_OEM615_HK_TLM_MID),
-                   NOVATEL_OEM615_HK_TLM_LNGTH);
-
-    /*
-    ** Initialize the device packet message
-    ** This packet is specific to your application
-    */
-    CFE_MSG_Init(CFE_MSG_PTR(Novatel_oem615Device.TlmHeader),
-                   CFE_SB_ValueToMsgId(NOVATEL_OEM615_DEVICE_TLM_MID),
-                   NOVATEL_OEM615_DEVICE_TLM_LNGTH);
-
 
     /* Open device specific protocols */
     Novatel_oem615Uart.deviceString = NOVATEL_OEM615_CFG_STRING;
@@ -275,19 +231,9 @@ int main(int argc, char *argv[])
     ** Initialize application data
     ** Note that counters are excluded as they were reset in the previous code block
     */
-    Novatel_oem615HK.DeviceEnabled = NOVATEL_OEM615_DEVICE_DISABLED;
-    Novatel_oem615HK.DeviceHK.DeviceCounter = 0;
-    Novatel_oem615HK.DeviceHK.DeviceConfig = 0;
-    Novatel_oem615HK.DeviceHK.DeviceStatus = 0;
-
-
-    /* Create hk data mutex */
-    status = OS_MutSemCreate(&HkDataMutex, NOVATEL_OEM615_HK_MUTEX_NAME, 0);
-    if (status != OS_SUCCESS)
-    {
-        CFE_EVS_SendEvent(NOVATEL_OEM615_CREATE_MUTEX_ERR_EID, CFE_EVS_EventType_ERROR, "NOVATEL_OEM615: Create hk mutex error %d", status);
-        return status;
-    }
+    Novatel_oem615HK.DeviceCounter = 0;
+    Novatel_oem615HK.DeviceConfig = 0;
+    Novatel_oem615HK.DeviceStatus = 0;
 
 
     status = uart_init_port(&Novatel_oem615Uart);
@@ -299,40 +245,6 @@ int main(int argc, char *argv[])
     {
         printf("UART device %s failed to initialize! \n", Novatel_oem615Uart.deviceString);
         run_status = OS_ERROR;
-    }
-
-    /* 
-    ** Create device task
-    */
-    status = CFE_ES_CreateChildTask(&DeviceID,
-                                    NOVATEL_OEM615_CHILD_TASK_NAME,
-                                    NOVATEL_OEM615_ChildTask, 0,
-                                    NOVATEL_OEM615_CHILD_TASK_STACK_SIZE,
-                                    NOVATEL_OEM615_CHILD_TASK_PRIORITY, 0);
-    if (status != CFE_SUCCESS)
-    {
-        CFE_EVS_SendEvent(NOVATEL_OEM615_CHILDTASKINIT_ERR_EID, CFE_EVS_EventType_ERROR, "NOVATEL_OEM615: Create device task error %d", status);
-        return status;
-    }
-
-    /* 
-    ** Always reset all counters during application initialization 
-    */
-    NOVATEL_OEM615_ResetCounters();
-
-    /* 
-     ** Send an information event that the app has initialized. 
-     ** This is useful for debugging the loading of individual applications.
-     */
-    status = CFE_EVS_SendEvent(NOVATEL_OEM615_STARTUP_INF_EID, CFE_EVS_EventType_INFORMATION,
-               "NOVATEL_OEM615 App Initialized. Version %d.%d.%d.%d",
-                NOVATEL_OEM615_MAJOR_VERSION,
-                NOVATEL_OEM615_MINOR_VERSION, 
-                NOVATEL_OEM615_REVISION, 
-                NOVATEL_OEM615_MISSION_REV);	
-    if (status != CFE_SUCCESS)
-    {
-        CFE_ES_WriteToSysLog("NOVATEL_OEM615: Error sending initialization event: 0x%08X\n", (unsigned int) status);
     }
 
     /* Main loop */

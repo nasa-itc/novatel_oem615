@@ -25,6 +25,7 @@ if(${TGTNAME} STREQUAL cpu1)
 endif()
 
 include_directories("./")
+include_directories("../cfs/mission_inc")
 include_directories("../cfs/platform_inc")
 include_directories("../cfs/src")
 include_directories("../shared")
