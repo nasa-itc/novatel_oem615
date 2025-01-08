@@ -11,6 +11,7 @@
 /*
 ** Required header files.
 */
+#include "device_cfg.h"
 #include "hwlib.h"
 #include "novatel_oem615_platform_cfg.h"
 
@@ -25,6 +26,7 @@
 #define NOVATEL_OEM615_DEVICE_NOOP_CMD         0x00
 #define NOVATEL_OEM615_DEVICE_REQ_HK_CMD       0x01
 #define NOVATEL_OEM615_DEVICE_REQ_DATA_CMD     0x02
+#define NOVATEL_OEM615_DEVICE_CFG_CMD          0x03
 
 #define NOVATEL_OEM615_DEVICE_TRAILER          0xBEEF
 #define NOVATEL_OEM615_DEVICE_TRAILER_0        0xBE
@@ -87,6 +89,7 @@ typedef struct
 /*
 ** Prototypes
 */
+int32_t NOVATEL_OEM615_ReadData(uart_info_t* uart_device, uint8_t* read_data, uint8_t data_length);
 int32_t NOVATEL_OEM615_ReadHK(uart_info_t* uart_device, uint8_t* read_data, uint8_t data_length);
 int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd, uint32_t payload);
 int32_t NOVATEL_OEM615_CommandDeviceCustom(uart_info_t* uart_device, uint8_t cmd_code, int8_t log_type, int8_t period_option);

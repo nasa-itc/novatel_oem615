@@ -148,32 +148,16 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
                 status = NOVATEL_OEM615_RequestData(&Novatel_oem615Uart, &Novatel_oem615Data);
                 if (status == OS_SUCCESS)
                 {
-                    //uint8_t read_data[NOVATEL_OEM615_DEVICE_DATA_SIZE];
                     OS_printf("NOVATEL_OEM615_RequestData command success\n");
-                    // TODO - Fix print statements, error says Novatel_oem615Data has no DeviceCounter attribute but its declaration is similar to HK so not sure why
-                    //OS_printf("NovatelData.DeviceCounter = %d \n", Novatel_oem615Data.DeviceCounter);
+                    OS_printf("NovatelData.Weeks = %u \n", Novatel_oem615Data.Weeks);
+                    OS_printf("NovatelData.Weeks = %u \n", Novatel_oem615Data.SecondsIntoWeek);
+                    OS_printf("NovatelData.Fractions = %lf \n", Novatel_oem615Data.Fractions);
+                    OS_printf("NovatelData.ECEFX = %lf \n", Novatel_oem615Data.ECEFX);
+                    OS_printf("NovatelData.ECEFY = %lf \n", Novatel_oem615Data.ECEFY);
+                    OS_printf("NovatelData.ECEFZ = %lf \n", Novatel_oem615Data.ECEFZ);
                     OS_printf("NovatelData.VelX = %lf \n", Novatel_oem615Data.VelX);
                     OS_printf("NovatelData.VelY = %lf \n", Novatel_oem615Data.VelY);
                     OS_printf("NovatelData.VelZ = %lf \n", Novatel_oem615Data.VelZ);
-                    // if ((read_data[0]  == NOVATEL_OEM615_DEVICE_HDR_0)     && 
-                    //     (read_data[1]  == NOVATEL_OEM615_DEVICE_HDR_1)     && 
-                    //     (read_data[12] == NOVATEL_OEM615_DEVICE_TRAILER_0) && 
-                    //     (read_data[13] == NOVATEL_OEM615_DEVICE_TRAILER_1) )
-                    // {
-                    //     Novatel_oem615Data.DeviceCounter  = read_data[2] << 24;
-                    //     Novatel_oem615Data.DeviceCounter |= read_data[3] << 16;
-                    //     Novatel_oem615Data.DeviceCounter |= read_data[4] << 8;
-                    //     Novatel_oem615Data.DeviceCounter |= read_data[5];
-
-                    //     Novatel_oem615Data.DeviceDataX  = read_data[6] << 8;
-                    //     Novatel_oem615Data.DeviceDataX |= read_data[7];
-
-                    //     Novatel_oem615Data.DeviceDataY  = read_data[8] << 8;
-                    //     Novatel_oem615Data.DeviceDataY |= read_data[9];
-                        
-                    //     Novatel_oem615Data.DeviceDataZ  = read_data[10] << 8;
-                    //     Novatel_oem615Data.DeviceDataZ |= read_data[11];
-                    // }
                 }
                 else
                 {
@@ -236,12 +220,6 @@ int main(int argc, char *argv[])
     Novatel_oem615HK.DeviceCounter = 0;
     Novatel_oem615HK.DeviceConfig = 0;
     Novatel_oem615HK.DeviceStatus = 0;
-
-    /*Novatel_oem615Data.DeviceCounter = 0;
-    Novatel_oem615Data.DeviceDataX = 0;
-    Novatel_oem615Data.DeviceDataY = 0;
-    Novatel_oem615Data.DeviceDataZ = 0;*/
-
 
     status = uart_init_port(&Novatel_oem615Uart);
     if (status == OS_SUCCESS)

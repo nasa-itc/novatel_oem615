@@ -12,6 +12,50 @@
 #include "novatel_oem615_device.h"
 
 static char* saveptr;
+/* 
+** Generic read data from device
+*/
+int32_t NOVATEL_OEM615_ReadData(uart_info_t* uart_device, uint8_t* read_data, uint8_t data_length)
+{
+    int32_t status = OS_SUCCESS;
+    int32_t bytes = 0;
+    int32_t bytes_available = 0;
+    uint8_t ms_timeout_counter = 0;
+
+    /* Wait until all data received or timeout occurs */
+    bytes_available = uart_bytes_available(uart_device);
+    while((bytes_available < data_length) && (ms_timeout_counter < NOVATEL_OEM615_CFG_MS_TIMEOUT))
+    {
+        ms_timeout_counter++;
+        OS_TaskDelay(1);
+        bytes_available = uart_bytes_available(uart_device);
+    }
+
+    if (ms_timeout_counter < NOVATEL_OEM615_CFG_MS_TIMEOUT)
+    {
+        /* Limit bytes available */
+        if (bytes_available > data_length)
+        {
+            bytes_available = data_length;
+        }
+        
+        /* Read data */
+        bytes = uart_read_port(uart_device, read_data, bytes_available);
+        if (bytes != bytes_available)
+        {
+            #ifdef NOVATEL_OEM615_CFG_DEBUG
+                OS_printf("  NOVATEL_OEM615_ReadData: Bytes read != to requested! \n");
+            #endif
+            status = OS_ERROR;
+        } /* uart_read */
+    }
+    else
+    {
+        status = OS_ERROR;
+    } /* ms_timeout_counter */
+
+    return status;
+}
 
 /* 
 ** Command to device
