@@ -33,7 +33,7 @@ void print_help(void)
         "hk                                 - Request device housekeeping     \n"
         "h                                  - ^                               \n"
         "novatel_oem615                     - Request novatel_oem615 data     \n"
-        "s                                  - ^                               \n"
+        "d                                  - ^                               \n"
         "cfg #                              - Send configuration #            \n"
         "c #                                - ^                               \n"
         "\n"
@@ -78,7 +78,7 @@ int get_command(const char* str)
     {
         status = CMD_NOVATEL_OEM615;
     }
-    else if(strcmp(lcmd, "s") == 0) 
+    else if(strcmp(lcmd, "d") == 0) 
     {
         status = CMD_NOVATEL_OEM615;
     }
