@@ -299,6 +299,7 @@ int32_t NOVATEL_OEM615_RequestHK(uart_info_t* uart_device, NOVATEL_OEM615_Device
     if (status == OS_SUCCESS)
     {
         /* Read HK data */
+        OS_printf("sizeof(read_data) = %lu, used to set data_length before NOVATEL_OEM615_ReadHK function call\n", sizeof(read_data));
         status = NOVATEL_OEM615_ReadHK(uart_device, read_data, sizeof(read_data));
         if (status == OS_SUCCESS)
         {
@@ -312,10 +313,10 @@ int32_t NOVATEL_OEM615_RequestHK(uart_info_t* uart_device, NOVATEL_OEM615_Device
             #endif
 
             /* Verify data header and trailer */
-            OS_printf("temp_read_data[i] %u == %d\n", read_data[0], NOVATEL_OEM615_DEVICE_HDR_0);
-            OS_printf("temp_read_data[i+1] %u == %d\n", read_data[1], NOVATEL_OEM615_DEVICE_HDR_1);
-            OS_printf("temp_read_data[i+data_length-2] %u == %d\n", read_data[14], NOVATEL_OEM615_DEVICE_TRAILER_0);
-            OS_printf("temp_read_data[i+data_length-1] %u == %d\n", read_data[15], NOVATEL_OEM615_DEVICE_TRAILER_1);
+            OS_printf("read_data[0] %u == %d\n", read_data[0], NOVATEL_OEM615_DEVICE_HDR_0);
+            OS_printf("read_data[1] %u == %d\n", read_data[1], NOVATEL_OEM615_DEVICE_HDR_1);
+            OS_printf("read_data[14] %u == %d\n", read_data[14], NOVATEL_OEM615_DEVICE_TRAILER_0);
+            OS_printf("read_data[15] %u == %d\n", read_data[15], NOVATEL_OEM615_DEVICE_TRAILER_1);
 
             if ((read_data[0]  == NOVATEL_OEM615_DEVICE_HDR_0)     && 
                 (read_data[1]  == NOVATEL_OEM615_DEVICE_HDR_1)     && 
@@ -379,6 +380,9 @@ int32_t NOVATEL_OEM615_ReadHK(uart_info_t* uart_device, uint8_t* read_data, uint
     int32_t status = OS_ERROR;
     int32_t bytes = 0;
     int32_t bytes_available = 0;
+    OS_printf("At start of readHK bytes = %u\n",bytes);
+    OS_printf("At start of readHK data_length = %u\n",data_length);
+
 
     if (data_length < 4)
     {
@@ -395,6 +399,8 @@ int32_t NOVATEL_OEM615_ReadHK(uart_info_t* uart_device, uint8_t* read_data, uint
             uint8_t* temp_read_data = (uint8_t*)calloc(bytes_available, sizeof(uint8_t));
             /* Read all existing data on uart port */
             bytes = uart_read_port(uart_device, temp_read_data, bytes_available);
+            OS_printf("After uart_read_port bytes = %u\n",bytes);
+            OS_printf("After uart_read_port data_length = %u\n",data_length);
             if (bytes != bytes_available)
             {
                 free(temp_read_data);
@@ -405,7 +411,8 @@ int32_t NOVATEL_OEM615_ReadHK(uart_info_t* uart_device, uint8_t* read_data, uint
             else
             {
                 /* search uart data for header+trailer signifying start of HK gps packet */
-                for (int i=0;i<=(bytes-data_length);i++)
+                OS_printf("bytes and data_length: %u and %u\n", bytes, data_length);
+                for (int i=0;i<(bytes-data_length);i++)
                 {
                     if ((temp_read_data[i]  == NOVATEL_OEM615_DEVICE_HDR_0)     && 
                     (temp_read_data[i+1]  == NOVATEL_OEM615_DEVICE_HDR_1)     && 
@@ -414,7 +421,8 @@ int32_t NOVATEL_OEM615_ReadHK(uart_info_t* uart_device, uint8_t* read_data, uint
                     {
                         for (int j=0;j<data_length;j++)
                         {
-                            read_data[j] = temp_read_data[i+j];
+                            OS_printf("read_data[j] = read_data[i+j]: %u = %u\n", read_data[j], read_data[i+j]);
+                            read_data[j] = read_data[i+j];
                         }
                         status = OS_SUCCESS;
                         return status;

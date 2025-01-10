@@ -129,6 +129,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
         case CMD_HK:
             if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
             {
+                OS_printf("size of Novatel_oem615Uart and Novatel_oem615HK: %lu and %lu\n",sizeof(Novatel_oem615Uart), sizeof(Novatel_oem615HK));
                 status = NOVATEL_OEM615_RequestHK(&Novatel_oem615Uart, &Novatel_oem615HK);
                 if (status == OS_SUCCESS)
                 {
