@@ -133,9 +133,9 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
                 status = NOVATEL_OEM615_RequestHK(&Novatel_oem615Uart, &Novatel_oem615HK);
                 if (status == OS_SUCCESS)
                 {
-                    OS_printf("NovatelHk.DeviceCounter = %d \n", Novatel_oem615HK.DeviceCounter);
-                    OS_printf("NovatelHK.DviceConfig = %d \n", Novatel_oem615HK.DeviceConfig);
-                    OS_printf("NovatelHK.DeviceStatus = %d \n", Novatel_oem615HK.DeviceStatus);
+                    OS_printf("NovatelHk.DeviceCounter = %d\n", Novatel_oem615HK.DeviceCounter);
+                    OS_printf("NovatelHK.DviceConfig = %d\n", Novatel_oem615HK.DeviceConfig);
+                    OS_printf("NovatelHK.DeviceStatus = %d\n", Novatel_oem615HK.DeviceStatus);
                 }
                 else {
                     OS_printf("failed, status = %d \n",status);
@@ -218,9 +218,9 @@ int main(int argc, char *argv[])
     ** Initialize application data
     ** Note that counters are excluded as they were reset in the previous code block
     */
-    Novatel_oem615HK.DeviceCounter = 0;
-    Novatel_oem615HK.DeviceConfig = 0;
-    Novatel_oem615HK.DeviceStatus = 0;
+    //Novatel_oem615HK.DeviceCounter = 0;
+    //Novatel_oem615HK.DeviceConfig = 0;
+    //Novatel_oem615HK.DeviceStatus = 0;
 
     status = uart_init_port(&Novatel_oem615Uart);
     if (status == OS_SUCCESS)
