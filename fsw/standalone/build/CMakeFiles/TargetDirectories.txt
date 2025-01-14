@@ -1,3 +1,0 @@
-/home/jstar/Desktop/github-nos3/components/novatel_oem615/fsw/standalone/build/CMakeFiles/novatel_oem615_checkout.dir
-/home/jstar/Desktop/github-nos3/components/novatel_oem615/fsw/standalone/build/CMakeFiles/edit_cache.dir
-/home/jstar/Desktop/github-nos3/components/novatel_oem615/fsw/standalone/build/CMakeFiles/rebuild_cache.dir
