@@ -36,6 +36,12 @@ void print_help(void)
         "d                                  - ^                               \n"
         "cfg #                              - Send configuration #            \n"
         "c #                                - ^                               \n"
+        "log                                - Log novatel_oem615 data         \n"
+        "l                                  - ^                               \n"
+        "unlog                              - Unlog novatel_oem615 data       \n"
+        "u                                  - ^                               \n"
+        "unlog_all                          - Unlog all novatel_oem615 data   \n"
+        "ua                                  - ^                               \n"
         "\n"
     );
 }
@@ -90,6 +96,30 @@ int get_command(const char* str)
     {
         status = CMD_CFG;
     }
+    else if(strcmp(lcmd, "log") == 0)
+    {
+        status = CMD_LOG
+    }
+    else if(strcmp(lcmd, "l") == 0)
+    {
+        status = CMD_LOG
+    }
+    else if(strcmp(lcmd, "unlog") == 0)
+    {
+        status = CMD_UNLOG
+    }
+    else if(strcmp(lcmd, "u") == 0)
+    {
+        status = CMD_UNLOG
+    }
+    else if(strcmp(lcmd, "unlog all") == 0)
+    {
+        status = CMD_UNLOG_ALL
+    }
+      else if(strcmp(lcmd, "ua") == 0)
+    {
+        status = CMD_UNLOG_ALL
+    }
     return status;
 }
 
@@ -138,6 +168,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
                     OS_printf("NovatelHK.DeviceStatus = %d\n", Novatel_oem615HK.DeviceStatus);
                 }
                 else {
+                    OS_printf("command failed, end size of Novatel_oem615Uart and Novatel_oem615HK: %lu and %lu\n",sizeof(Novatel_oem615Uart), sizeof(Novatel_oem615HK));
                     OS_printf("failed, status = %d \n",status);
                 }
             }
@@ -182,7 +213,51 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
                 }
             }
             break;
-        
+
+        case CMD_LOG:
+            if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
+            {
+                status = NOVATEL_OEM615_CommandDevice(&Novatel_oem615Uart, 4, 0);
+                if (status == OS_SUCCESS)
+                {
+                    OS_printf("LOG command success!\n");
+                }
+                else
+                {
+                    OS_printf("LOG command failed!\n");
+                }
+            }
+            break;
+
+        case CMD_UNLOG:
+            if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
+            {
+                status = NOVATEL_OEM615_CommandDevice(&Novatel_oem615Uart, 5, 0);
+                if (status == OS_SUCCESS)
+                {
+                    OS_printf("UNLOG command success!\n");
+                }
+                else
+                {
+                    OS_printf("UNLOG command failed!\n");
+                }
+            }
+            break;
+
+        case CMD_UNLOG_ALL:
+            if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
+            {
+                status =  NOVATEL_OEM615_CommandDevice(&Novatel_oem615Uart, 6, 0);
+                if (status == OS_SUCCESS)        
+                {
+                    OS_printf("UNLOG_ALL command success!\n");
+                }
+                else
+                {
+                    OS_printf("UNLOG_ALL command failed!\n");
+                }
+            }
+
         default: 
             OS_printf("Invalid command format, type 'help' for more info\n");
             break;
