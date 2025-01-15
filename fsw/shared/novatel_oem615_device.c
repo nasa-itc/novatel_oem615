@@ -73,6 +73,7 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd_code,
                 }
                 else
                 {
+                    OS_printf("Line 76 status current value: %d", status);
                     if (status == OS_SUCCESS)
                     {
                         // Confirm echoed response 
@@ -81,6 +82,7 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd_code,
                         {
                             if (read_data[bytes] != write_data[bytes])
                             {
+                                OS_Printf("line 85, if condition triggered and status being set to OS_ERROR. Status current value: %d", status);
                                 status = OS_ERROR;
                             }
                             bytes++;
@@ -90,6 +92,7 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd_code,
             }
             else
             {
+                //Exiting here currently
                 #ifdef NOVATEL_OEM615_CFG_DEBUG
                     OS_printf("NOVATEL_OEM615_CommandDevice - uart_bytes_available returned no bytes available!");
                 #endif
