@@ -257,6 +257,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
                     OS_printf("UNLOG_ALL command failed!\n");
                 }
             }
+            break;
 
         default: 
             OS_printf("Invalid command format, type 'help' for more info\n");
