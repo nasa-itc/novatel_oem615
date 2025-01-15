@@ -98,27 +98,27 @@ int get_command(const char* str)
     }
     else if(strcmp(lcmd, "log") == 0)
     {
-        status = CMD_LOG
+        status = CMD_LOG;
     }
     else if(strcmp(lcmd, "l") == 0)
     {
-        status = CMD_LOG
+        status = CMD_LOG;
     }
     else if(strcmp(lcmd, "unlog") == 0)
     {
-        status = CMD_UNLOG
+        status = CMD_UNLOG;
     }
     else if(strcmp(lcmd, "u") == 0)
     {
-        status = CMD_UNLOG
+        status = CMD_UNLOG;
     }
     else if(strcmp(lcmd, "unlog all") == 0)
     {
-        status = CMD_UNLOG_ALL
+        status = CMD_UNLOG_ALL;
     }
       else if(strcmp(lcmd, "ua") == 0)
     {
-        status = CMD_UNLOG_ALL
+        status = CMD_UNLOG_ALL;
     }
     return status;
 }
