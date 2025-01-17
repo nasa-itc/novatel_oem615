@@ -82,7 +82,7 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd_code,
                         {
                             if (read_data[bytes] != write_data[bytes])
                             {
-                                OS_Printf("line 85, if condition triggered and status being set to OS_ERROR. Status current value: %d", status);
+                                OS_printf("line 85, if condition triggered and status being set to OS_ERROR. Status current value: %d", status);
                                 status = OS_ERROR;
                             }
                             bytes++;
