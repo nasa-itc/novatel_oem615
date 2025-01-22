@@ -133,36 +133,25 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
             exit_status = OS_ERROR;
             break;
 
-        case CMD_NOOP:
-            if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
-            {
-                OS_printf("size of Novatel_oem615Uart %lu\n",sizeof(Novatel_oem615Uart));
-                status = NOVATEL_OEM615_CommandDevice(&Novatel_oem615Uart, 0, 0);
-                if (status == OS_SUCCESS)
-                {
-                    OS_printf("NOOP command success\n");
-                }
-                else
-                {
-                    OS_printf("NOOP command failed!\n");
-                }
-            }
-            break;
-
         case CMD_HK:
             if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
             {
-                int32_t status = OS_SUCCESS;
-                uint8_t read_data[NOVATEL_OEM615_DEVICE_HK_SIZE] = {0};
-                status = NOVATEL_OEM615_RequestHK(&Novatel_oem615Uart, &Novatel_oem615HK);
-                //status = NOVATEL_OEM615_ReadHK(&Novatel_oem615Uart, &Novatel_oem615HK);
+                //status = OS_SUCCESS;
+                //uint8_t read_data[sizeof(Novatel_oem615HK)+4] = {0};
+                //read_data[0] = 0xDE;
+                //read_data[1] = 0xAD;
+                //read_data[14] = 0xBE;
+                //read_data[15] = 0xEF;
                 //status = NOVATEL_OEM615_CommandDevice(&Novatel_oem615Uart, 1, 0);
+                status = NOVATEL_OEM615_RequestHK(&Novatel_oem615Uart, &Novatel_oem615HK);
+                //status = NOVATEL_OEM615_ReadHK(&Novatel_oem615Uart, read_data, sizeof(read_data));
+                //status = NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 1, 0, 0);
+
                 if (status == OS_SUCCESS)
                 {
-
-                    OS_printf("NovatelHk.DeviceCounter = %u\n", Novatel_oem615HK.DeviceCounter);
-                    OS_printf("NovatelHK.DeviceConfig = %u\n", Novatel_oem615HK.DeviceConfig);
-                    OS_printf("NovatelHK.DeviceStatus = %u\n", Novatel_oem615HK.DeviceStatus);
+                    OS_printf("Novatel_oem615HK.DeviceCounter = %d\n", Novatel_oem615HK.DeviceCounter);
+                    OS_printf("Novatel_oem615HK.DeviceCounter = %d\n", Novatel_oem615HK.DeviceConfig);
+                    OS_printf("Novatel_oem615HK.DeviceStatus = %d\n", Novatel_oem615HK.DeviceStatus);
                     OS_printf("RequstHK command success!\n");
                 }
                 else 
@@ -179,15 +168,6 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
                 if (status == OS_SUCCESS)
                 {
                     OS_printf("NOVATEL_OEM615_RequestData command success\n");
-                    OS_printf("NovatelData.Weeks = %u \n", Novatel_oem615Data.Weeks);
-                    OS_printf("NovatelData.Weeks = %u \n", Novatel_oem615Data.SecondsIntoWeek);
-                    OS_printf("NovatelData.Fractions = %lf \n", Novatel_oem615Data.Fractions);
-                    OS_printf("NovatelData.ECEFX = %lf \n", Novatel_oem615Data.ECEFX);
-                    OS_printf("NovatelData.ECEFY = %lf \n", Novatel_oem615Data.ECEFY);
-                    OS_printf("NovatelData.ECEFZ = %lf \n", Novatel_oem615Data.ECEFZ);
-                    OS_printf("NovatelData.VelX = %lf \n", Novatel_oem615Data.VelX);
-                    OS_printf("NovatelData.VelY = %lf \n", Novatel_oem615Data.VelY);
-                    OS_printf("NovatelData.VelZ = %lf \n", Novatel_oem615Data.VelZ);
                 }
                 else
                 {
@@ -199,7 +179,6 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
         case CMD_CFG:
             if (check_number_arguments(num_tokens, 1) == OS_SUCCESS)
             {
-                OS_printf("size of Novatel_oem615Uart %lu\n",sizeof(Novatel_oem615Uart));
                 config = atoi(tokens[0]);
                 status = NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 7, config, 0);
                 if (status == OS_SUCCESS)
@@ -216,7 +195,6 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
         case CMD_LOG:
             if (check_number_arguments(num_tokens, 2) == OS_SUCCESS)
             {
-                OS_printf("size of Novatel_oem615Uart %lu\n",sizeof(Novatel_oem615Uart));
                 log_type = atoi(tokens[0]);
                 period = atoi(tokens[1]);
                 status = NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 4, log_type, period);
@@ -234,7 +212,6 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
         case CMD_UNLOG:
             if (check_number_arguments(num_tokens, 1) == OS_SUCCESS)
             {
-                OS_printf("size of Novatel_oem615Uart %lu\n",sizeof(Novatel_oem615Uart));
                 log_type = atoi(tokens[0]);
                 status = NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 5, log_type, 0);
                 if (status == OS_SUCCESS)
@@ -251,7 +228,6 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
         case CMD_UNLOG_ALL:
             if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
             {
-                OS_printf("size of Novatel_oem615Uart %lu\n",sizeof(Novatel_oem615Uart));
                 status =  NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 6, 0, 0);
                 if (status == OS_SUCCESS)        
                 {
@@ -299,9 +275,9 @@ int main(int argc, char *argv[])
     ** Initialize application data
     ** Note that counters are excluded as they were reset in the previous code block
     */
-    //Novatel_oem615HK.DeviceCounter = 0;
-    //Novatel_oem615HK.DeviceConfig = 0;
-    //Novatel_oem615HK.DeviceStatus = 0;
+    Novatel_oem615HK.DeviceCounter = 0;
+    Novatel_oem615HK.DeviceConfig = 0;
+    Novatel_oem615HK.DeviceStatus = 0;
 
     status = uart_init_port(&Novatel_oem615Uart);
     if (status == OS_SUCCESS)
