@@ -138,10 +138,6 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
             {
                 //status = OS_SUCCESS;
                 //uint8_t read_data[sizeof(Novatel_oem615HK)+4] = {0};
-                //read_data[0] = 0xDE;
-                //read_data[1] = 0xAD;
-                //read_data[14] = 0xBE;
-                //read_data[15] = 0xEF;
                 //status = NOVATEL_OEM615_CommandDevice(&Novatel_oem615Uart, 1, 0);
                 status = NOVATEL_OEM615_RequestHK(&Novatel_oem615Uart, &Novatel_oem615HK);
                 //status = NOVATEL_OEM615_ReadHK(&Novatel_oem615Uart, read_data, sizeof(read_data));
@@ -150,7 +146,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
                 if (status == OS_SUCCESS)
                 {
                     OS_printf("Novatel_oem615HK.DeviceCounter = %d\n", Novatel_oem615HK.DeviceCounter);
-                    OS_printf("Novatel_oem615HK.DeviceCounter = %d\n", Novatel_oem615HK.DeviceConfig);
+                    OS_printf("Novatel_oem615HK.DeviceConfig = %d\n", Novatel_oem615HK.DeviceConfig);
                     OS_printf("Novatel_oem615HK.DeviceStatus = %d\n", Novatel_oem615HK.DeviceStatus);
                     OS_printf("RequstHK command success!\n");
                 }
