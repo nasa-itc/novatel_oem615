@@ -73,7 +73,6 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd_code,
                 }
                 else
                 {
-                    OS_printf("Line 76 status current value: %d", status);
                     if (status == OS_SUCCESS)
                     {
                         // Confirm echoed response 
@@ -82,7 +81,6 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd_code,
                         {
                             if (read_data[bytes] != write_data[bytes])
                             {
-                                OS_printf("line 85, if condition triggered and status being set to OS_ERROR. Status current value: %d", status);
                                 status = OS_ERROR;
                             }
                             bytes++;
@@ -92,7 +90,6 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd_code,
             }
             else
             {
-                //Exiting here currently
                 #ifdef NOVATEL_OEM615_CFG_DEBUG
                     OS_printf("NOVATEL_OEM615_CommandDevice - uart_bytes_available returned no bytes available!");
                 #endif
@@ -103,7 +100,7 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd_code,
     else
     {
         #ifdef NOVATEL_OEM615_CFG_DEBUG
-            OS_printf("NOVATEL_OEM615_CommandDevice - uart_flush returned error with status = %d! No uart_write_port performed.", status);
+            OS_printf("NOVATEL_OEM615_CommandDevice - uart_flush returned error with status = %s! No uart_write_port performed.", status);
         #endif
         status = OS_ERROR;
     }
@@ -237,7 +234,7 @@ int32_t NOVATEL_OEM615_CommandDeviceCustom(uart_info_t* uart_device, uint8_t cmd
         else
         {
             #ifdef NOVATEL_OEM615_CFG_DEBUG
-                OS_printf("NOVATEL_OEM615_CommandDeviceCustom - uart_flush returned error with status = %d! No uart_write_port performed.", status);
+                OS_printf("NOVATEL_OEM615_CommandDeviceCustom - uart_flush returned error with status = %s! No uart_write_port performed.", status);
             #endif
             status = OS_ERROR;
         }
@@ -258,7 +255,6 @@ int32_t NOVATEL_OEM615_RequestHK(uart_info_t* uart_device, NOVATEL_OEM615_Device
     if (status == OS_SUCCESS)
     {
         /* Read HK data */
-        OS_printf("sizeof(uart_device) = %lu and sizeof(read_data) = %lu, sizeof(read_data is used to set data_length before NOVATEL_OEM615_ReadHK function call\n",sizeof(uart_device) , sizeof(read_data));
         status = NOVATEL_OEM615_ReadHK(uart_device, read_data, sizeof(read_data));
         if (status == OS_SUCCESS)
         {
@@ -272,11 +268,6 @@ int32_t NOVATEL_OEM615_RequestHK(uart_info_t* uart_device, NOVATEL_OEM615_Device
             #endif
 
             /* Verify data header and trailer */
-            OS_printf("read_data[0] %u == %d\n", read_data[0], NOVATEL_OEM615_DEVICE_HDR_0);
-            OS_printf("read_data[1] %u == %d\n", read_data[1], NOVATEL_OEM615_DEVICE_HDR_1);
-            OS_printf("read_data[14] %u == %d\n", read_data[14], NOVATEL_OEM615_DEVICE_TRAILER_0);
-            OS_printf("read_data[15] %u == %d\n", read_data[15], NOVATEL_OEM615_DEVICE_TRAILER_1);
-
             if ((read_data[0]  == NOVATEL_OEM615_DEVICE_HDR_0)     && 
                 (read_data[1]  == NOVATEL_OEM615_DEVICE_HDR_1)     && 
                 (read_data[14] == NOVATEL_OEM615_DEVICE_TRAILER_0) && 
@@ -339,9 +330,6 @@ int32_t NOVATEL_OEM615_ReadHK(uart_info_t* uart_device, uint8_t* read_data, uint
     int32_t status = OS_ERROR;
     int32_t bytes = 0;
     int32_t bytes_available = 0;
-    OS_printf("At start of readHK bytes = %u\n",bytes);
-    OS_printf("At start of readHK data_length = %u\n",data_length);
-
 
     if (data_length < 4)
     {
@@ -353,15 +341,11 @@ int32_t NOVATEL_OEM615_ReadHK(uart_info_t* uart_device, uint8_t* read_data, uint
     {
         /* check how many bytes are waiting on the uart */
         bytes_available = uart_bytes_available(uart_device);
-        OS_printf("bytes_available = %d\n",bytes_available);
-
         if (bytes_available > 0)
         {
             uint8_t* temp_read_data = (uint8_t*)calloc(bytes_available, sizeof(uint8_t));
             /* Read all existing data on uart port */
             bytes = uart_read_port(uart_device, temp_read_data, bytes_available);
-            OS_printf("After uart_read_port bytes = %u\n",bytes);
-            OS_printf("After uart_read_port data_length = %u\n",data_length);
             if (bytes != bytes_available)
             {
                 free(temp_read_data);
@@ -372,7 +356,6 @@ int32_t NOVATEL_OEM615_ReadHK(uart_info_t* uart_device, uint8_t* read_data, uint
             else
             {
                 /* search uart data for header+trailer signifying start of HK gps packet */
-                OS_printf("bytes and data_length: %u and %u\n", bytes, data_length);
                 for (int i=0;i<(bytes-data_length);i++)
                 {
                     if ((temp_read_data[i]  == NOVATEL_OEM615_DEVICE_HDR_0)     && 
@@ -382,7 +365,6 @@ int32_t NOVATEL_OEM615_ReadHK(uart_info_t* uart_device, uint8_t* read_data, uint
                     {
                         for (int j=0;j<data_length;j++)
                         {
-                            OS_printf("read_data[j] = read_data[i+j]: %u = %u\n", read_data[j], read_data[i+j]);
                             read_data[j] = read_data[i+j];
                         }
                         status = OS_SUCCESS;
@@ -477,7 +459,7 @@ int32_t NOVATEL_OEM615_RequestData(uart_info_t* uart_device, NOVATEL_OEM615_Devi
     else
     {
         #ifdef NOVATEL_OEM615_CFG_DEBUG
-            OS_printf("  NOVATEL_OEM615_RequestData: CommandDevice returned error with status = %d! \n", status);
+            OS_printf("  NOVATEL_OEM615_RequestData: CommandDevice returned error with status = %s! \n", status);
         #endif
         status = OS_ERROR;
     }
