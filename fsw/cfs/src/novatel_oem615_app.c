@@ -622,9 +622,7 @@ int32 NOVATEL_OEM615_SafeRequestHK(NOVATEL_OEM615_Device_HK_tlm_t* data)
 
     if (OS_MutSemTake(NOVATEL_OEM615_AppData.HkDataMutex) == OS_SUCCESS)
     {
-        int succs = 0;
-        int fails = 0;
-        status = NOVATEL_OEM615_RequestHK(&NOVATEL_OEM615_AppData.Novatel_oem615Uart, data, &succs, &fails);
+        status = NOVATEL_OEM615_RequestHK(&NOVATEL_OEM615_AppData.Novatel_oem615Uart, data);
 
         OS_MutSemGive(NOVATEL_OEM615_AppData.HkDataMutex);
     }

@@ -245,7 +245,7 @@ int32_t NOVATEL_OEM615_CommandDeviceCustom(uart_info_t* uart_device, uint8_t cmd
 /*
 ** Request housekeeping command
 */
-int32_t NOVATEL_OEM615_RequestHK(uart_info_t* uart_device, NOVATEL_OEM615_Device_HK_tlm_t* data, int *successes, int *failures)
+int32_t NOVATEL_OEM615_RequestHK(uart_info_t* uart_device, NOVATEL_OEM615_Device_HK_tlm_t* data)
 {
     int32_t status = OS_SUCCESS;
     uint8_t read_data[NOVATEL_OEM615_DEVICE_HK_SIZE] = {0};
@@ -258,14 +258,14 @@ int32_t NOVATEL_OEM615_RequestHK(uart_info_t* uart_device, NOVATEL_OEM615_Device
         status = NOVATEL_OEM615_ReadHK(uart_device, read_data, sizeof(read_data));
         if (status == OS_SUCCESS)
         {
-            //#ifdef NOVATEL_OEM615_CFG_DEBUG
+            #ifdef NOVATEL_OEM615_CFG_DEBUG
                 OS_printf("  NOVATEL_OEM615_RequestHK = ");
                 for (uint32_t i = 0; i < sizeof(read_data); i++)
                 {
                     OS_printf("%02x", read_data[i]);
                 }
                 OS_printf("\n");
-            //#endif
+            #endif
 
             /* Verify data header and trailer */
             if ((read_data[0]  == NOVATEL_OEM615_DEVICE_HDR_0)     && 
@@ -298,13 +298,9 @@ int32_t NOVATEL_OEM615_RequestHK(uart_info_t* uart_device, NOVATEL_OEM615_Device
             }
             else
             {
-                OS_printf("Sucesses = %d\n", *successes);
-                OS_printf("failures = %d\n", *failures);
-
-                *successes = *successes + 1;
-                //#ifdef NOVATEL_OEM615_CFG_DEBUG
+                #ifdef NOVATEL_OEM615_CFG_DEBUG
                     OS_printf("  NOVATEL_OEM615_RequestHK: NOVATEL_OEM615_ReadHK returned data with either invalid header [0x%02x%02x] or invalid trailer [0x%02x%02x]!\n", read_data[0], read_data[1], read_data[14], read_data[15]);
-                //#endif 
+                #endif 
                 status = OS_ERROR;
             }
         }
@@ -359,6 +355,19 @@ int32_t NOVATEL_OEM615_ReadHK(uart_info_t* uart_device, uint8_t* read_data, uint
             }
             else
             {
+                OS_printf("  read_data = ");
+                for (uint32_t i = 0; i < sizeof(temp_read_data); i++)
+                {
+                    OS_printf("%02x", temp_read_data[i]);
+                }
+                OS_printf("\n");
+
+                OS_printf("  temp_read_data = ");
+                for (uint32_t i = 0; i < sizeof(temp_read_data); i++)
+                {
+                    OS_printf("%02x", temp_read_data[i]);
+                }
+                OS_printf("\n");
                 /* search uart data for header+trailer signifying start of HK gps packet */
                 for (int i=0;i<(bytes-data_length);i++)
                 {
