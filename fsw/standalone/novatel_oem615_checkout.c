@@ -144,9 +144,9 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
                 uint8_t read_data[sizeof(Novatel_oem615HK)+4] = {0};
                 int successes = 0;
                 int failures = 0;
-               
+                bool reachedHK = false;
 
-                while (status != OS_SUCCESS)
+                while (!reachedHK)
                 {
                     OS_printf("Successes: %d\n", successes);
                     OS_printf("failures: %d\n", failures);
@@ -158,6 +158,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
                         status = NOVATEL_OEM615_ReadHK(&Novatel_oem615Uart, read_data, sizeof(read_data));
                         if (status == OS_SUCCESS)
                         {
+                            reachedHK = true;
                             successes++;
                             OS_printf("Novatel_oem615HK.DeviceCounter = %d\n", Novatel_oem615HK.DeviceCounter);
                             OS_printf("Novatel_oem615HK.DeviceConfig = %d\n", Novatel_oem615HK.DeviceConfig);
