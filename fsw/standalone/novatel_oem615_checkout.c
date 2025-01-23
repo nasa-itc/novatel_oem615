@@ -137,11 +137,74 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
             if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
             {
                 //status = OS_SUCCESS;
-                uint8_t read_data[sizeof(Novatel_oem615HK)+4] = {0};
                 status = NOVATEL_OEM615_CommandDevice(&Novatel_oem615Uart, 1, 0);
                 //status = NOVATEL_OEM615_RequestHK(&Novatel_oem615Uart, &Novatel_oem615HK);
                 //status = NOVATEL_OEM615_ReadHK(&Novatel_oem615Uart, read_data, sizeof(read_data));
                 //status = NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 1, 0, 0);
+                uint8_t read_data[sizeof(Novatel_oem615HK)+4] = {0};
+
+               
+
+                // for (int i=0; i < 1000000; i++)
+                // {
+                //     uint8_t read_data[sizeof(Novatel_oem615HK)+4] = {0};
+                //     //status = NOVATEL_OEM615_RequestHK(&Novatel_oem615Uart, &Novatel_oem615HK);
+                //     status = NOVATEL_OEM615_CommandDevice(&Novatel_oem615Uart, 1, 0);
+                //     if (status == OS_SUCCESS) {
+                //         status = NOVATEL_OEM615_ReadHK(&Novatel_oem615Uart, read_data, sizeof(read_data));
+                //         if (status == OS_SUCCESS)
+                //         {
+                //             OS_printf("Novatel_oem615HK.DeviceCounter = %d\n", Novatel_oem615HK.DeviceCounter);
+                //             OS_printf("Novatel_oem615HK.DeviceConfig = %d\n", Novatel_oem615HK.DeviceConfig);
+                //             OS_printf("Novatel_oem615HK.DeviceStatus = %d\n", Novatel_oem615HK.DeviceStatus);
+                //             OS_printf("RequstHK command success!\n");
+
+                //              #ifdef NOVATEL_OEM615_CFG_DEBUG
+                //                 OS_printf("  NOVATEL_OEM615_RequestHK = ");
+                //                 for (uint32_t i = 0; i < sizeof(read_data); i++)
+                //                 {
+                //                     OS_printf("%02x", read_data[i]);
+                //                 }
+                //                 OS_printf("\n");
+                //             #endif
+
+                //             /* Verify data header and trailer */
+                //             if ((read_data[0]  == NOVATEL_OEM615_DEVICE_HDR_0)     && 
+                //                 (read_data[1]  == NOVATEL_OEM615_DEVICE_HDR_1)     && 
+                //                 (read_data[14] == NOVATEL_OEM615_DEVICE_TRAILER_0) && 
+                //                 (read_data[15] == NOVATEL_OEM615_DEVICE_TRAILER_1) )
+                //             {
+                //                 Novatel_oem615HK.DeviceCounter  = read_data[2] << 24;
+                //                 Novatel_oem615HK.DeviceCounter |= read_data[3] << 16;
+                //                 Novatel_oem615HK.DeviceCounter |= read_data[4] << 8;
+                //                 Novatel_oem615HK.DeviceCounter |= read_data[5];
+
+                //                 Novatel_oem615HK.DeviceConfig  = read_data[6] << 24;
+                //                 Novatel_oem615HK.DeviceConfig |= read_data[7] << 16;
+                //                 Novatel_oem615HK.DeviceConfig |= read_data[8] << 8;
+                //                 Novatel_oem615HK.DeviceConfig |= read_data[9];
+
+                //                 Novatel_oem615HK.DeviceStatus  = read_data[10] << 24;
+                //                 Novatel_oem615HK.DeviceStatus |= read_data[11] << 16;
+                //                 Novatel_oem615HK.DeviceStatus |= read_data[12] << 8;
+                //                 Novatel_oem615HK.DeviceStatus |= read_data[13];
+
+                //                 #ifdef NOVATEL_OEM615_CFG_DEBUG
+                //                     OS_printf("  Header  = 0x%02x%02x  \n", read_data[0], read_data[1]);
+                //                     OS_printf("  Counter = 0x%08x      \n", Novatel_oem615HK.DeviceCounter);
+                //                     OS_printf("  Config  = 0x%08x      \n", Novatel_oem615HK.DeviceConfig);
+                //                     OS_printf("  Status  = 0x%08x      \n", Novatel_oem615HK.DeviceStatus);
+                //                     OS_printf("  Trailer = 0x%02x%02x  \n", read_data[14], read_data[15]);
+                //                 #endif
+                //             }
+                //         }
+                //         else 
+                //         {
+                //             //OS_printf("RequstHK command failed!\n");
+                //         }
+                //     }
+                // }                
+
 
 
 
