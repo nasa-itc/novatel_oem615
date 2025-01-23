@@ -93,7 +93,7 @@ int32_t NOVATEL_OEM615_ReadData(uart_info_t* uart_device, uint8_t* read_data, ui
 int32_t NOVATEL_OEM615_ReadHK(uart_info_t* uart_device, uint8_t* read_data, uint8_t data_length);
 int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd, uint32_t payload);
 int32_t NOVATEL_OEM615_CommandDeviceCustom(uart_info_t* uart_device, uint8_t cmd_code, int8_t log_type, int8_t period_option);
-int32_t NOVATEL_OEM615_RequestHK(uart_info_t* uart_device, NOVATEL_OEM615_Device_HK_tlm_t* data);
+int32_t NOVATEL_OEM615_RequestHK(uart_info_t* uart_device, NOVATEL_OEM615_Device_HK_tlm_t* data, int *successes, int *failures);
 int32_t NOVATEL_OEM615_RequestData(uart_info_t* uart_device, NOVATEL_OEM615_Device_Data_tlm_t* data);
 int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t* uart_device, NOVATEL_OEM615_Device_Data_tlm_t* data);
 void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t* device_data_struct);

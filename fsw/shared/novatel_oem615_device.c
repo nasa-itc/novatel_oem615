@@ -245,7 +245,7 @@ int32_t NOVATEL_OEM615_CommandDeviceCustom(uart_info_t* uart_device, uint8_t cmd
 /*
 ** Request housekeeping command
 */
-int32_t NOVATEL_OEM615_RequestHK(uart_info_t* uart_device, NOVATEL_OEM615_Device_HK_tlm_t* data)
+int32_t NOVATEL_OEM615_RequestHK(uart_info_t* uart_device, NOVATEL_OEM615_Device_HK_tlm_t* data, int *successes, int *failures)
 {
     int32_t status = OS_SUCCESS;
     uint8_t read_data[NOVATEL_OEM615_DEVICE_HK_SIZE] = {0};
@@ -298,9 +298,13 @@ int32_t NOVATEL_OEM615_RequestHK(uart_info_t* uart_device, NOVATEL_OEM615_Device
             }
             else
             {
-                #ifdef NOVATEL_OEM615_CFG_DEBUG
-                    OS_printf("  NOVATEL_OEM615_RequestHK: NOVATEL_OEM615_ReadHK returned data with either invalid header [0x%02x%02x] or invalid trailer [0x%02x%02x]!\n", read_data[0], read_data[1], read_data[14], read_data[15]);
-                #endif 
+                OS_printf("Sucesses = %d\n", *successes);
+                OS_printf("failures = %d\n", *failures);
+
+                *successes = *successes + 1;
+                //#ifdef NOVATEL_OEM615_CFG_DEBUG
+                OS_printf("  NOVATEL_OEM615_RequestHK: NOVATEL_OEM615_ReadHK returned data with either invalid header [0x%02x%02x] or invalid trailer [0x%02x%02x]!\n", read_data[0], read_data[1], read_data[14], read_data[15]);
+                //#endif 
                 status = OS_ERROR;
             }
         }
