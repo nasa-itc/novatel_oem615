@@ -77,10 +77,5 @@ int  main(int argc, char *argv[]);
 */
 int check_number_arguments(int actual, int expected);
 void to_lower(char* str);
-void NOVATEL_OEM615_IncrementDeviceCount(void);
-void NOVATEL_OEM615_IncrementDeviceErrorCount(void);
-int32 NOVATEL_OEM615_GetDeviceEnabledStatus(void);
-int32 NOVATEL_OEM615_SafeRequestHK(NOVATEL_OEM615_Device_HK_tlm_t* data);
-
 
 #endif /* _NOVATEL_OEM615_CHECKOUT_H_ */
