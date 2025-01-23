@@ -146,7 +146,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
                 int failures = 0;
                
 
-                for (int i=0; i < 1000000; i++)
+                while (status != OS_SUCCESS)
                 {
                     OS_printf("Successes: %d\n", successes);
                     OS_printf("failures: %d\n", failures);
