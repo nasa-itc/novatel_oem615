@@ -18,6 +18,7 @@
 uart_info_t Novatel_oem615Uart;             /* Hardware protocol definition */
 NOVATEL_OEM615_Device_HK_tlm_t Novatel_oem615HK;    /* NOVATEL_OEM615 Housekeeping Telemetry Packet */
 NOVATEL_OEM615_Device_Data_tlm_t Novatel_oem615Data; 
+uint32 HkMutex;                         /* Locks all data */
 
 /*
 ** Component Functions
@@ -67,6 +68,7 @@ int get_command(const char* str)
         status = CMD_HK;
     }
     else if(strcmp(lcmd, "h") == 0) 
+
     {
         status = CMD_HK;
     }
@@ -134,44 +136,36 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
             break;
 
         case CMD_HK:
+
             if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
             {
-                 int successes = 0;
-                int failures = 0;
-                //status = OS_SUCCESS;
-                //status = NOVATEL_OEM615_CommandDevice(&Novatel_oem615Uart, 1, 0);
-                    status = NOVATEL_OEM615_RequestHK(&Novatel_oem615Uart, &Novatel_oem615HK, &successes, &failures);
-                //status = NOVATEL_OEM615_ReadHK(&Novatel_oem615Uart, read_data, sizeof(read_data));
-                //status = NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 1, 0, 0);
-                //uint8_t read_data[sizeof(Novatel_oem615HK)+4] = {0};
+                int32 status = OS_SUCCESS;
+
+                /* Check that device is enabled */
+                
+                    status = NOVATEL_OEM615_SafeRequestHK((NOVATEL_OEM615_Device_HK_tlm_t*) &Novatel_oem615HK);
+                    if (status == OS_SUCCESS)
+                    {
+                        NOVATEL_OEM615_IncrementDeviceCount();
+                        OS_printf("HK success!\n");
+                    }
+                    else
+                    {
+                        NOVATEL_OEM615_IncrementDeviceErrorCount();
+                        OS_printf("HK failed!\n");
+
+                        // This spams the NOS3 FSW window when uncommented because there usually isn't any data available to be read, and that returns an error.
+                        /*
+                        CFE_EVS_SendEvent(NOVATEL_OEM615_REQ_HK_ERR_EID, CFE_EVS_EventType_ERROR, 
+                                "NOVATEL_OEM615: Request device HK reported error %d", status);
+                        */
+                    }
+                /* Intentionally do not report errors if disabled */
+
+                /* Time stamp and publish housekeeping telemetry */
+                //CFE_SB_TimeStampMsg((CFE_MSG_Message_t *) &NOVATEL_OEM615_AppData.HkTelemetryPkt);
+                //CFE_SB_TransmitMsg((CFE_MSG_Message_t *) &NOVATEL_OEM615_AppData.HkTelemetryPkt, true);
                
-                //bool reachedHK = false;
-
-                while (status != OS_SUCCESS)
-                {
-                    //OS_printf("Successes: %d\n", successes);
-                    //OS_printf("failures: %d\n", failures);
-                    status = NOVATEL_OEM615_RequestHK(&Novatel_oem615Uart, &Novatel_oem615HK, &successes, &failures);
-                    //uint8_t read_data[sizeof(Novatel_oem615HK)+4] = {0};
-                    //status = NOVATEL_OEM615_RequestHK(&Novatel_oem615Uart, &Novatel_oem615HK);
-                    //status = NOVATEL_OEM615_CommandDevice(&Novatel_oem615Uart, 1, 0);
-                    if (status == OS_SUCCESS) 
-                    {
-
-                            //reachedHK = true;
-                            successes++;
-                            OS_printf("Novatel_oem615HK.DeviceCounter = %d\n", Novatel_oem615HK.DeviceCounter);
-                            OS_printf("Novatel_oem615HK.DeviceConfig = %d\n", Novatel_oem615HK.DeviceConfig);
-                            OS_printf("Novatel_oem615HK.DeviceStatus = %d\n", Novatel_oem615HK.DeviceStatus);
-                            OS_printf("RequstHK command success!\n");
-
-                    }
-                    else 
-                    {
-                        failures++;
-                        //OS_printf("RequstHK command failed!\n");
-                    }
-                }                
             }
             break;
 
@@ -273,6 +267,7 @@ int main(int argc, char *argv[])
     uint8_t run_status = OS_SUCCESS;
 
 
+
     /* Initialize HWLIB */
     #ifdef _NOS_ENGINE_LINK_
         nos_init_link();
@@ -292,6 +287,14 @@ int main(int argc, char *argv[])
     Novatel_oem615HK.DeviceCounter = 0;
     Novatel_oem615HK.DeviceConfig = 0;
     Novatel_oem615HK.DeviceStatus = 0;
+
+    /* Create hk data mutex */
+    status = OS_MutSemCreate(&HkMutex, NOVATEL_OEM615_HK_MUTEX_NAME, 0);
+    if (status != OS_SUCCESS)
+    {
+        OS_printf("NOVATEL_OEM615: Create hk mutex error %d", status);
+        return status;
+    }
 
     status = uart_init_port(&Novatel_oem615Uart);
     if (status == OS_SUCCESS)
@@ -377,3 +380,83 @@ void to_lower(char* str)
     return;
 }
 
+/*
+** Safely increment device counter
+*/
+void NOVATEL_OEM615_IncrementDeviceCount(void)
+{
+    if (OS_MutSemTake(HkDataMutex) == OS_SUCCESS)
+    {
+        Novatel_oem615HK.DeviceCounter++;
+
+        OS_MutSemGive(HkDataMutex);
+    }
+    else
+    {
+        OS_printf( "NOVATEL_OEM615: Increment device count reported error obtaining mutex\n");
+    }
+    return;
+}
+
+/*
+** Safely increment device error counter
+*/
+void NOVATEL_OEM615_IncrementDeviceErrorCount(void)
+{
+    if (OS_MutSemTake(HkDataMutex) == OS_SUCCESS)
+    {
+        //Novatel_oem615HK.DeviceErrorCount++;
+
+        OS_MutSemGive(HkDataMutex);
+    }
+    else
+    {
+        OS_printf( "NOVATEL_OEM615: Increment device error count reported error obtaining mutex\n");
+    }
+    return;
+}
+
+/*
+** Safely request HK
+*/
+int32 NOVATEL_OEM615_SafeRequestHK(NOVATEL_OEM615_Device_HK_tlm_t* data)
+{
+    uint32 status;
+
+    if (OS_MutSemTake(HkMutex) == OS_SUCCESS)
+    {
+        int succs = 0;
+        int fails = 0;
+        status = NOVATEL_OEM615_RequestHK(&Novatel_oem615Uart, &Novatel_oem615HK, &succs, &fails);
+        OS_printf("RequestHK executed from safeHK, status = %d\n", status);
+        OS_MutSemGive(HkMutex);
+    }
+    else
+    {
+        OS_printf( "NOVATEL_OEM615: Request device HK reported error obtaining mutex\n");
+        status = OS_ERROR;
+    }
+
+    return status;
+}
+
+/*
+** Safe Get Device Enable Status
+*/
+int32 NOVATEL_OEM615_GetDeviceEnabledStatus(void)
+{
+    uint32 status;
+
+    if (OS_MutSemTake(HkMutex) == OS_SUCCESS)
+    {
+        status = OS_SUCCESS;
+
+        OS_MutSemGive(HkMutex);
+    }
+    else
+    {
+        OS_printf("NOVATEL_OEM615: Get device enabled status reported error obtaining mutex\n");
+        status = OS_ERROR;
+    }
+    return status;
+}

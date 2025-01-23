@@ -26,6 +26,8 @@
 #include "hwlib.h"
 #include "device_cfg.h"
 #include "novatel_oem615_device.h"
+#include "../../../../../fsw/osal/src/os/inc/common_types.h"
+
 
 #if TGTNAME == cpu1
     #include "nos_link.h"
@@ -54,6 +56,15 @@
 #define CMD_UNLOG           7
 #define CMD_UNLOG_ALL       8
 
+//#define NOVATEL_OEM615_MUTEX_NAME            "NOVATEL_OEM615_MUTEX"
+#define NOVATEL_OEM615_HK_MUTEX_NAME         "NAV_HK_MUTEX"
+
+/*
+** Enabled and Disabled Definitions
+*/
+#define NOVATEL_OEM615_DEVICE_DISABLED       0
+#define NOVATEL_OEM615_DEVICE_ENABLED        1
+
 /*
 ** Prototypes
 */
@@ -66,5 +77,10 @@ int  main(int argc, char *argv[]);
 */
 int check_number_arguments(int actual, int expected);
 void to_lower(char* str);
+void NOVATEL_OEM615_IncrementDeviceCount(void);
+void NOVATEL_OEM615_IncrementDeviceErrorCount(void);
+int32 NOVATEL_OEM615_GetDeviceEnabledStatus(void);
+int32 NOVATEL_OEM615_SafeRequestHK(NOVATEL_OEM615_Device_HK_tlm_t* data);
+
 
 #endif /* _NOVATEL_OEM615_CHECKOUT_H_ */
