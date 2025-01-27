@@ -17,8 +17,7 @@
 */
 uart_info_t Novatel_oem615Uart;                         /* Hardware protocol definition */
 NOVATEL_OEM615_Device_HK_tlm_t Novatel_oem615HK;        /* NOVATEL_OEM615 Housekeeping Telemetry Packet */
-NOVATEL_OEM615_Device_Data_tlm_t Novatel_oem615Data;    /* NOVATEL_OEM615 Data Telemetry Packet */
-uint32 HkDataMutex;                                     /* Locks all data */
+NOVATEL_OEM615_Device_Data_tlm_t Novatel_oem615Data; 
 
 /*
 ** Component Functions
@@ -33,7 +32,7 @@ void print_help(void)
         "h                                  - ^                               \n"
         "data                               - Request novatel_oem615 data     \n"
         "d                                  - ^                               \n"
-        "serialconfig #                              - Serial configuration #          \n"
+        "serialconfig #                     - Serial configuration #          \n"
         "s #                                - ^                               \n"
         "log # #                            - Log novatel_oem615 data         \n"
         "l                                  - ^                               \n"
@@ -138,51 +137,34 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
 
             if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
             {
-                if (OS_MutSemTake(HkDataMutex) == OS_SUCCESS)
+                status = NOVATEL_OEM615_RequestHK(&Novatel_oem615Uart, &Novatel_oem615HK);
+
+                if (status == OS_SUCCESS)
                 {
-                    status = NOVATEL_OEM615_RequestHK(&Novatel_oem615Uart, &Novatel_oem615HK);
-
-                    OS_MutSemGive(HkDataMutex);
-
-                    if (status == OS_SUCCESS)
-                    {
-                        OS_printf("NOVATEL_OEM615_RequestHK command success\n");
-                    }
-                    else
-                    {
-                        OS_printf("NOVATEL_OEM615_RequestHK command failed!\n");
-                    }
+                    OS_printf("NOVATEL_OEM615_RequestHK command success\n");
                 }
                 else
                 {
-                    OS_printf("NOVATEL_OEM615: Request Device HK reported error obtaining mutex");
+                    OS_printf("NOVATEL_OEM615_RequestHK command failed!\n");
                 }
+
             }
             break;
 
         case CMD_NOVATEL_OEM615:
             if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
             {   
-                if (OS_MutSemTake(HkDataMutex) == OS_SUCCESS)
+                status = NOVATEL_OEM615_RequestData(&Novatel_oem615Uart, &Novatel_oem615Data);
+
+                if (status == OS_SUCCESS)
                 {
-                    status = NOVATEL_OEM615_RequestData(&Novatel_oem615Uart, &Novatel_oem615Data);
-
-                    OS_MutSemGive(HkDataMutex);
-
-                    if (status == OS_SUCCESS)
-                    {
-                        OS_printf("NOVATEL_OEM615_RequestData command success\n");
-                    }
-                    else
-                    {
-                        OS_printf("NOVATEL_OEM615_RequestData command failed!\n");
-                    }
+                    OS_printf("NOVATEL_OEM615_RequestData command success\n");
                 }
                 else
                 {
-                   OS_printf("NOVATEL_OEM615: Request Device Data reported error obtaining mutex");
+                    OS_printf("NOVATEL_OEM615_RequestData command failed!\n");
                 }
-            }
+        }
             break;
 
         case CMD_CFG:
@@ -190,24 +172,15 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
             {
                 config = atoi(tokens[0]);
 
-                if (OS_MutSemTake(HkDataMutex) == OS_SUCCESS)
+                status = NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 7, config, 0);
+
+                if (status == OS_SUCCESS)
                 {
-                    status = NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 7, config, 0);
-
-                    OS_MutSemGive(HkDataMutex);
-
-                    if (status == OS_SUCCESS)
-                    {
-                        OS_printf("Configuration command success with value %u\n", config);
-                    }
-                    else
-                    {
-                        OS_printf("Configuration command failed!\n");
-                    }
+                    OS_printf("Configuration command success with value %u\n", config);
                 }
                 else
                 {
-                   OS_printf("NOVATEL_OEM615: Set Device Config reported error obtaining mutex");
+                    OS_printf("Configuration command failed!\n");
                 }
             }
             break;
@@ -217,25 +190,14 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
             {
                 log_type = atoi(tokens[0]);
                 period = atoi(tokens[1]);
-
-                if (OS_MutSemTake(HkDataMutex) == OS_SUCCESS)
+                status = NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 4, log_type, period);
+                if (status == OS_SUCCESS)
                 {
-                    status = NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 4, log_type, period);
-
-                    OS_MutSemGive(HkDataMutex);
-
-                    if (status == OS_SUCCESS)
-                    {
-                        OS_printf("LOG command success!\n");
-                    }
-                    else
-                    {
-                        OS_printf("LOG command failed!\n");
-                    }
+                    OS_printf("LOG command success!\n");
                 }
                 else
                 {
-                   OS_printf("NOVATEL_OEM615: Device Log Command reported error obtaining mutex");
+                    OS_printf("LOG command failed!\n");
                 }
             }
             break;
@@ -244,51 +206,29 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
             if (check_number_arguments(num_tokens, 1) == OS_SUCCESS)
             {
                 log_type = atoi(tokens[0]);
-                
-                
-                if (OS_MutSemTake(HkDataMutex) == OS_SUCCESS)
+                status = NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 5, log_type, 0);
+                if (status == OS_SUCCESS)
                 {
-                    status = NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 5, log_type, 0);
-
-                    OS_MutSemGive(HkDataMutex);
-
-                    if (status == OS_SUCCESS)
-                    {
-                        OS_printf("UNLOG command success!\n");
-                    }
-                    else
-                    {
-                        OS_printf("UNLOG command failed!\n");
-                    }
+                    OS_printf("UNLOG command success!\n");
                 }
                 else
                 {
-                   OS_printf("NOVATEL_OEM615: Device Unlog Command reported error obtaining mutex");
+                    OS_printf("UNLOG command failed!\n");
                 }
             }
             break;
 
         case CMD_UNLOG_ALL:
             if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
-            {   
-                if (OS_MutSemTake(HkDataMutex) == OS_SUCCESS)
+            {
+                status =  NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 6, 0, 0);
+                if (status == OS_SUCCESS)        
                 {
-                    status =  NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 6, 0, 0);
-
-                    OS_MutSemGive(HkDataMutex);
-
-                    if (status == OS_SUCCESS)        
-                    {
-                        OS_printf("UNLOG_ALL command success!\n");
-                    }
-                    else
-                    {
-                        OS_printf("UNLOG_ALL command failed!\n");
-                    }
+                    OS_printf("UNLOG_ALL command success!\n");
                 }
                 else
                 {
-                   OS_printf("NOVATEL_OEM615: Device Unlog All Command reported error obtaining mutex");
+                    OS_printf("UNLOG_ALL command failed!\n");
                 }
             }
             break;
@@ -332,14 +272,6 @@ int main(int argc, char *argv[])
     Novatel_oem615HK.DeviceCounter = 0;
     Novatel_oem615HK.DeviceConfig = 0;
     Novatel_oem615HK.DeviceStatus = 0;
-
-    /* Create hk data mutex */
-    status = OS_MutSemCreate(&HkDataMutex, NOVATEL_OEM615_HK_MUTEX_NAME, 0);
-    if (status != OS_SUCCESS)
-    {
-        OS_printf("NOVATEL_OEM615: Create hk mutex error %d", status);
-        return status;
-    }
 
     status = uart_init_port(&Novatel_oem615Uart);
     if (status == OS_SUCCESS)

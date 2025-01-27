@@ -56,9 +56,6 @@
 #define CMD_UNLOG           7
 #define CMD_UNLOG_ALL       8
 
-//#define NOVATEL_OEM615_MUTEX_NAME            "NOVATEL_OEM615_MUTEX"
-#define NOVATEL_OEM615_HK_MUTEX_NAME         "NAV_HK_MUTEX"
-
 /*
 ** Enabled and Disabled Definitions
 */
