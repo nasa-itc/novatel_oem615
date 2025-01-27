@@ -11,4 +11,5 @@ aux_source_directory(src APP_SRC_FILES)
 include_directories(${hwlib_MISSION_DIR}/fsw/public_inc)
 
 # Create the app module
-add_cfe_app(novatel_oem615 ${APP_SRC_FILES})
+add_cfe_app(novatel_oem615 ${APP_SRC_FILES}
+            ../shared/novatel_oem615_device.c)

@@ -100,7 +100,7 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd_code,
     else
     {
         #ifdef NOVATEL_OEM615_CFG_DEBUG
-            OS_printf("NOVATEL_OEM615_CommandDevice - uart_flush returned error with status = %s! No uart_write_port performed.", status);
+            OS_printf("NOVATEL_OEM615_CommandDevice - uart_flush returned error with status = %d! No uart_write_port performed.", status);
         #endif
         status = OS_ERROR;
     }
@@ -234,7 +234,7 @@ int32_t NOVATEL_OEM615_CommandDeviceCustom(uart_info_t* uart_device, uint8_t cmd
         else
         {
             #ifdef NOVATEL_OEM615_CFG_DEBUG
-                OS_printf("NOVATEL_OEM615_CommandDeviceCustom - uart_flush returned error with status = %s! No uart_write_port performed.", status);
+                OS_printf("NOVATEL_OEM615_CommandDeviceCustom - uart_flush returned error with status = %d! No uart_write_port performed.", status);
             #endif
             status = OS_ERROR;
         }
@@ -355,19 +355,19 @@ int32_t NOVATEL_OEM615_ReadHK(uart_info_t* uart_device, uint8_t* read_data, uint
             }
             else
             {
-                OS_printf("  read_data = ");
-                for (uint32_t i = 0; i < sizeof(temp_read_data); i++)
-                {
-                    OS_printf("%02x", temp_read_data[i]);
-                }
-                OS_printf("\n");
+                // OS_printf("  read_data = ");
+                // for (uint32_t i = 0; i < sizeof(temp_read_data); i++)
+                // {
+                //     OS_printf("%02x", temp_read_data[i]);
+                // }
+                // OS_printf("\n");
 
-                OS_printf("  temp_read_data = ");
-                for (uint32_t i = 0; i < sizeof(temp_read_data); i++)
-                {
-                    OS_printf("%02x", temp_read_data[i]);
-                }
-                OS_printf("\n");
+                // OS_printf("  temp_read_data = ");
+                // for (uint32_t i = 0; i < sizeof(temp_read_data); i++)
+                // {
+                //     OS_printf("%02x", temp_read_data[i]);
+                // }
+                // OS_printf("\n");
                 /* search uart data for header+trailer signifying start of HK gps packet */
                 for (int i=0;i<(bytes-data_length);i++)
                 {
@@ -472,7 +472,7 @@ int32_t NOVATEL_OEM615_RequestData(uart_info_t* uart_device, NOVATEL_OEM615_Devi
     else
     {
         #ifdef NOVATEL_OEM615_CFG_DEBUG
-            OS_printf("  NOVATEL_OEM615_RequestData: CommandDevice returned error with status = %s! \n", status);
+            OS_printf("  NOVATEL_OEM615_RequestData: CommandDevice returned error with status = %d! \n", status);
         #endif
         status = OS_ERROR;
     }
