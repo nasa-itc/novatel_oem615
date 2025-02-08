@@ -11,6 +11,7 @@
 /*
 ** Required header files.
 */
+#include "device_cfg.h"
 #include "hwlib.h"
 #include "novatel_oem615_platform_cfg.h"
 
