@@ -16,6 +16,6 @@
 ** id conflict with other apps.  Performance IDs are used for cFE performance
 ** metrics.
 */
-#define NOVATEL_OEM615_PERF_ID          48
+#define NOVATEL_OEM615_PERF_ID 48
 
 #endif /* _NOVATEL_OEM615_PERFIDS_H_ */
