@@ -46,6 +46,6 @@
 /*
  * Allow UT access to the global "NOVATEL_OEM615_APP_Data" object.
  */
-// extern NOVATEL_OEM615_AppData_t NOVATEL_OEM615_APP_Data;
+//extern NOVATEL_OEM615_AppData_t NOVATEL_OEM615_APP_Data;
 
 #endif /* UT_NOVATEL_OEM615_APP_H */
