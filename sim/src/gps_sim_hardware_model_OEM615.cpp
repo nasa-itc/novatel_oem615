@@ -98,6 +98,7 @@ namespace Nos3
         // in the firmware of the STF-1 NovAtel OEM615 - Remove me and make me a configuration option and/or out of band commanding option
         _periodic_logs.insert(std::map<std::string, boost::tuple<double, double>>::value_type("RANGECMPA", boost::tuple<double, double>(_absolute_start_time + 10.0, 1.0)));
         _periodic_logs.insert(std::map<std::string, boost::tuple<double, double>>::value_type("BESTXYZA", boost::tuple<double, double>(_absolute_start_time + 10.0, 1.0)));
+        _periodic_logs.insert(std::map<std::string, boost::tuple<double, double>>::value_type("GPGGAA", boost::tuple<double, double>(_absolute_start_time + 10.0, 1.0)));
     }
 
     GPSSimHardwareModelOEM615::~GPSSimHardwareModelOEM615(void)
