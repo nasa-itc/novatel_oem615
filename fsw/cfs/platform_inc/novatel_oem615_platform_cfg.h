@@ -18,11 +18,12 @@
 /* Notes:
 **   NOS3 uart requires matching handle and bus number
 */
-#define NOVATEL_OEM615_CFG_STRING       "usart_1"
-#define NOVATEL_OEM615_CFG_HANDLE       1
-#define NOVATEL_OEM615_CFG_BAUDRATE_HZ  115200
-#define NOVATEL_OEM615_CFG_MS_TIMEOUT   50 /* Max 255 */
-#define NOVATEL_OEM615_CFG_READ_TIMEOUT 250
+#define NOVATEL_OEM615_CFG_STRING           "usart_1"
+#define NOVATEL_OEM615_CFG_HANDLE           1
+#define NOVATEL_OEM615_CFG_BAUDRATE_HZ      115200
+#define NOVATEL_OEM615_CFG_MS_TIMEOUT       50 /* Max 255 */
+#define NOVATEL_OEM615_CFG_READ_TIMEOUT     250
+#define NOVATEL_OEM615_CFG_DATA_ERROR_CNT   10
 /* Note: Debug flag disabled (commented out) by default */
 //#define NOVATEL_OEM615_CFG_DEBUG
 #endif

@@ -108,144 +108,23 @@ namespace Nos3
     /*************************************************************************
      * Private helper methods
      *************************************************************************/
-/*
     void GPSSimHardwareModelOEM615::uart_read_callback(const uint8_t *buf, size_t len)
     {
         // Get the data out of the message bytes - Hardware independent
         std::vector<uint8_t> in_data(buf, buf + len);
+        std::vector<uint8_t> out_data;
 
         sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  REQUEST %s",
             SimIHardwareModel::uint8_vector_to_hex_string(in_data).c_str()); // log data in a man readable format
 
         // Get the hardware response for the request - Hardware and algorithm dependent
-        std::vector<uint8_t> out_data = determine_response_for_request(in_data);
+        determine_response_for_request(in_data, out_data);
 
         // Ship the message bytes off (we're done!) - Hardware independent
         sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  REPLY   %s\n",
             SimIHardwareModel::uint8_vector_to_hex_string(out_data).c_str()); // log data in a man readable format
 
         _uart_connection->write(&out_data[0], out_data.size());
-    }
-*/
-
-    void GPSSimHardwareModelOEM615::uart_read_callback(const uint8_t *buf, size_t len)
-    {
-        std::vector<uint8_t> out_data; 
-        std::uint8_t valid = NOVATEL_OEM615_SIM_SUCCESS;
-
-        // Retrieve data and log in man readable format
-        std::vector<uint8_t> in_data(buf, buf + len);
-        sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  REQUEST %s",
-            SimIHardwareModel::uint8_vector_to_hex_string(in_data).c_str());
-
-        // Check simulator is enabled
-        if (_enabled != NOVATEL_OEM615_SIM_SUCCESS)
-        {
-            sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  Novatel_oem615 sim disabled!");
-            valid = NOVATEL_OEM615_SIM_ERROR;
-        }
-        else
-        {
-            // Check if generic command using dead header / beef trailer (NOOP, Request HK, Request Data)
-            if (in_data.size() == 9 && ((in_data[0] == 0xDE) && (in_data[1] ==0xAD)))
-            {
-                // Check trailer - 0xBEEF
-                if ((in_data[7] != 0xBE) || (in_data[8] !=0xEF))
-                {
-                    sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  Trailer incorrect!");
-                    valid = NOVATEL_OEM615_SIM_ERROR;
-                }
-                else
-                {
-                    // Increment count as valid command format received
-                    _count++;
-                }
-                if (valid == NOVATEL_OEM615_SIM_SUCCESS)
-                {   
-                    // Process command
-                    switch (in_data[2])
-                    {
-                        case 0:
-                            // NOOP
-                            sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  NOOP command received!");
-                            break;
-
-                        case 1:
-                            // Request HK
-                            sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  Send HK command received!");
-                            create_novatel_oem615_hk(out_data);
-                            break;
-
-                        case 2:
-                            // Request data
-                            sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  Send data command received!");
-                            create_novatel_oem615_data(out_data);
-                            break;
-
-                        default:
-                            // Unused command code
-                            valid = NOVATEL_OEM615_SIM_ERROR;
-                            sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  Unused command %d received!", in_data[2]);
-                            break;
-                    }
-                }
-            }
-            // Otherwise, check for NOVATEL_OEM615 specific command
-            else
-            {
-
-                // Get the hardware response for the request - Hardware and algorithm dependent
-                valid = determine_response_for_request(in_data, out_data);
-            }
-        }
-
-        // Increment count and echo command since format valid
-        if (valid == NOVATEL_OEM615_SIM_SUCCESS)
-        {
-            _count++;
-            _uart_connection->write(&in_data[0], in_data.size());
-
-            // Send response if existing
-            if (out_data.size() > 0)
-            {
-                sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  REPLY %s",
-                    SimIHardwareModel::uint8_vector_to_hex_string(out_data).c_str());
-                _uart_connection->write(&out_data[0], out_data.size());
-            }
-        }
-    }
-
-    // Custom function to prepare the Novatel_oem615 HK telemetry 
-    void GPSSimHardwareModelOEM615::create_novatel_oem615_hk(std::vector<uint8_t>& out_data)
-    {
-        // Prepare data size 
-        out_data.resize(16, 0x00);
-
-        // Streaming data header - 0xDEAD 
-        out_data[0] = 0xDE;
-        out_data[1] = 0xAD;
-        
-        // Sequence count 
-        out_data[2] = (_count >> 24) & 0x000000FF; 
-        out_data[3] = (_count >> 16) & 0x000000FF; 
-        out_data[4] = (_count >>  8) & 0x000000FF; 
-        out_data[5] =  _count & 0x000000FF;
-        
-        // Configuration 
-        out_data[6] = (_config >> 24) & 0x000000FF; 
-        out_data[7] = (_config >> 16) & 0x000000FF; 
-        out_data[8] = (_config >>  8) & 0x000000FF; 
-        out_data[9] =  _config & 0x000000FF;
-
-        // Device Status 
-        out_data[10] = (_status >> 24) & 0x000000FF; 
-        out_data[11] = (_status >> 16) & 0x000000FF; 
-        out_data[12] = (_status >>  8) & 0x000000FF; 
-        out_data[13] =  _status & 0x000000FF;
-
-        // Streaming data trailer - 0xBEEF 
-        out_data[14] = 0xBE;
-        out_data[15] = 0xEF;
     }
 
     void GPSSimHardwareModelOEM615::create_novatel_oem615_data(std::vector<uint8_t>& out_data)
