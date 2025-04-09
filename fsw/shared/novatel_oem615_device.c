@@ -11,15 +11,15 @@
 */
 #include "novatel_oem615_device.h"
 
-static char* saveptr;
+static char *saveptr;
 
-int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd_code, int8_t log_type, int8_t period_option)
+int32_t NOVATEL_OEM615_CommandDevice(uart_info_t *uart_device, uint8_t cmd_code, int8_t log_type, int8_t period_option)
 {
-    int32_t status = OS_SUCCESS;
-    int32_t command_length = 0;
-    uint8_t* write_data;
-    char* log_type_str;
-    char* period_option_str;
+    int32_t  status         = OS_SUCCESS;
+    int32_t  command_length = 0;
+    uint8_t *write_data;
+    char    *log_type_str;
+    char    *period_option_str;
 
     // log
     if (cmd_code == 4)
@@ -27,19 +27,24 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd_code,
         command_length = sizeof(NOVATEL_OEM615_LOG) + sizeof(NOVATEL_OEM615_PORT);
         switch (log_type)
         {
-            case 0: command_length += sizeof(NOVATEL_OEM615_LOGTYPE_BESTXYZA);
+            case 0:
+                command_length += sizeof(NOVATEL_OEM615_LOGTYPE_BESTXYZA);
                 log_type_str = NOVATEL_OEM615_LOGTYPE_BESTXYZA;
                 break;
-            case 1: command_length += sizeof(NOVATEL_OEM615_LOGTYPE_GPGGAA);
+            case 1:
+                command_length += sizeof(NOVATEL_OEM615_LOGTYPE_GPGGAA);
                 log_type_str = NOVATEL_OEM615_LOGTYPE_GPGGAA;
                 break;
-            case 2: command_length += sizeof(NOVATEL_OEM615_LOGTYPE_RANGECMPA);
+            case 2:
+                command_length += sizeof(NOVATEL_OEM615_LOGTYPE_RANGECMPA);
                 log_type_str = NOVATEL_OEM615_LOGTYPE_RANGECMPA;
                 break;
-            case 3: command_length += sizeof(NOVATEL_OEM615_LOGTYPE_BESTXYZB);
+            case 3:
+                command_length += sizeof(NOVATEL_OEM615_LOGTYPE_BESTXYZB);
                 log_type_str = NOVATEL_OEM615_LOGTYPE_BESTXYZB;
                 break;
-            case 4: command_length += sizeof(NOVATEL_OEM615_LOGTYPE_RANGECMPB);
+            case 4:
+                command_length += sizeof(NOVATEL_OEM615_LOGTYPE_RANGECMPB);
                 log_type_str = NOVATEL_OEM615_LOGTYPE_RANGECMPB;
                 break;
             default:
@@ -48,22 +53,28 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd_code,
         }
         switch (period_option)
         {
-            case 0: command_length += sizeof(NOVATEL_OEM615_PERIOD_OPTION_0);
+            case 0:
+                command_length += sizeof(NOVATEL_OEM615_PERIOD_OPTION_0);
                 period_option_str = NOVATEL_OEM615_PERIOD_OPTION_0;
                 break;
-            case 1: command_length += sizeof(NOVATEL_OEM615_PERIOD_OPTION_1);
+            case 1:
+                command_length += sizeof(NOVATEL_OEM615_PERIOD_OPTION_1);
                 period_option_str = NOVATEL_OEM615_PERIOD_OPTION_1;
                 break;
-            case 2: command_length += sizeof(NOVATEL_OEM615_PERIOD_OPTION_2);
+            case 2:
+                command_length += sizeof(NOVATEL_OEM615_PERIOD_OPTION_2);
                 period_option_str = NOVATEL_OEM615_PERIOD_OPTION_2;
                 break;
-            case 3: command_length += sizeof(NOVATEL_OEM615_PERIOD_OPTION_3);
+            case 3:
+                command_length += sizeof(NOVATEL_OEM615_PERIOD_OPTION_3);
                 period_option_str = NOVATEL_OEM615_PERIOD_OPTION_3;
                 break;
-            case 4: command_length += sizeof(NOVATEL_OEM615_PERIOD_OPTION_4);
+            case 4:
+                command_length += sizeof(NOVATEL_OEM615_PERIOD_OPTION_4);
                 period_option_str = NOVATEL_OEM615_PERIOD_OPTION_4;
                 break;
-            case 5: command_length += sizeof(NOVATEL_OEM615_PERIOD_OPTION_5);
+            case 5:
+                command_length += sizeof(NOVATEL_OEM615_PERIOD_OPTION_5);
                 period_option_str = NOVATEL_OEM615_PERIOD_OPTION_5;
                 break;
             default:
@@ -72,11 +83,11 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd_code,
         }
         if (status == OS_SUCCESS)
         {
-            write_data = (uint8_t*)calloc(command_length, sizeof(uint8_t));
-            strcpy((char*)write_data, NOVATEL_OEM615_LOG);
-            strcat((char*)write_data, NOVATEL_OEM615_PORT);
-            strcat((char*)write_data, log_type_str);
-            strcat((char*)write_data, period_option_str);
+            write_data = (uint8_t *)calloc(command_length, sizeof(uint8_t));
+            strcpy((char *)write_data, NOVATEL_OEM615_LOG);
+            strcat((char *)write_data, NOVATEL_OEM615_PORT);
+            strcat((char *)write_data, log_type_str);
+            strcat((char *)write_data, period_option_str);
         }
     }
     // unlog
@@ -85,19 +96,24 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd_code,
         command_length = sizeof(NOVATEL_OEM615_UNLOG) + sizeof(NOVATEL_OEM615_PORT);
         switch (log_type)
         {
-            case 0: command_length += sizeof(NOVATEL_OEM615_LOGTYPE_BESTXYZA);
+            case 0:
+                command_length += sizeof(NOVATEL_OEM615_LOGTYPE_BESTXYZA);
                 log_type_str = NOVATEL_OEM615_LOGTYPE_BESTXYZA;
                 break;
-            case 1: command_length += sizeof(NOVATEL_OEM615_LOGTYPE_GPGGAA);
+            case 1:
+                command_length += sizeof(NOVATEL_OEM615_LOGTYPE_GPGGAA);
                 log_type_str = NOVATEL_OEM615_LOGTYPE_GPGGAA;
                 break;
-            case 2: command_length += sizeof(NOVATEL_OEM615_LOGTYPE_RANGECMPA);
+            case 2:
+                command_length += sizeof(NOVATEL_OEM615_LOGTYPE_RANGECMPA);
                 log_type_str = NOVATEL_OEM615_LOGTYPE_RANGECMPA;
                 break;
-            case 3: command_length += sizeof(NOVATEL_OEM615_LOGTYPE_BESTXYZB);
+            case 3:
+                command_length += sizeof(NOVATEL_OEM615_LOGTYPE_BESTXYZB);
                 log_type_str = NOVATEL_OEM615_LOGTYPE_BESTXYZB;
                 break;
-            case 4: command_length += sizeof(NOVATEL_OEM615_LOGTYPE_RANGECMPB);
+            case 4:
+                command_length += sizeof(NOVATEL_OEM615_LOGTYPE_RANGECMPB);
                 log_type_str = NOVATEL_OEM615_LOGTYPE_RANGECMPB;
                 break;
             default:
@@ -106,42 +122,44 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd_code,
         }
         if (status == OS_SUCCESS)
         {
-            write_data = (uint8_t*)calloc(command_length, sizeof(uint8_t));
-            strcpy((char*)write_data, NOVATEL_OEM615_UNLOG);
-            strcat((char*)write_data, NOVATEL_OEM615_PORT);
-            strcat((char*)write_data, log_type_str);
+            write_data = (uint8_t *)calloc(command_length, sizeof(uint8_t));
+            strcpy((char *)write_data, NOVATEL_OEM615_UNLOG);
+            strcat((char *)write_data, NOVATEL_OEM615_PORT);
+            strcat((char *)write_data, log_type_str);
         }
     }
     // unlogall
     else if (cmd_code == 6)
     {
         command_length = sizeof(NOVATEL_OEM615_UNLOGALL);
-        write_data = (uint8_t*)calloc(command_length, sizeof(uint8_t));
-        strcpy((char*)write_data, NOVATEL_OEM615_UNLOGALL);
+        write_data     = (uint8_t *)calloc(command_length, sizeof(uint8_t));
+        strcpy((char *)write_data, NOVATEL_OEM615_UNLOGALL);
     }
     // serialconfig
     else if (cmd_code == 7)
     {
         command_length = sizeof(NOVATEL_OEM615_SERIALCONFIG);
-        write_data = (uint8_t*)calloc(command_length, sizeof(uint8_t));
-        strcpy((char*)write_data, NOVATEL_OEM615_SERIALCONFIG);
+        write_data     = (uint8_t *)calloc(command_length, sizeof(uint8_t));
+        strcpy((char *)write_data, NOVATEL_OEM615_SERIALCONFIG);
     }
 
-    // Flush any prior data 
+    // Flush any prior data
     if (status == OS_SUCCESS)
     {
         status = uart_flush(uart_device);
         if (status == OS_SUCCESS)
         {
-            // Write data 
+            // Write data
             uart_write_port(uart_device, write_data, command_length);
             free(write_data);
         } // uart_flush
         else
         {
-            #ifdef NOVATEL_OEM615_CFG_DEBUG
-                OS_printf("NOVATEL_OEM615_CommandDevice - uart_flush returned error with status = %d! No uart_write_port performed.", status);
-            #endif
+#ifdef NOVATEL_OEM615_CFG_DEBUG
+            OS_printf("NOVATEL_OEM615_CommandDevice - uart_flush returned error with status = %d! No uart_write_port "
+                      "performed.",
+                      status);
+#endif
             status = OS_ERROR;
         }
     }
@@ -151,12 +169,12 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t* uart_device, uint8_t cmd_code,
 /*
 ** Request data command
 */
-int32_t NOVATEL_OEM615_RequestData(uart_info_t* uart_device, NOVATEL_OEM615_Device_Data_tlm_t* data)
+int32_t NOVATEL_OEM615_RequestData(uart_info_t *uart_device, NOVATEL_OEM615_Device_Data_tlm_t *data)
 {
-    int32_t status = OS_SUCCESS;
-    int32_t bytes = 0;
+    int32_t status          = OS_SUCCESS;
+    int32_t bytes           = 0;
     int32_t bytes_available = 0;
-    char *token;
+    char   *token;
 
     if (status == OS_SUCCESS)
     {
@@ -164,42 +182,42 @@ int32_t NOVATEL_OEM615_RequestData(uart_info_t* uart_device, NOVATEL_OEM615_Devi
         bytes_available = uart_bytes_available(uart_device);
         if (bytes_available > 0)
         {
-            uint8_t* temp_read_data = (uint8_t*)calloc(bytes_available, sizeof(uint8_t));
+            uint8_t *temp_read_data = (uint8_t *)calloc(bytes_available, sizeof(uint8_t));
             /* Read all existing data on uart port */
             bytes = uart_read_port(uart_device, temp_read_data, bytes_available);
             if (bytes != bytes_available)
             {
-                #ifdef NOVATEL_OEM615_CFG_DEBUG
-                    OS_printf("  NOVATEL_OEM615_RequestData: Bytes read != to requested! \n");
-                #endif
+#ifdef NOVATEL_OEM615_CFG_DEBUG
+                OS_printf("  NOVATEL_OEM615_RequestData: Bytes read != to requested! \n");
+#endif
                 status = OS_ERROR;
                 free(temp_read_data);
             }
             else
             {
-                /* search uart data for token signifying start of bestxyza gps data packet */
-                #ifdef NOVATEL_OEM615_CFG_DEBUG
-                    OS_printf(" ALL UART BYTES READ FROM BUFFER: \n");
-                    for (int i=0;i<bytes;i++)
-                    {
-                        OS_printf("%02x", temp_read_data[i]);
-                    }
-                    OS_printf(" DONE PRINTING ALL UART BYTES READ FROM BUFFER \n");
-                #endif
-                token = strtok_r((char*)temp_read_data, ",", &saveptr);
-                if ((token != NULL) && (strncmp(token, "#BESTXYZA", 9) == 0)) 
+/* search uart data for token signifying start of bestxyza gps data packet */
+#ifdef NOVATEL_OEM615_CFG_DEBUG
+                OS_printf(" ALL UART BYTES READ FROM BUFFER: \n");
+                for (int i = 0; i < bytes; i++)
                 {
-                    #ifdef NOVATEL_OEM615_CFG_DEBUG
-                        OS_printf(" DATA TOKEN FOUND = %s\n", token);
-                    #endif
-                    
+                    OS_printf("%02x", temp_read_data[i]);
+                }
+                OS_printf(" DONE PRINTING ALL UART BYTES READ FROM BUFFER \n");
+#endif
+                token = strtok_r((char *)temp_read_data, ",", &saveptr);
+                if ((token != NULL) && (strncmp(token, "#BESTXYZA", 9) == 0))
+                {
+#ifdef NOVATEL_OEM615_CFG_DEBUG
+                    OS_printf(" DATA TOKEN FOUND = %s\n", token);
+#endif
+
                     NOVATEL_OEM615_ParseBestXYZA(data);
                 }
                 else
                 {
-                    #ifdef NOVATEL_OEM615_CFG_DEBUG
-                        OS_printf("  NOVATEL_OEM615_RequestData: No #BESTXYZA token found when reading uart port! \n");
-                    #endif
+#ifdef NOVATEL_OEM615_CFG_DEBUG
+                    OS_printf("  NOVATEL_OEM615_RequestData: No #BESTXYZA token found when reading uart port! \n");
+#endif
                     status = OS_ERROR;
                     free(temp_read_data);
                 }
@@ -207,17 +225,17 @@ int32_t NOVATEL_OEM615_RequestData(uart_info_t* uart_device, NOVATEL_OEM615_Devi
         }
         else
         {
-            #ifdef NOVATEL_OEM615_CFG_DEBUG
-                OS_printf("  NOVATEL_OEM615_RequestData: No data available when attempting to read from uart port! \n");
-            #endif
+#ifdef NOVATEL_OEM615_CFG_DEBUG
+            OS_printf("  NOVATEL_OEM615_RequestData: No data available when attempting to read from uart port! \n");
+#endif
             status = OS_ERROR;
         }
     }
     else
     {
-        #ifdef NOVATEL_OEM615_CFG_DEBUG
-            OS_printf("  NOVATEL_OEM615_RequestData: CommandDevice returned error with status = %d! \n", status);
-        #endif
+#ifdef NOVATEL_OEM615_CFG_DEBUG
+        OS_printf("  NOVATEL_OEM615_RequestData: CommandDevice returned error with status = %d! \n", status);
+#endif
         status = OS_ERROR;
     }
     return status;
@@ -226,53 +244,53 @@ int32_t NOVATEL_OEM615_RequestData(uart_info_t* uart_device, NOVATEL_OEM615_Devi
 /*
 ** Request data command for child task
 */
-int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t* uart_device, NOVATEL_OEM615_Device_Data_tlm_t* data)
+int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OEM615_Device_Data_tlm_t *data)
 {
-    int32_t status = OS_SUCCESS;
-    int32_t bytes = 0;
+    int32_t status          = OS_SUCCESS;
+    int32_t bytes           = 0;
     int32_t bytes_available = 0;
-    char *token;
+    char   *token;
 
     /* check how many bytes are waiting on the uart */
     bytes_available = uart_bytes_available(uart_device);
     if (bytes_available > 0)
     {
-        uint8_t* temp_read_data = (uint8_t*)calloc(bytes_available, sizeof(uint8_t));
+        uint8_t *temp_read_data = (uint8_t *)calloc(bytes_available, sizeof(uint8_t));
         /* Read all existing data on uart port */
         bytes = uart_read_port(uart_device, temp_read_data, bytes_available);
         if (bytes != bytes_available)
         {
-            #ifdef NOVATEL_OEM615_CFG_DEBUG
-                OS_printf("  NOVATEL_OEM615_ChildProcessReadData: Bytes read != to requested! \n");
-            #endif
+#ifdef NOVATEL_OEM615_CFG_DEBUG
+            OS_printf("  NOVATEL_OEM615_ChildProcessReadData: Bytes read != to requested! \n");
+#endif
             status = OS_ERROR;
             free(temp_read_data);
         }
         else
         {
-            /* search uart data for token signifying start of bestxyza gps data packet */
-            #ifdef NOVATEL_OEM615_CFG_DEBUG
-                OS_printf(" ALL UART BYTES READ FROM BUFFER: \n");
-                for (int i=0;i<bytes;i++)
-                {
-                    OS_printf("%02x", temp_read_data[i]);
-                }
-                OS_printf(" DONE PRINTING ALL UART BYTES READ FROM BUFFER \n");
-            #endif
-            token = strtok_r((char*)temp_read_data, ",", &saveptr);
-            if ((token != NULL) && (strncmp(token, "#BESTXYZA", 9) == 0)) 
+/* search uart data for token signifying start of bestxyza gps data packet */
+#ifdef NOVATEL_OEM615_CFG_DEBUG
+            OS_printf(" ALL UART BYTES READ FROM BUFFER: \n");
+            for (int i = 0; i < bytes; i++)
             {
-                #ifdef NOVATEL_OEM615_CFG_DEBUG
-                    OS_printf(" DATA TOKEN FOUND = %s\n", token);
-                #endif
-                
+                OS_printf("%02x", temp_read_data[i]);
+            }
+            OS_printf(" DONE PRINTING ALL UART BYTES READ FROM BUFFER \n");
+#endif
+            token = strtok_r((char *)temp_read_data, ",", &saveptr);
+            if ((token != NULL) && (strncmp(token, "#BESTXYZA", 9) == 0))
+            {
+#ifdef NOVATEL_OEM615_CFG_DEBUG
+                OS_printf(" DATA TOKEN FOUND = %s\n", token);
+#endif
+
                 NOVATEL_OEM615_ParseBestXYZA(data);
             }
             else
             {
-                #ifdef NOVATEL_OEM615_CFG_DEBUG
-                    OS_printf("  NOVATEL_OEM615_ChildProcessReadData: No #BESTXYZA token found when reading uart port! \n");
-                #endif
+#ifdef NOVATEL_OEM615_CFG_DEBUG
+                OS_printf("  NOVATEL_OEM615_ChildProcessReadData: No #BESTXYZA token found when reading uart port! \n");
+#endif
                 status = OS_ERROR;
                 free(temp_read_data);
             }
@@ -280,9 +298,10 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t* uart_device, NOVATEL_OE
     }
     else
     {
-        #ifdef NOVATEL_OEM615_CFG_DEBUG
-            OS_printf("  NOVATEL_OEM615_ChildProcessReadData: No data available when attempting to read from uart port! \n");
-        #endif
+#ifdef NOVATEL_OEM615_CFG_DEBUG
+        OS_printf(
+            "  NOVATEL_OEM615_ChildProcessReadData: No data available when attempting to read from uart port! \n");
+#endif
         status = OS_ERROR;
     }
     return status;
@@ -291,19 +310,20 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t* uart_device, NOVATEL_OE
 /************************************************************************
 ** Parse NovAtel OEM615 BESTXYZA log data
 *************************************************************************/
-// Reference:  Section 1.1.1, p. 24, OEM6 Family Firmware Reference Manual, OM-20000129, Rev 8, January 2015 (file om-20000129.pdf)
-// Reference:  Section 3.2.17, pp. 420-422, OEM6 Family Firmware Reference Manual, OM-20000129, Rev 8, January 2015 (file om-20000129.pdf)
-void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t* device_data_struct)
+// Reference:  Section 1.1.1, p. 24, OEM6 Family Firmware Reference Manual, OM-20000129, Rev 8, January 2015 (file
+// om-20000129.pdf) Reference:  Section 3.2.17, pp. 420-422, OEM6 Family Firmware Reference Manual, OM-20000129, Rev 8,
+// January 2015 (file om-20000129.pdf)
+void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_struct)
 {
-    device_data_struct->Weeks = 0;
+    device_data_struct->Weeks           = 0;
     device_data_struct->SecondsIntoWeek = 0;
-    device_data_struct->Fractions = 0.0;
-    device_data_struct->ECEFX = 0.0;
-    device_data_struct->ECEFY = 0.0;
-    device_data_struct->ECEFZ = 0.0;
-    device_data_struct->VelX = 0.0;
-    device_data_struct->VelY = 0.0;
-    device_data_struct->VelZ = 0.0;
+    device_data_struct->Fractions       = 0.0;
+    device_data_struct->ECEFX           = 0.0;
+    device_data_struct->ECEFY           = 0.0;
+    device_data_struct->ECEFZ           = 0.0;
+    device_data_struct->VelX            = 0.0;
+    device_data_struct->VelY            = 0.0;
+    device_data_struct->VelZ            = 0.0;
     char *token;
 
     token = strtok_r(NULL, ",; ", &saveptr); // Port
@@ -311,10 +331,12 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t* device_data_
     token = strtok_r(NULL, ",; ", &saveptr); // % Idle Time
     token = strtok_r(NULL, ",; ", &saveptr); // Time Status
     token = strtok_r(NULL, ",; ", &saveptr); // Week
-    if (token != NULL) device_data_struct->Weeks = atol(token);
+    if (token != NULL)
+        device_data_struct->Weeks = atol(token);
     token = strtok_r(NULL, ",; ", &saveptr); // Seconds
-    if (token != NULL) {
-        device_data_struct->Fractions = atof(token);
+    if (token != NULL)
+    {
+        device_data_struct->Fractions       = atof(token);
         device_data_struct->SecondsIntoWeek = (uint32_t)device_data_struct->Fractions;
         device_data_struct->Fractions -= device_data_struct->SecondsIntoWeek;
     }
@@ -326,33 +348,39 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t* device_data_
     token = strtok_r(NULL, ",; ", &saveptr); // P-sol status
     token = strtok_r(NULL, ",; ", &saveptr); // pos type
     token = strtok_r(NULL, ",; ", &saveptr); // P-X (m)
-    if (token != NULL) device_data_struct->ECEFX = atof(token);
+    if (token != NULL)
+        device_data_struct->ECEFX = atof(token);
     token = strtok_r(NULL, ",; ", &saveptr); // P-Y (m)
-    if (token != NULL) device_data_struct->ECEFY = atof(token);
+    if (token != NULL)
+        device_data_struct->ECEFY = atof(token);
     token = strtok_r(NULL, ",; ", &saveptr); // P-Z (m)
-    if (token != NULL) device_data_struct->ECEFZ = atof(token);
+    if (token != NULL)
+        device_data_struct->ECEFZ = atof(token);
     token = strtok_r(NULL, ",; ", &saveptr); // P-X sigma
     token = strtok_r(NULL, ",; ", &saveptr); // P-Y sigma
     token = strtok_r(NULL, ",; ", &saveptr); // P-Z sigma
     token = strtok_r(NULL, ",; ", &saveptr); // V-sol status
     token = strtok_r(NULL, ",; ", &saveptr); // vel type
     token = strtok_r(NULL, ",; ", &saveptr); // V-X (m/s
-    if (token != NULL) device_data_struct->VelX = atof(token);
+    if (token != NULL)
+        device_data_struct->VelX = atof(token);
     token = strtok_r(NULL, ",; ", &saveptr); // V-Y (m/s)
-    if (token != NULL) device_data_struct->VelY = atof(token);
+    if (token != NULL)
+        device_data_struct->VelY = atof(token);
     token = strtok_r(NULL, ",; ", &saveptr); // V-Z (m/s)
-    if (token != NULL) device_data_struct->VelZ = atof(token);
+    if (token != NULL)
+        device_data_struct->VelZ = atof(token);
 
-    #ifdef NOVATEL_OEM615_CFG_DEBUG
-        OS_printf("  Weeks = %d\n", device_data_struct->Weeks);
-        OS_printf("  SecondsIntoWeek = %d\n", device_data_struct->SecondsIntoWeek);
-        OS_printf("  Fractions = %f\n", device_data_struct->Fractions);
-        OS_printf("  ECEFX = %f\n", device_data_struct->ECEFX);
-        OS_printf("  ECEFY = %f\n", device_data_struct->ECEFY);
-        OS_printf("  ECEFZ = %f\n", device_data_struct->ECEFZ);
-        OS_printf("  VelX = %f\n", device_data_struct->VelX);
-        OS_printf("  VelY = %f\n", device_data_struct->VelY);
-        OS_printf("  VelZ = %f\n", device_data_struct->VelZ);
-    #endif
+#ifdef NOVATEL_OEM615_CFG_DEBUG
+    OS_printf("  Weeks = %d\n", device_data_struct->Weeks);
+    OS_printf("  SecondsIntoWeek = %d\n", device_data_struct->SecondsIntoWeek);
+    OS_printf("  Fractions = %f\n", device_data_struct->Fractions);
+    OS_printf("  ECEFX = %f\n", device_data_struct->ECEFX);
+    OS_printf("  ECEFY = %f\n", device_data_struct->ECEFY);
+    OS_printf("  ECEFZ = %f\n", device_data_struct->ECEFZ);
+    OS_printf("  VelX = %f\n", device_data_struct->VelX);
+    OS_printf("  VelY = %f\n", device_data_struct->VelY);
+    OS_printf("  VelZ = %f\n", device_data_struct->VelZ);
+#endif
 
 } /* NAV_ParseOEM615Bestxyza */
