@@ -611,7 +611,7 @@ int32 NOVATEL_OEM615_SafeRequestData(NOVATEL_OEM615_Device_Data_tlm_t* data)
 
     if (OS_MutSemTake(NOVATEL_OEM615_AppData.HkDataMutex) == OS_SUCCESS)
     {
-        status = NOVATEL_OEM615_ChildProcessReadData(&NOVATEL_OEM615_AppData.Novatel_oem615Uart, data);
+        status = NOVATEL_OEM615_RequestData(&NOVATEL_OEM615_AppData.Novatel_oem615Uart, data);
 
         OS_MutSemGive(NOVATEL_OEM615_AppData.HkDataMutex);
     }

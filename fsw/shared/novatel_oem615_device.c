@@ -158,7 +158,6 @@ int32_t NOVATEL_OEM615_RequestData(uart_info_t* uart_device, NOVATEL_OEM615_Devi
     int32_t bytes_available = 0;
     char *token;
 
-    status = NOVATEL_OEM615_CommandDevice(uart_device, NOVATEL_OEM615_DEVICE_REQ_DATA_CMD, 0, 0);
     if (status == OS_SUCCESS)
     {
         /* check how many bytes are waiting on the uart */

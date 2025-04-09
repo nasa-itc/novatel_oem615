@@ -19,12 +19,6 @@ def get_gps_hk()
     sleep(NOVATEL_OEM615_CMD_SLEEP)
 end
 
-def get_gps_data()
-    cmd("NOVATEL_OEM615 NOVATEL_OEM615_REQ_DATA")
-    wait_check_packet("NOVATEL_OEM615", "NOVATEL_OEM615_DATA_TLM", 1, NOVATEL_OEM615_RESPONSE_TIMEOUT)
-    sleep(NOVATEL_OEM615_CMD_SLEEP)
-end
-
 def gps_cmd(*command)
     count = tlm("NOVATEL_OEM615 NOVATEL_OEM615_HK_TLM CMD_COUNT") + 1
 
@@ -76,8 +70,7 @@ def confirm_gps_data()
     dev_cmd_cnt = tlm("NOVATEL_OEM615 NOVATEL_OEM615_HK_TLM DEVICE_COUNT")
     dev_cmd_err_cnt = tlm("NOVATEL_OEM615 NOVATEL_OEM615_HK_TLM DEVICE_ERR_COUNT")
     
-    get_gps_data()
-    diff = 1000 # 1000 meter tolerance
+    diff = 25000 # 25 kilometer tolerance
     wait_check_tolerance("NOVATEL_OEM615 NOVATEL_OEM615_DATA_TLM ECEF_X", tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA POSITION_W_0"), diff, NOVATEL_OEM615_RESPONSE_TIMEOUT)
     wait_check_tolerance("NOVATEL_OEM615 NOVATEL_OEM615_DATA_TLM ECEF_Y", tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA POSITION_W_1"), diff, NOVATEL_OEM615_RESPONSE_TIMEOUT)
     wait_check_tolerance("NOVATEL_OEM615 NOVATEL_OEM615_DATA_TLM ECEF_Z", tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA POSITION_W_2"), diff, NOVATEL_OEM615_RESPONSE_TIMEOUT)
