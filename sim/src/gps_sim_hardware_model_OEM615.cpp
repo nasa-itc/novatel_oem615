@@ -90,7 +90,7 @@ namespace Nos3
             std::bind(&GPSSimHardwareModelOEM615::uart_read_callback, this, std::placeholders::_1, std::placeholders::_2));
 
         _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("BESTXYZA", &GPSSimHardwareModelOEM615::get_bestxyza_response));
-        _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("GPGGAA", &GPSSimHardwareModelOEM615::get_gpggaa_response));
+        _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("GPGGA", &GPSSimHardwareModelOEM615::get_gpgga_response));
         _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("RANGECMPA", &GPSSimHardwareModelOEM615::get_rangecmpa_response));
         _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("BESTXYZB", &GPSSimHardwareModelOEM615::get_bestxyzb_response));
         _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("RANGECMPB", &GPSSimHardwareModelOEM615::get_rangecmpb_response));
@@ -98,7 +98,7 @@ namespace Nos3
         // in the firmware of the STF-1 NovAtel OEM615 - Remove me and make me a configuration option and/or out of band commanding option
         _periodic_logs.insert(std::map<std::string, boost::tuple<double, double>>::value_type("RANGECMPA", boost::tuple<double, double>(_absolute_start_time + 10.0, 1.0)));
         _periodic_logs.insert(std::map<std::string, boost::tuple<double, double>>::value_type("BESTXYZA", boost::tuple<double, double>(_absolute_start_time + 10.0, 1.0)));
-        _periodic_logs.insert(std::map<std::string, boost::tuple<double, double>>::value_type("GPGGAA", boost::tuple<double, double>(_absolute_start_time + 10.0, 1.0)));
+        _periodic_logs.insert(std::map<std::string, boost::tuple<double, double>>::value_type("GPGGA", boost::tuple<double, double>(_absolute_start_time + 10.0, 1.0)));
     }
 
     GPSSimHardwareModelOEM615::~GPSSimHardwareModelOEM615(void)
@@ -396,25 +396,29 @@ namespace Nos3
             boost::dynamic_pointer_cast<GPSSimDataPoint>(_sim_data_provider->get_data_point());
 
         std::vector<uint8_t> data;
+        time = time;
 
-        double abs_time = _absolute_start_time + (double(time * _sim_microseconds_per_tick)) / 1000000.0;
+        // Periodic logging is currently disabled, seemed in consistent on whether it was workinn correctly?
+        // double abs_time = _absolute_start_time + (double(time * _sim_microseconds_per_tick)) / 1000000.0;
 
         for (std::map<std::string, boost::tuple<double, double>>::iterator it = _periodic_logs.begin(); it != _periodic_logs.end(); it++) {
-            boost::tuple<double, double> value = it->second;
-            double prev_time = boost::tuples::get<0>(value);
-            double period = boost::tuples::get<1>(value);
-            double next_time = prev_time + period - (_sim_microseconds_per_tick / 1000000.0) / 2; // within half a tick time period
-            if (next_time < abs_time) { // Time to send more data
-                it->second = boost::tuple<double, double>(abs_time, period);
-                std::map<std::string, get_log_data_func>::iterator search = _get_log_data_map.find(it->first);
+            // boost::tuple<double, double> value = it->second;
+            // double prev_time = boost::tuples::get<0>(value);
+            // double period = boost::tuples::get<1>(value);
+            // double next_time = prev_time + period - (_sim_microseconds_per_tick / 1000000.0) / 2; // within half a tick time period
+            // if (next_time < abs_time) { // Time to send more data
+            //     it->second = boost::tuple<double, double>(abs_time, period);
+            std::map<std::string, get_log_data_func>::iterator search = _get_log_data_map.find(it->first);
                 if (search != _get_log_data_map.end()) {
                     get_log_data_func f = search->second;
                     (this->*f)(*data_point, data);
                     _uart_connection->write(&data[0], data.size());
+                    // Reset vector, otherwise will append data
+                    data.clear();
                 }
             }
         }
-    }
+    // }
 
     /* Just reinterprets each character as its ASCII value */
     void GPSSimHardwareModelOEM615::string_to_uint8vector(const std::string& in_data, std::vector<uint8_t>& out_data)
@@ -692,7 +696,7 @@ namespace Nos3
     }
 
     // Reference:  Section 3.2.4, pp. 474-476, OEM6 Family Firmware Reference Manual, OM-20000129, Rev 8, January 2015 (file om-20000129.pdf)
-    void GPSSimHardwareModelOEM615::get_gpggaa_response(const GPSSimDataPoint& data_point, std::vector<uint8_t>& out_data)
+    void GPSSimHardwareModelOEM615::get_GPGGA_response(const GPSSimDataPoint& data_point, std::vector<uint8_t>& out_data)
     {
         // Computations
         double abs_time = data_point.get_abs_time();
@@ -713,8 +717,8 @@ namespace Nos3
         SimCoordinateTransformations::ECEF2LLA(ecef_x, ecef_y, ecef_z, latitude, longitude, ellipsoid_height);
         msl_height = ellipsoid_height; // TODO - Fix this
         undulation = ellipsoid_height - msl_height; // Height of EGM96 geoid above WGS84 ellipsoid
-        latitude = latitude * 180.0 / M_PI;
-        longitude = longitude * 180.0 / M_PI;
+        // latitude = latitude * 180.0 / M_PI;
+        // longitude = longitude * 180.0 / M_PI;
         latitude_whole_degrees = int(latitude);
         latitude_fractional_degrees = latitude - latitude_whole_degrees;
         longitude_whole_degrees = int(longitude);

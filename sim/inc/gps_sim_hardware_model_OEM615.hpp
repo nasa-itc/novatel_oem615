@@ -73,7 +73,7 @@ namespace Nos3
 
         void get_ascii_header_string(const std::string& message, const GPSSimDataPoint& data_point, std::string& header);
         void get_binary_header_bytes(uint16_t message, uint16_t length, const GPSSimDataPoint& data_point, std::vector<uint8_t>& header);
-        void get_gpggaa_response(const GPSSimDataPoint& data_point, std::vector<uint8_t>& response);
+        void get_gpgga_response(const GPSSimDataPoint& data_point, std::vector<uint8_t>& response);
         void get_bestxyza_response(const GPSSimDataPoint& data_point, std::vector<uint8_t>& response);
         void get_bestxyzb_response(const GPSSimDataPoint& data_point, std::vector<uint8_t>& response);
         void get_rangecmpa_response(const GPSSimDataPoint& data_point, std::vector<uint8_t>& response);

@@ -138,7 +138,7 @@
           <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
           <xtce:EnumerationList>
             <xtce:Enumeration value="0" label="BESTXYZA"/>
-            <xtce:Enumeration value="1" label="GPGGAA"/>
+            <xtce:Enumeration value="1" label="GPGGA"/>
             <xtce:Enumeration value="2" label="RANGECMPA"/>
             <xtce:Enumeration value="3" label="BESTXYZB"/>
             <xtce:Enumeration value="4" label="RANGECMPB"/>

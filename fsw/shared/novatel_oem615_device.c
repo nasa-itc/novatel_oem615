@@ -131,8 +131,8 @@ int32_t NOVATEL_OEM615_CommandDeviceCustom(uart_info_t *uart_device, uint8_t cmd
                 log_type_str = NOVATEL_OEM615_LOGTYPE_BESTXYZA;
                 break;
             case 1:
-                command_length += sizeof(NOVATEL_OEM615_LOGTYPE_GPGGAA);
-                log_type_str = NOVATEL_OEM615_LOGTYPE_GPGGAA;
+                command_length += sizeof(NOVATEL_OEM615_LOGTYPE_GPGGA);
+                log_type_str = NOVATEL_OEM615_LOGTYPE_GPGGA;
                 break;
             case 2:
                 command_length += sizeof(NOVATEL_OEM615_LOGTYPE_RANGECMPA);
@@ -200,8 +200,8 @@ int32_t NOVATEL_OEM615_CommandDeviceCustom(uart_info_t *uart_device, uint8_t cmd
                 log_type_str = NOVATEL_OEM615_LOGTYPE_BESTXYZA;
                 break;
             case 1:
-                command_length += sizeof(NOVATEL_OEM615_LOGTYPE_GPGGAA);
-                log_type_str = NOVATEL_OEM615_LOGTYPE_GPGGAA;
+                command_length += sizeof(NOVATEL_OEM615_LOGTYPE_GPGGA);
+                log_type_str = NOVATEL_OEM615_LOGTYPE_GPGGA;
                 break;
             case 2:
                 command_length += sizeof(NOVATEL_OEM615_LOGTYPE_RANGECMPA);
@@ -549,7 +549,7 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
 
                 NOVATEL_OEM615_ParseBestXYZA(data);
             }
-            else if ((token != NULL) && (strncmp(token, "#BESTGPGGA", 10) == 0))
+            else if ((token != NULL) && (strncmp(token, "$GPGGA", 6) == 0))
             {
 #ifdef NOVATEL_OEM615_CFG_DEBUG
                 OS_printf(" DATA TOKEN FOUND = %s\n", token);
@@ -729,7 +729,7 @@ void NOVATEL_OEM615_ParseBestGPGGA(NOVATEL_OEM615_Device_Data_tlm_t *device_data
     }
 
     // Convert latitude and longitude from NMEA format to decimal degrees
-    // NMEA format is ddmm.mmmm
+    // NMEA latitude format is ddmm.mmmm
     int lat_deg = (int)(data.latitude / 100);
     double lat_min = data.latitude - (lat_deg * 100);
     data.latitude = lat_deg + (lat_min / 60.0);
@@ -738,6 +738,7 @@ void NOVATEL_OEM615_ParseBestGPGGA(NOVATEL_OEM615_Device_Data_tlm_t *device_data
         data.latitude = -data.latitude;
     }
 
+    // NMEA longitude format is dddmm.mmmm
     int lon_deg = (int)(data.longitude / 100);
     double lon_min = data.longitude - (lon_deg * 100);
     data.longitude = lon_deg + (lon_min / 60.0);
