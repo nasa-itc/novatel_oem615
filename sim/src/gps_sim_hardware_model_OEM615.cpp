@@ -696,7 +696,7 @@ namespace Nos3
     }
 
     // Reference:  Section 3.2.4, pp. 474-476, OEM6 Family Firmware Reference Manual, OM-20000129, Rev 8, January 2015 (file om-20000129.pdf)
-    void GPSSimHardwareModelOEM615::get_GPGGA_response(const GPSSimDataPoint& data_point, std::vector<uint8_t>& out_data)
+    void GPSSimHardwareModelOEM615::get_gpgga_response(const GPSSimDataPoint& data_point, std::vector<uint8_t>& out_data)
     {
         // Computations
         double abs_time = data_point.get_abs_time();

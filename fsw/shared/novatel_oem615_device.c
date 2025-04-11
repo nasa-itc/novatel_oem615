@@ -731,7 +731,7 @@ void NOVATEL_OEM615_ParseBestGPGGA(NOVATEL_OEM615_Device_Data_tlm_t *device_data
     // Convert latitude and longitude from NMEA format to decimal degrees
     // NMEA latitude format is ddmm.mmmm
     int lat_deg = (int)(data.latitude / 100);
-    double lat_min = data.latitude - (lat_deg * 100);
+    float lat_min = data.latitude - (lat_deg * 100);
     data.latitude = lat_deg + (lat_min / 60.0);
     if (data.lat_direction == 'S') 
     {
@@ -740,7 +740,7 @@ void NOVATEL_OEM615_ParseBestGPGGA(NOVATEL_OEM615_Device_Data_tlm_t *device_data
 
     // NMEA longitude format is dddmm.mmmm
     int lon_deg = (int)(data.longitude / 100);
-    double lon_min = data.longitude - (lon_deg * 100);
+    float lon_min = data.longitude - (lon_deg * 100);
     data.longitude = lon_deg + (lon_min / 60.0);
     if (data.lon_direction == 'W') 
     {
