@@ -83,13 +83,12 @@ typedef struct
 */
 typedef struct
 {
-    CFE_MSG_TelemetryHeader_t      TlmHeader;
-    uint8                          CommandErrorCount;
-    uint8                          CommandCount;
-    uint8                          DeviceErrorCount;
-    uint8                          DeviceCount;
-    uint8                          DeviceEnabled;
-    NOVATEL_OEM615_Device_HK_tlm_t DeviceHK;
+    CFE_MSG_TelemetryHeader_t TlmHeader;
+    uint8                     CommandErrorCount;
+    uint8                     CommandCount;
+    uint8                     DeviceErrorCount;
+    uint8                     DeviceCount;
+    uint8                     DeviceEnabled;
 
 } __attribute__((packed)) NOVATEL_OEM615_Hk_tlm_t;
 #define NOVATEL_OEM615_HK_TLM_LNGTH sizeof(NOVATEL_OEM615_Hk_tlm_t)

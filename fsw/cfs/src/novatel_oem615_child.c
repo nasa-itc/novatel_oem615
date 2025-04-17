@@ -12,6 +12,11 @@
 #include "novatel_oem615_child.h"
 
 /*
+** Global variables
+*/
+uint8_t error_max_count = NOVATEL_OEM615_CFG_DATA_ERROR_CNT;
+
+/*
 ** Run child task until stopped
 */
 void NOVATEL_OEM615_ChildTask(void)
@@ -41,17 +46,25 @@ void NOVATEL_OEM615_ProcessData(void)
         if (status == OS_SUCCESS)
         {
             NOVATEL_OEM615_IncrementDeviceCount();
-
             CFE_SB_TimeStampMsg((CFE_MSG_Message_t *)&NOVATEL_OEM615_AppData.DevicePkt);
             CFE_SB_TransmitMsg((CFE_MSG_Message_t *)&NOVATEL_OEM615_AppData.DevicePkt, true);
+            error_max_count = NOVATEL_OEM615_CFG_DATA_ERROR_CNT;
         }
         else
         {
-            NOVATEL_OEM615_IncrementDeviceErrorCount();
-            // This spams the NOS3 FSW window when uncommented.
-            // CFE_EVS_SendEvent(NOVATEL_OEM615_UART_READ_ERR_EID, CFE_EVS_EventType_ERROR,
-            //    "(ChildTask) NOVATEL_OEM615_ProcessData: Device read error.  NOVATEL_OEM615_ChildProcessRequestData
-            //    returned %d.", status);
+            if (error_max_count == 0)
+            {
+                NOVATEL_OEM615_IncrementDeviceErrorCount();
+                CFE_EVS_SendEvent(NOVATEL_OEM615_UART_READ_ERR_EID, CFE_EVS_EventType_ERROR,
+                                  "(ChildTask) NOVATEL_OEM615_ProcessData: Device read error.  "
+                                  "NOVATEL_OEM615_ChildProcessRequestData returned %d.",
+                                  status);
+                error_max_count = NOVATEL_OEM615_CFG_DATA_ERROR_CNT;
+            }
+            else
+            {
+                error_max_count = error_max_count - 1;
+            }
         }
     }
     OS_TaskDelay(sleeptime);

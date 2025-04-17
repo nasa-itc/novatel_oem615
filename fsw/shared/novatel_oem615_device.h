@@ -17,7 +17,6 @@
 
 /*
 ** Type definitions
-** TODO: Make specific to your application
 */
 #define NOVATEL_OEM615_DEVICE_HDR   0xDEAD
 #define NOVATEL_OEM615_DEVICE_HDR_0 0xDE
@@ -52,19 +51,6 @@
 #define NOVATEL_OEM615_PERIOD_OPTION_5   "ONTIME 0.5"
 
 /*
-** NOVATEL_OEM615 device housekeeping telemetry definition
-*/
-typedef struct
-{
-    uint32_t DeviceCounter;
-    uint32_t DeviceConfig;
-    uint32_t DeviceStatus;
-
-} __attribute__((packed)) NOVATEL_OEM615_Device_HK_tlm_t;
-#define NOVATEL_OEM615_DEVICE_HK_LNGTH sizeof(NOVATEL_OEM615_Device_HK_tlm_t)
-#define NOVATEL_OEM615_DEVICE_HK_SIZE  NOVATEL_OEM615_DEVICE_HK_LNGTH + NOVATEL_OEM615_DEVICE_HDR_TRL_LEN
-
-/*
 ** NOVATEL_OEM615 device data telemetry definition
 */
 typedef struct
@@ -86,11 +72,7 @@ typedef struct
 /*
 ** Prototypes
 */
-int32_t NOVATEL_OEM615_ReadHK(uart_info_t *uart_device, uint8_t *read_data, uint8_t data_length);
-int32_t NOVATEL_OEM615_CommandDevice(uart_info_t *uart_device, uint8_t cmd, uint32_t payload);
-int32_t NOVATEL_OEM615_CommandDeviceCustom(uart_info_t *uart_device, uint8_t cmd_code, int8_t log_type,
-                                           int8_t period_option);
-int32_t NOVATEL_OEM615_RequestHK(uart_info_t *uart_device, NOVATEL_OEM615_Device_HK_tlm_t *data);
+int32_t NOVATEL_OEM615_CommandDevice(uart_info_t *uart_device, uint8_t cmd_code, int8_t log_type, int8_t period_option);
 int32_t NOVATEL_OEM615_RequestData(uart_info_t *uart_device, NOVATEL_OEM615_Device_Data_tlm_t *data);
 int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OEM615_Device_Data_tlm_t *data);
 void    NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_struct);
