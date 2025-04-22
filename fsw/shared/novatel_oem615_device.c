@@ -32,8 +32,8 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t *uart_device, uint8_t cmd_code,
                 log_type_str = NOVATEL_OEM615_LOGTYPE_BESTXYZA;
                 break;
             case 1:
-                command_length += sizeof(NOVATEL_OEM615_LOGTYPE_GPGGAA);
-                log_type_str = NOVATEL_OEM615_LOGTYPE_GPGGAA;
+                command_length += sizeof(NOVATEL_OEM615_LOGTYPE_GPGGA);
+                log_type_str = NOVATEL_OEM615_LOGTYPE_GPGGA;
                 break;
             case 2:
                 command_length += sizeof(NOVATEL_OEM615_LOGTYPE_RANGECMPA);
@@ -101,8 +101,8 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t *uart_device, uint8_t cmd_code,
                 log_type_str = NOVATEL_OEM615_LOGTYPE_BESTXYZA;
                 break;
             case 1:
-                command_length += sizeof(NOVATEL_OEM615_LOGTYPE_GPGGAA);
-                log_type_str = NOVATEL_OEM615_LOGTYPE_GPGGAA;
+                command_length += sizeof(NOVATEL_OEM615_LOGTYPE_GPGGA);
+                log_type_str = NOVATEL_OEM615_LOGTYPE_GPGGA;
                 break;
             case 2:
                 command_length += sizeof(NOVATEL_OEM615_LOGTYPE_RANGECMPA);
@@ -286,6 +286,14 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
 
                 NOVATEL_OEM615_ParseBestXYZA(data);
             }
+            else if ((token != NULL) && (strncmp(token, "$GPGGA", 6) == 0))
+            {
+#ifdef NOVATEL_OEM615_CFG_DEBUG
+                OS_printf(" DATA TOKEN FOUND = %s\n", token);
+#endif
+
+                NOVATEL_OEM615_ParseBestGPGGA(data);
+            }
             else
             {
 #ifdef NOVATEL_OEM615_CFG_DEBUG
@@ -384,3 +392,100 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
 #endif
 
 } /* NAV_ParseOEM615Bestxyza */
+
+/************************************************************************
+** Parse NovAtel OEM615 BESTGPGGA log data
+*************************************************************************/
+// Reference:  Section 1.1.1, p. 24, OEM6 Family Firmware Reference Manual, OM-20000129, Rev 8, January 2015 (file
+// om-20000129.pdf) Reference:  Section 3.2.17, pp. 420-422, OEM6 Family Firmware Reference Manual, OM-20000129, Rev 8,
+// January 2015 (file om-20000129.pdf)
+void NOVATEL_OEM615_ParseBestGPGGA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_struct)
+{
+    device_data_struct->lat = 0;
+    device_data_struct->lon = 0;
+    device_data_struct->alt = 0;
+
+    char        *token;
+    GPGGA_Data_t data;
+
+    // Parse each field
+    int field = 0;
+    while ((token = strtok_r(NULL, ",", &saveptr)) != NULL)
+    {
+        field++;
+        switch (field)
+        {
+            case 1: // UTC Time
+                strncpy(data.utc_time, token, sizeof(data.utc_time) - 1);
+                data.utc_time[sizeof(data.utc_time) - 1] = '\0';
+                break;
+            case 2: // Latitude
+                data.latitude = atof(token);
+                break;
+            case 3: // N/S Indicator
+                data.lat_direction = token[0];
+                break;
+            case 4: // Longitude
+                data.longitude = atof(token);
+                break;
+            case 5: // E/W Indicator
+                data.lon_direction = token[0];
+                break;
+            case 6: // Position Fix Indicator
+                data.fix_quality = atoi(token);
+                break;
+            case 7: // Satellites Used
+                data.num_satellites = atoi(token);
+                break;
+            case 8: // HDOP
+                data.hdop = atof(token);
+                break;
+            case 9: // MSL Altitude
+                data.altitude = atof(token);
+                break;
+            case 10: // Units (Altitude)
+                data.altitude_units = token[0];
+                break;
+            case 11: // Geoid Separation
+                data.geoid_separation = atof(token);
+                break;
+            case 12: // Units (Geoid Separation)
+                data.geoid_units = token[0];
+                break;
+            case 13: // Age of Diff. Corr.
+                strncpy(data.dgps_age, token, sizeof(data.dgps_age) - 1);
+                data.dgps_age[sizeof(data.dgps_age) - 1] = '\0';
+                break;
+            case 14: // Diff. Ref. Station ID
+                strncpy(data.dgps_station_id, token, sizeof(data.dgps_station_id) - 1);
+                data.dgps_station_id[sizeof(data.dgps_station_id) - 1] = '\0';
+                break;
+            default:
+                break;
+        }
+    }
+
+    // Convert latitude and longitude from NMEA format to decimal degrees
+    // NMEA latitude format is ddmm.mmmm
+    int   lat_deg = (int)(data.latitude / 100);
+    float lat_min = data.latitude - (lat_deg * 100);
+    data.latitude = lat_deg + (lat_min / 60.0);
+    if (data.lat_direction == 'S')
+    {
+        data.latitude = -data.latitude;
+    }
+
+    // NMEA longitude format is dddmm.mmmm
+    int   lon_deg  = (int)(data.longitude / 100);
+    float lon_min  = data.longitude - (lon_deg * 100);
+    data.longitude = lon_deg + (lon_min / 60.0);
+    if (data.lon_direction == 'W')
+    {
+        data.longitude = -data.longitude;
+    }
+
+    // Update Device Data struct with latest
+    device_data_struct->lat = data.latitude;
+    device_data_struct->lon = data.longitude;
+    device_data_struct->alt = data.altitude;
+}

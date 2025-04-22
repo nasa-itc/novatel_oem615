@@ -38,7 +38,7 @@
 #define NOVATEL_OEM615_UNLOGALL          "UNLOGALL"
 #define NOVATEL_OEM615_SERIALCONFIG      "SERIALCONFIG"
 #define NOVATEL_OEM615_LOGTYPE_BESTXYZA  "BESTXYZA "
-#define NOVATEL_OEM615_LOGTYPE_GPGGAA    "GPGGAA "
+#define NOVATEL_OEM615_LOGTYPE_GPGGA     "GPGGA "
 #define NOVATEL_OEM615_LOGTYPE_RANGECMPA "RANGECMPA "
 #define NOVATEL_OEM615_LOGTYPE_BESTXYZB  "BESTXYZB "
 #define NOVATEL_OEM615_LOGTYPE_RANGECMPB "RANGECMPB "
@@ -64,10 +64,33 @@ typedef struct
     double   VelX;
     double   VelY;
     double   VelZ;
+    float    lat;
+    float    lon;
+    float    alt;
 
 } __attribute__((packed)) NOVATEL_OEM615_Device_Data_tlm_t;
 #define NOVATEL_OEM615_DEVICE_DATA_LNGTH sizeof(NOVATEL_OEM615_Device_Data_tlm_t)
 #define NOVATEL_OEM615_DEVICE_DATA_SIZE  NOVATEL_OEM615_DEVICE_DATA_LNGTH + NOVATEL_OEM615_DEVICE_HDR_TRL_LEN
+
+// Define the struct to hold GPGGA data
+typedef struct
+{
+    char   utc_time[11];        // hhmmss.ss
+    double latitude;            // Decimal degrees
+    char   lat_direction;       // 'N' or 'S'
+    double longitude;           // Decimal degrees
+    char   lon_direction;       // 'E' or 'W'
+    int    fix_quality;         // 0 = Invalid, 1 = GPS fix, etc.
+    int    num_satellites;      // Number of satellites
+    double hdop;                // Horizontal Dilution of Precision
+    double altitude;            // Altitude in meters
+    char   altitude_units;      // 'M' for meters
+    double geoid_separation;    // Height of geoid
+    char   geoid_units;         // 'M' for meters
+    char   dgps_age[10];        // Time since last DGPS update
+    char   dgps_station_id[10]; // DGPS station ID
+} __attribute__((packed)) GPGGA_Data_t;
+#define GPGGA_DATA_LENGTH sizeof(GPGGA_Data_t);
 
 /*
 ** Prototypes
@@ -76,5 +99,6 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t *uart_device, uint8_t cmd_code,
 int32_t NOVATEL_OEM615_RequestData(uart_info_t *uart_device, NOVATEL_OEM615_Device_Data_tlm_t *data);
 int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OEM615_Device_Data_tlm_t *data);
 void    NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_struct);
+void    NOVATEL_OEM615_ParseBestGPGGA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_struct);
 
 #endif /* _NOVATEL_OEM615_DEVICE_H_ */
