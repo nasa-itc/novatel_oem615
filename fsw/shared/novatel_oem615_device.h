@@ -73,21 +73,22 @@ typedef struct
 #define NOVATEL_OEM615_DEVICE_DATA_SIZE  NOVATEL_OEM615_DEVICE_DATA_LNGTH + NOVATEL_OEM615_DEVICE_HDR_TRL_LEN
 
 // Define the struct to hold GPGGA data
-typedef struct {
-    char    utc_time[11];           // hhmmss.ss
-    double  latitude;               // Decimal degrees
-    char    lat_direction;          // 'N' or 'S'
-    double  longitude;              // Decimal degrees
-    char    lon_direction;          // 'E' or 'W'
-    int     fix_quality;            // 0 = Invalid, 1 = GPS fix, etc.
-    int     num_satellites;         // Number of satellites
-    double  hdop;                   // Horizontal Dilution of Precision
-    double  altitude;               // Altitude in meters
-    char    altitude_units;         // 'M' for meters
-    double  geoid_separation;       // Height of geoid
-    char    geoid_units;            // 'M' for meters
-    char    dgps_age[10];           // Time since last DGPS update
-    char    dgps_station_id[10];    // DGPS station ID
+typedef struct
+{
+    char   utc_time[11];        // hhmmss.ss
+    double latitude;            // Decimal degrees
+    char   lat_direction;       // 'N' or 'S'
+    double longitude;           // Decimal degrees
+    char   lon_direction;       // 'E' or 'W'
+    int    fix_quality;         // 0 = Invalid, 1 = GPS fix, etc.
+    int    num_satellites;      // Number of satellites
+    double hdop;                // Horizontal Dilution of Precision
+    double altitude;            // Altitude in meters
+    char   altitude_units;      // 'M' for meters
+    double geoid_separation;    // Height of geoid
+    char   geoid_units;         // 'M' for meters
+    char   dgps_age[10];        // Time since last DGPS update
+    char   dgps_station_id[10]; // DGPS station ID
 } __attribute__((packed)) GPGGA_Data_t;
 #define GPGGA_DATA_LENGTH sizeof(GPGGA_Data_t);
 

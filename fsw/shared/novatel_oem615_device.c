@@ -405,19 +405,19 @@ void NOVATEL_OEM615_ParseBestGPGGA(NOVATEL_OEM615_Device_Data_tlm_t *device_data
     device_data_struct->lon = 0;
     device_data_struct->alt = 0;
 
-    char *token;
+    char        *token;
     GPGGA_Data_t data;
-    
+
     // Parse each field
     int field = 0;
-    while ((token = strtok_r(NULL, ",", &saveptr)) != NULL) 
+    while ((token = strtok_r(NULL, ",", &saveptr)) != NULL)
     {
         field++;
-        switch(field) 
+        switch (field)
         {
             case 1: // UTC Time
-                strncpy(data.utc_time, token, sizeof(data.utc_time)-1);
-                data.utc_time[sizeof(data.utc_time)-1] = '\0';
+                strncpy(data.utc_time, token, sizeof(data.utc_time) - 1);
+                data.utc_time[sizeof(data.utc_time) - 1] = '\0';
                 break;
             case 2: // Latitude
                 data.latitude = atof(token);
@@ -453,12 +453,12 @@ void NOVATEL_OEM615_ParseBestGPGGA(NOVATEL_OEM615_Device_Data_tlm_t *device_data
                 data.geoid_units = token[0];
                 break;
             case 13: // Age of Diff. Corr.
-                strncpy(data.dgps_age, token, sizeof(data.dgps_age)-1);
-                data.dgps_age[sizeof(data.dgps_age)-1] = '\0';
+                strncpy(data.dgps_age, token, sizeof(data.dgps_age) - 1);
+                data.dgps_age[sizeof(data.dgps_age) - 1] = '\0';
                 break;
             case 14: // Diff. Ref. Station ID
-                strncpy(data.dgps_station_id, token, sizeof(data.dgps_station_id)-1);
-                data.dgps_station_id[sizeof(data.dgps_station_id)-1] = '\0';
+                strncpy(data.dgps_station_id, token, sizeof(data.dgps_station_id) - 1);
+                data.dgps_station_id[sizeof(data.dgps_station_id) - 1] = '\0';
                 break;
             default:
                 break;
@@ -467,19 +467,19 @@ void NOVATEL_OEM615_ParseBestGPGGA(NOVATEL_OEM615_Device_Data_tlm_t *device_data
 
     // Convert latitude and longitude from NMEA format to decimal degrees
     // NMEA latitude format is ddmm.mmmm
-    int lat_deg = (int)(data.latitude / 100);
+    int   lat_deg = (int)(data.latitude / 100);
     float lat_min = data.latitude - (lat_deg * 100);
     data.latitude = lat_deg + (lat_min / 60.0);
-    if (data.lat_direction == 'S') 
+    if (data.lat_direction == 'S')
     {
         data.latitude = -data.latitude;
     }
 
     // NMEA longitude format is dddmm.mmmm
-    int lon_deg = (int)(data.longitude / 100);
-    float lon_min = data.longitude - (lon_deg * 100);
+    int   lon_deg  = (int)(data.longitude / 100);
+    float lon_min  = data.longitude - (lon_deg * 100);
     data.longitude = lon_deg + (lon_min / 60.0);
-    if (data.lon_direction == 'W') 
+    if (data.lon_direction == 'W')
     {
         data.longitude = -data.longitude;
     }
