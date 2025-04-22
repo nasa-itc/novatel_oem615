@@ -16,7 +16,6 @@
 ** Global Variables
 */
 uart_info_t                      Novatel_oem615Uart; /* Hardware protocol definition */
-NOVATEL_OEM615_Device_HK_tlm_t   Novatel_oem615HK;   /* NOVATEL_OEM615 Housekeeping Telemetry Packet */
 NOVATEL_OEM615_Device_Data_tlm_t Novatel_oem615Data;
 
 /*
@@ -28,8 +27,6 @@ void print_help(void)
                   "---------------------------------------------------------------------\n"
                   "help                               - Display help                    \n"
                   "exit                               - Exit app                        \n"
-                  "hk                                 - Request device housekeeping     \n"
-                  "h                                  - ^                               \n"
                   "data                               - Request novatel_oem615 data     \n"
                   "d                                  - ^                               \n"
                   "serialconfig #                     - Serial configuration #          \n"
@@ -59,14 +56,6 @@ int get_command(const char *str)
     else if (strcmp(lcmd, "exit") == 0)
     {
         status = CMD_EXIT;
-    }
-    else if (strcmp(lcmd, "hk") == 0)
-    {
-        status = CMD_HK;
-    }
-    else if (strcmp(lcmd, "h") == 0)
-    {
-        status = CMD_HK;
     }
     else if (strcmp(lcmd, "data") == 0)
     {
@@ -130,27 +119,10 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
             exit_status = OS_ERROR;
             break;
 
-        case CMD_HK:
-
-            if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
-            {
-                status = NOVATEL_OEM615_RequestHK(&Novatel_oem615Uart, &Novatel_oem615HK);
-
-                if (status == OS_SUCCESS)
-                {
-                    OS_printf("NOVATEL_OEM615_RequestHK command success\n");
-                }
-                else
-                {
-                    OS_printf("NOVATEL_OEM615_RequestHK command failed!\n");
-                }
-            }
-            break;
-
         case CMD_NOVATEL_OEM615:
             if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
             {
-                status = NOVATEL_OEM615_RequestData(&Novatel_oem615Uart, &Novatel_oem615Data);
+                status = NOVATEL_OEM615_ChildProcessReadData(&Novatel_oem615Uart, &Novatel_oem615Data);
 
                 if (status == OS_SUCCESS)
                 {
@@ -168,7 +140,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
             {
                 config = atoi(tokens[0]);
 
-                status = NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 7, config, 0);
+                status = NOVATEL_OEM615_CommandDevice(&Novatel_oem615Uart, 7, config, 0);
 
                 if (status == OS_SUCCESS)
                 {
@@ -186,7 +158,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
             {
                 log_type = atoi(tokens[0]);
                 period   = atoi(tokens[1]);
-                status   = NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 4, log_type, period);
+                status   = NOVATEL_OEM615_CommandDevice(&Novatel_oem615Uart, 4, log_type, period);
                 if (status == OS_SUCCESS)
                 {
                     OS_printf("LOG command success!\n");
@@ -202,7 +174,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
             if (check_number_arguments(num_tokens, 1) == OS_SUCCESS)
             {
                 log_type = atoi(tokens[0]);
-                status   = NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 5, log_type, 0);
+                status   = NOVATEL_OEM615_CommandDevice(&Novatel_oem615Uart, 5, log_type, 0);
                 if (status == OS_SUCCESS)
                 {
                     OS_printf("UNLOG command success!\n");
@@ -217,7 +189,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
         case CMD_UNLOG_ALL:
             if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
             {
-                status = NOVATEL_OEM615_CommandDeviceCustom(&Novatel_oem615Uart, 6, 0, 0);
+                status = NOVATEL_OEM615_CommandDevice(&Novatel_oem615Uart, 6, 0, 0);
                 if (status == OS_SUCCESS)
                 {
                     OS_printf("UNLOG_ALL command success!\n");
@@ -258,20 +230,11 @@ int main(int argc, char *argv[])
     Novatel_oem615Uart.baud          = NOVATEL_OEM615_CFG_BAUDRATE_HZ;
     Novatel_oem615Uart.access_option = uart_access_flag_RDWR;
 
-    /*
-    ** Initialize application data
-    ** Note that counters are excluded as they were reset in the previous code block
-    */
-    Novatel_oem615HK.DeviceCounter = 0;
-    Novatel_oem615HK.DeviceConfig  = 0;
-    Novatel_oem615HK.DeviceStatus  = 0;
-
     status = uart_init_port(&Novatel_oem615Uart);
     if (status == OS_SUCCESS)
     {
         OS_printf("UART device %s configured with baudrate %d \n", Novatel_oem615Uart.deviceString,
                   Novatel_oem615Uart.baud);
-        Novatel_oem615HK.DeviceCounter++;
     }
     else
     {

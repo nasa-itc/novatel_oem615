@@ -56,7 +56,6 @@ namespace Nos3
 
     private:
         // Private helper methods
-        void create_novatel_oem615_hk(std::vector<uint8_t>& out_data); 
         void create_novatel_oem615_data(std::vector<uint8_t>& out_data); 
         void uart_read_callback(const uint8_t *buf, size_t len);
         std::uint8_t determine_response_for_request(const std::vector<uint8_t>& in_data, std::vector<uint8_t>& out_data);

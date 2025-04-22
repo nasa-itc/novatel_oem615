@@ -88,15 +88,6 @@
             <xtce:Enumeration value="1" label="ENABLED"/>
           </xtce:EnumerationList>
         </xtce:EnumeratedParameterType>
-        <xtce:IntegerParameterType name="DEVICE_COUNTER_Type" shortDescription="Reported Device Command Counter" signed="false">
-          <xtce:IntegerDataEncoding sizeInBits="32" encoding="unsigned" byteOrder="leastSignificantByteFirst"/>
-        </xtce:IntegerParameterType>
-        <xtce:IntegerParameterType name="DEVICE_CONFIG_Type" shortDescription="Reported Device Configuration" signed="false">
-          <xtce:IntegerDataEncoding sizeInBits="32" encoding="unsigned" byteOrder="leastSignificantByteFirst"/>
-        </xtce:IntegerParameterType>
-        <xtce:IntegerParameterType name="DEVICE_STATUS_Type" shortDescription="Reported Device Status" signed="false">
-          <xtce:IntegerDataEncoding sizeInBits="32" encoding="unsigned" byteOrder="leastSignificantByteFirst"/>
-        </xtce:IntegerParameterType>
       </xtce:ParameterTypeSet>
       <xtce:ParameterSet>
         <xtce:Parameter name="CMD_ERR_COUNT" parameterTypeRef="CMD_ERR_COUNT_Type"/>
@@ -104,9 +95,6 @@
         <xtce:Parameter name="DEVICE_ERR_COUNT" parameterTypeRef="DEVICE_ERR_COUNT_Type"/>
         <xtce:Parameter name="DEVICE_COUNT" parameterTypeRef="DEVICE_COUNT_Type"/>
         <xtce:Parameter name="DEVICE_ENABLED" parameterTypeRef="DEVICE_ENABLED_Type"/>
-        <xtce:Parameter name="DEVICE_COUNTER" parameterTypeRef="DEVICE_COUNTER_Type"/>
-        <xtce:Parameter name="DEVICE_CONFIG" parameterTypeRef="DEVICE_CONFIG_Type"/>
-        <xtce:Parameter name="DEVICE_STATUS" parameterTypeRef="DEVICE_STATUS_Type"/>
       </xtce:ParameterSet>
       <xtce:ContainerSet>
         <xtce:SequenceContainer name="NOVATEL_OEM615_HK_TLM" shortDescription="NOVATEL_OEM615_Hk_tlm_t">
@@ -116,9 +104,6 @@
             <xtce:ParameterRefEntry parameterRef="DEVICE_ERR_COUNT"/>
             <xtce:ParameterRefEntry parameterRef="DEVICE_COUNT"/>
             <xtce:ParameterRefEntry parameterRef="DEVICE_ENABLED"/>
-            <xtce:ParameterRefEntry parameterRef="DEVICE_COUNTER"/>
-            <xtce:ParameterRefEntry parameterRef="DEVICE_CONFIG"/>
-            <xtce:ParameterRefEntry parameterRef="DEVICE_STATUS"/>
           </xtce:EntryList>
           <xtce:BaseContainer containerRef="/CCSDS/CCSDS_TM">
             <xtce:RestrictionCriteria>
