@@ -130,26 +130,26 @@ static void UT_CheckEvent_Setup(UT_CheckEvent_t *Evt, uint16 ExpectedEvent, cons
 **********************************************************************************
 */
 
-void Test_NOVATEL_OEM615_AppMain(void)
+void Test_NOVATEL_AppMain(void)
 {
     CFE_SB_MsgId_t MsgId = CFE_SB_INVALID_MSG_ID;
 
     /*
      * Test Case For:
-     * void NOVATEL_OEM615_AppMain( void )
+     * void NOVATEL_AppMain( void )
      */
 
     UT_CheckEvent_t EventTest;
 
     /*
-     * NOVATEL_OEM615_AppMain does not return a value,
+     * NOVATEL_AppMain does not return a value,
      * but it has several internal decision points
      * that need to be exercised here.
      *
      * First call it in "nominal" mode where all
      * dependent calls should be successful by default.
      */
-    NOVATEL_OEM615_AppMain();
+    NOVATEL_AppMain();
 
     /*
      * Confirm that CFE_ES_ExitApp() was called at the end of execution
@@ -173,7 +173,7 @@ void Test_NOVATEL_OEM615_AppMain(void)
      * However, it should show up in the coverage report that
      * the NOVATEL_OEM615_AppInit() failure path was taken.
      */
-    NOVATEL_OEM615_AppMain();
+    NOVATEL_AppMain();
 
     /*
      * This can validate that the internal "RunStatus" was
@@ -204,7 +204,7 @@ void Test_NOVATEL_OEM615_AppMain(void)
     /*
      * Invoke again
      */
-    NOVATEL_OEM615_AppMain();
+    NOVATEL_AppMain();
 
     /*
      * Confirm that CFE_SB_ReceiveBuffer() (inside the loop) was called
@@ -223,7 +223,7 @@ void Test_NOVATEL_OEM615_AppMain(void)
     /*
      * Invoke again
      */
-    NOVATEL_OEM615_AppMain();
+    NOVATEL_AppMain();
 
     /*
      * Confirm that the event was generated
@@ -459,7 +459,7 @@ void Novatel_oem615_UT_TearDown(void) {}
  */
 void UtTest_Setup(void)
 {
-    ADD_TEST(NOVATEL_OEM615_AppMain);
+    ADD_TEST(NOVATEL_AppMain);
     ADD_TEST(NOVATEL_OEM615_AppInit);
     ADD_TEST(NOVATEL_OEM615_ProcessCommandPacket);
     ADD_TEST(NOVATEL_OEM615_ProcessGroundCommand);
