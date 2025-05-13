@@ -37,4 +37,5 @@ add_cfe_coverage_test(novatel_oem615 ALL
     "../src/novatel_oem615_app.c"
     "../../shared/novatel_oem615_device.c"
     "../../../../../fsw/apps/hwlib/fsw/stubs/libuart.c"
+    "stubs/novatel_oem615_app_stubs.c"
 )
