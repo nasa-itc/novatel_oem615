@@ -250,6 +250,7 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
     int32_t bytes           = 0;
     int32_t bytes_available = 0;
     char   *token;
+    char temp_buff[10]; 
 
     /* check how many bytes are waiting on the uart */
     bytes_available = uart_bytes_available(uart_device);
@@ -277,7 +278,14 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
             }
             OS_printf(" DONE PRINTING ALL UART BYTES READ FROM BUFFER \n");
 #endif
-            token = strtok_r((char *)temp_read_data, ",", &saveptr);
+            for(int i = 0; i < 9; i++)
+            {
+                temp_buff[i] = (char)temp_read_data[i];
+            }
+            temp_buff[9] = '\0';
+            OS_printf("LENGTH OF TEMP DATA = %d",sizeof(temp_read_data));
+            token = strtok_r(&temp_buff, ",", &saveptr);
+            //token="#BESTXYZA";
             if ((token != NULL) && (strncmp(token, "#BESTXYZA", 9) == 0))
             {
 #ifdef NOVATEL_OEM615_CFG_DEBUG
