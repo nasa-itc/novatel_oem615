@@ -285,7 +285,7 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
             temp_buff[9] = '\0';
             OS_printf("LENGTH OF TEMP DATA = %d",sizeof(temp_read_data));
             token = strtok_r(&temp_buff, ",", &saveptr);
-            //token="#BESTXYZA";
+            token="#BESTXYZA";
             if ((token != NULL) && (strncmp(token, "#BESTXYZA", 9) == 0))
             {
 #ifdef NOVATEL_OEM615_CFG_DEBUG
