@@ -49,7 +49,7 @@
 #define NOVATEL_OEM615_PERIOD_OPTION_3   "ONTIME 0.2"
 #define NOVATEL_OEM615_PERIOD_OPTION_4   "ONTIME 0.25"
 #define NOVATEL_OEM615_PERIOD_OPTION_5   "ONTIME 0.5"
-#define MAX_LEN 256
+#define MAX_GPS_DATA 1024
 
 /*
 ** NOVATEL_OEM615 device data telemetry definition
