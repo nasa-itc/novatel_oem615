@@ -250,7 +250,7 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
     int32_t bytes           = 0;
     int32_t bytes_available = 0;
     char   *token;
-    char *temp_buff[10]; 
+    char *temp_buff[MAX_LEN]; 
 
     /* check how many bytes are waiting on the uart */
     bytes_available = uart_bytes_available(uart_device);
@@ -278,19 +278,28 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
             }
             OS_printf(" DONE PRINTING ALL UART BYTES READ FROM BUFFER \n");
 #endif
-            for(int i = 0; i < 9; i++)
-            {
-                temp_buff[i] = (char)temp_read_data[i];
-            }
-            //temp_buff[9] = ',';
-            //temp_buff[10] = '\0';
-            temp_buff[9] = '\0';
-            //OS_printf("temp_buff after assignment loop: %s\n", temp_buff);
-            token = strtok_r(temp_buff, ",", &saveptr);
-            //temp_data[9] = '\0';
-            token = strtok_r(&temp_read_data, ",", &saveptr);
-            token="#BESTXYZA";
 
+            /*Workig method #1 */
+            
+            // int i = 0;
+            // int j = 0;
+
+            // while(temp_read_data[j] != NULL)
+            // {
+            //     if(temp_read_data[j] == ',')
+            //     {
+            //         temp_buff[i] = '\0';
+            //         i++;
+            //     }
+            //     temp_buff[i] = (char)temp_read_data[j];
+            //     i++;
+            //     j++;               
+            // }
+            // temp_buff[9] = '\0';
+            // token = strtok_r(temp_buff, ",", &saveptr);
+            temp_read_data[9] = '\0';
+            token = strtok_r((char*)temp_read_data, ",", &saveptr);
+            token = "#BESTXYZA";
             if ((token != NULL) && (strncmp(token, "#BESTXYZA", 9) == 0))
             {
 #ifdef NOVATEL_OEM615_CFG_DEBUG
