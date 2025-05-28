@@ -250,15 +250,13 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
     int32_t bytes           = 0;
     int32_t bytes_available = 0;
     char   *token;
-    uint8_t temp_data[MAX_GPS_DATA + 1];
-    uint8_t *temp_read_data = temp_data;
     char temp_buff[10]; 
 
     /* check how many bytes are waiting on the uart */
     bytes_available = uart_bytes_available(uart_device);
     if (bytes_available > 0)
     {
-        //uint8_t *temp_read_data = (uint8_t *)calloc(bytes_available, sizeof(uint8_t));
+        uint8_t *temp_read_data = (uint8_t *)calloc(bytes_available, sizeof(uint8_t));
         /* Read all existing data on uart port */
         bytes = uart_read_port(uart_device, temp_read_data, bytes_available);
         if (bytes != bytes_available)
@@ -280,7 +278,7 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
             }
             OS_printf(" DONE PRINTING ALL UART BYTES READ FROM BUFFER \n");
 #endif
-            OS_printf("temp_read_data = %u\n",temp_read_data);
+            OS_printf("temp_read_data = %s\n",temp_read_data);
             // for(int i = 0; i < 9; i++)
             // {
             //     char tmp_char = (char)temp_read_data[i];
