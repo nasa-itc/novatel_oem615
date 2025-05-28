@@ -250,14 +250,13 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
     int32_t bytes           = 0;
     int32_t bytes_available = 0;
     char   *token;
-    uint8_t temp_data[MAX_GPS_DATA + 1];
-    uint8_t *temp_read_data = temp_data;
+    char temp_buff[10]; 
 
     /* check how many bytes are waiting on the uart */
     bytes_available = uart_bytes_available(uart_device);
     if (bytes_available > 0)
     {
-        //uint8_t *temp_read_data = (uint8_t *)calloc(bytes_available, sizeof(uint8_t));
+        uint8_t *temp_read_data = (uint8_t *)calloc(bytes_available, sizeof(uint8_t));
         /* Read all existing data on uart port */
         bytes = uart_read_port(uart_device, temp_read_data, bytes_available);
         if (bytes != bytes_available)
@@ -266,13 +265,10 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
             OS_printf("  NOVATEL_OEM615_ChildProcessReadData: Bytes read != to requested! \n");
 #endif
             status = OS_ERROR;
-            //free(temp_read_data);
+            free(temp_read_data);
         }
         else
         {
-            // Check bytes available < sizeof(temp_data)
-            temp_data[bytes_available + 1] = '\0';
-
 /* search uart data for token signifying start of bestxyza gps data packet */
 #ifdef NOVATEL_OEM615_CFG_DEBUG
             OS_printf(" ALL UART BYTES READ FROM BUFFER: \n");
@@ -282,14 +278,23 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
             }
             OS_printf(" DONE PRINTING ALL UART BYTES READ FROM BUFFER \n");
 #endif
+            for(int i = 0; i < 9; i++)
+            {
+                char tmp_char = (char)temp_read_data[i];
+                temp_buff[i] = tmp_char;
+            }
+            token = strtok_r(&temp_read_data, ",", &saveptr);
+            //token = strtok_r(temp_buff, ",", &saveptr);
+            //temp_data[9] = '\0';
+            token = temp_buff;
 
-            token = strtok_r(temp_read_data, ",", &saveptr);
+            //token = strtok_r(&temp_read_data, ",", &saveptr);
+            //token="#BESTXYZA";
             if ((token != NULL) && (strncmp(token, "#BESTXYZA", 9) == 0))
             {
 #ifdef NOVATEL_OEM615_CFG_DEBUG
                 OS_printf(" DATA TOKEN FOUND = %s\n", token);
 #endif
-
                 NOVATEL_OEM615_ParseBestXYZA(data);
             }
             else if ((token != NULL) && (strncmp(token, "$GPGGA", 6) == 0))
