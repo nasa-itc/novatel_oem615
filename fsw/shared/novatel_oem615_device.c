@@ -250,13 +250,15 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
     int32_t bytes           = 0;
     int32_t bytes_available = 0;
     char   *token;
+    uint8_t temp_data[MAX_GPS_DATA + 1];
+    uint8_t *temp_read_data = temp_data;
     char temp_buff[10]; 
 
     /* check how many bytes are waiting on the uart */
     bytes_available = uart_bytes_available(uart_device);
     if (bytes_available > 0)
     {
-        uint8_t *temp_read_data = (uint8_t *)calloc(bytes_available, sizeof(uint8_t));
+        //uint8_t *temp_read_data = (uint8_t *)calloc(bytes_available, sizeof(uint8_t));
         /* Read all existing data on uart port */
         bytes = uart_read_port(uart_device, temp_read_data, bytes_available);
         if (bytes != bytes_available)
@@ -278,17 +280,18 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
             }
             OS_printf(" DONE PRINTING ALL UART BYTES READ FROM BUFFER \n");
 #endif
-            for(int i = 0; i < 9; i++)
-            {
-                char tmp_char = (char)temp_read_data[i];
-                temp_buff[i] = tmp_char;
-            }
+            OS_printf("temp_read_data = %u\n",temp_read_data);
+            // for(int i = 0; i < 9; i++)
+            // {
+            //     char tmp_char = (char)temp_read_data[i];
+            //     temp_buff[i] = tmp_char;
+            // }
             token = strtok_r((char *)temp_read_data, ",", &saveptr);
             //token = strtok_r(temp_buff, ",", &saveptr);
             //temp_data[9] = '\0';
-            token = temp_buff;
+            //token = temp_buff;
             //token = strtok_r(&temp_read_data, ",", &saveptr);
-            //token="#BESTXYZA";
+            token="#BESTXYZA";
             if ((token != NULL) && (strncmp(token, "#BESTXYZA", 9) == 0))
             {
 #ifdef NOVATEL_OEM615_CFG_DEBUG
@@ -296,14 +299,14 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
 #endif
                 NOVATEL_OEM615_ParseBestXYZA(data);
             }
-            else if ((token != NULL) && (strncmp(token, "$GPGGA", 6) == 0))
-            {
-#ifdef NOVATEL_OEM615_CFG_DEBUG
-                OS_printf(" DATA TOKEN FOUND = %s\n", token);
-#endif
+//             else if ((token != NULL) && (strncmp(token, "$GPGGA", 6) == 0))
+//             {
+// #ifdef NOVATEL_OEM615_CFG_DEBUG
+//                 OS_printf(" DATA TOKEN FOUND = %s\n", token);
+// #endif
 
-                NOVATEL_OEM615_ParseBestGPGGA(data);
-            }
+//                 NOVATEL_OEM615_ParseBestGPGGA(data);
+//             }
             else
             {
 #ifdef NOVATEL_OEM615_CFG_DEBUG
@@ -348,16 +351,24 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
     token = strtok_r(NULL, ",; ", &saveptr); // Sequence #
     token = strtok_r(NULL, ",; ", &saveptr); // % Idle Time
     token = strtok_r(NULL, ",; ", &saveptr); // Time Status
+    char tmp_week[3];
+    for(int i = 0; i < 3; i++)
+    {
+        char temp = (char)saveptr[i];
+        tmp_week[i] = temp;
+    }
+    OS_printf("TEST Weeks: %s\n",tmp_week);
     token = strtok_r(NULL, ",; ", &saveptr); // Week
     if (token != NULL)
-        device_data_struct->Weeks = atol(token);
+        device_data_struct->Weeks = atol(tmp_week);
+        //device_data_struct->Weeks = atol(token);
     token = strtok_r(NULL, ",; ", &saveptr); // Seconds
-    if (token != NULL)
-    {
-        device_data_struct->Fractions       = atof(token);
-        device_data_struct->SecondsIntoWeek = (uint32_t)device_data_struct->Fractions;
-        device_data_struct->Fractions -= device_data_struct->SecondsIntoWeek;
-    }
+    // if (token != NULL)
+    // {
+    //     device_data_struct->Fractions       = atof(token);
+    //     device_data_struct->SecondsIntoWeek = (uint32_t)device_data_struct->Fractions;
+    //     device_data_struct->Fractions -= device_data_struct->SecondsIntoWeek;
+    // }
     token = strtok_r(NULL, ",; ", &saveptr); // Receiver Status
     token = strtok_r(NULL, ",; ", &saveptr); // Reserved
     token = strtok_r(NULL, ",; ", &saveptr); // Receiver s/w Version
@@ -366,28 +377,28 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
     token = strtok_r(NULL, ",; ", &saveptr); // P-sol status
     token = strtok_r(NULL, ",; ", &saveptr); // pos type
     token = strtok_r(NULL, ",; ", &saveptr); // P-X (m)
-    if (token != NULL)
-        device_data_struct->ECEFX = atof(token);
+    //if (token != NULL)
+        //device_data_struct->ECEFX = atof(token);
     token = strtok_r(NULL, ",; ", &saveptr); // P-Y (m)
-    if (token != NULL)
-        device_data_struct->ECEFY = atof(token);
+    //if (token != NULL)
+        //device_data_struct->ECEFY = atof(token);
     token = strtok_r(NULL, ",; ", &saveptr); // P-Z (m)
-    if (token != NULL)
-        device_data_struct->ECEFZ = atof(token);
+    //if (token != NULL)
+        //device_data_struct->ECEFZ = atof(token);
     token = strtok_r(NULL, ",; ", &saveptr); // P-X sigma
     token = strtok_r(NULL, ",; ", &saveptr); // P-Y sigma
     token = strtok_r(NULL, ",; ", &saveptr); // P-Z sigma
     token = strtok_r(NULL, ",; ", &saveptr); // V-sol status
     token = strtok_r(NULL, ",; ", &saveptr); // vel type
     token = strtok_r(NULL, ",; ", &saveptr); // V-X (m/s
-    if (token != NULL)
-        device_data_struct->VelX = atof(token);
+    //if (token != NULL)
+        //device_data_struct->VelX = atof(token);
     token = strtok_r(NULL, ",; ", &saveptr); // V-Y (m/s)
-    if (token != NULL)
-        device_data_struct->VelY = atof(token);
+    //if (token != NULL)
+        //device_data_struct->VelY = atof(token);
     token = strtok_r(NULL, ",; ", &saveptr); // V-Z (m/s)
-    if (token != NULL)
-        device_data_struct->VelZ = atof(token);
+    //if (token != NULL)
+        //device_data_struct->VelZ = atof(token);
 
 #ifdef NOVATEL_OEM615_CFG_DEBUG
     OS_printf("  Weeks = %d\n", device_data_struct->Weeks);
