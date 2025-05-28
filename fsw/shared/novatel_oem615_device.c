@@ -283,11 +283,10 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
                 char tmp_char = (char)temp_read_data[i];
                 temp_buff[i] = tmp_char;
             }
-            token = strtok_r(&temp_read_data, ",", &saveptr);
+            token = strtok_r((char *)temp_read_data, ",", &saveptr);
             //token = strtok_r(temp_buff, ",", &saveptr);
             //temp_data[9] = '\0';
             token = temp_buff;
-
             //token = strtok_r(&temp_read_data, ",", &saveptr);
             //token="#BESTXYZA";
             if ((token != NULL) && (strncmp(token, "#BESTXYZA", 9) == 0))
