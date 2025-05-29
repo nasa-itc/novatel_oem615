@@ -342,41 +342,49 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
     device_data_struct->VelY            = 0.0;
     device_data_struct->VelZ            = 0.0;
     char *token;
+    char *data_values[8];
+    data_values[0] = malloc(8);
+    data_values[1] = malloc(16);
+    data_values[2] = malloc(16);
+    data_values[3] = malloc(16);
+    data_values[4] = malloc(16);
+    data_values[5] = malloc(16);
+    data_values[6] = malloc(16);
+    data_values[7] = malloc(16);
+
 
     token = strtok_r(NULL, ",; ", &saveptr); // Port
     token = strtok_r(NULL, ",; ", &saveptr); // Sequence #
     token = strtok_r(NULL, ",; ", &saveptr); // % Idle Time
     token = strtok_r(NULL, ",; ", &saveptr); // Time Status
-    char tmp_weeks[8];
     int i = 0;
     while(saveptr[i] != ',')
     {
         char temp = (char)saveptr[i];
-        tmp_weeks[i] = temp;
+        data_values[0][i] = temp;
         i++;
     }
-    tmp_weeks[i+1] = '\0';
-    OS_printf("TEST Weeks: %s\n",tmp_weeks);
+    data_values[0][i+1] = '\0';
+    OS_printf("TEST Weeks: %s\n",data_values[0]);
     token = strtok_r(NULL, ",; ", &saveptr); // Week
     if (token != NULL)
-        device_data_struct->Weeks = atol(tmp_weeks);
+        device_data_struct->Weeks = atol(data_values[0]);
         //device_data_struct->Weeks = atol(token);
 
-    char tmp_seconds[16];
     i = 0;
     while(saveptr[i] != ',')
     {
         char temp = (char)saveptr[i];
-        tmp_seconds[i] = temp;
+        data_values[1][i] = temp;
         i++;
     }
-    tmp_seconds[i+1] = '\0';
-    OS_printf("TEST Seconds: %s\n",tmp_seconds);
+    data_values[1][i+1] = '\0';
+    OS_printf("TEST Seconds: %s\n",data_values[1]);
 
     token = strtok_r(NULL, ",; ", &saveptr); // Seconds
     if (token != NULL)
     {
-        device_data_struct->Fractions       = atof(tmp_seconds);
+        device_data_struct->Fractions       = atof(data_values[1]);
         device_data_struct->SecondsIntoWeek = (uint32_t)device_data_struct->Fractions;
         device_data_struct->Fractions -= device_data_struct->SecondsIntoWeek;
     }
@@ -389,49 +397,46 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
     token = strtok_r(NULL, ",; ", &saveptr); // pos type
     
     i = 0;
-    char tmp_ECEFX[16];
     while(saveptr[i] != ',')
     {
         char temp = (char)saveptr[i];
         
-        tmp_ECEFX[i] = temp;
+        data_values[2][i] = temp;
         i++;
     }
-    tmp_ECEFX[i+1] = '\0';
-    OS_printf("TEST ECEFX: %s\n",tmp_ECEFX);
+    data_values[2][i+1] = '\0';
+    OS_printf("TEST ECEFX: %s\n",data_values[2]);
     token = strtok_r(NULL, ",; ", &saveptr); // P-X (m)
     if (token != NULL)
-        device_data_struct->ECEFX = atof(tmp_ECEFX);
+        device_data_struct->ECEFX = atof(data_values[2]);
 
     i = 0;
-    char tmp_ECEFY[16];
     while(saveptr[i] != ',')
     {
         char temp = (char)saveptr[i];
         
-        tmp_ECEFY[i] = temp;
+        data_values[3][i] = temp;
         i++;
     }
-    tmp_ECEFY[i+1] = '\0';
-    OS_printf("TEST ECEFY: %s\n",tmp_ECEFY);
+    data_values[3][i+1] = '\0';
+    OS_printf("TEST ECEFY: %s\n",data_values[3]);
     token = strtok_r(NULL, ",; ", &saveptr); // P-Y (m)
     if (token != NULL)
-        device_data_struct->ECEFY = atof(tmp_ECEFY);
+        device_data_struct->ECEFY = atof(data_values[3]);
 
     i = 0;
-    char tmp_ECEFZ[16];
     while(saveptr[i] != ',')
     {
         char temp = (char)saveptr[i];
         
-        tmp_ECEFZ[i] = temp;
+        data_values[4][i] = temp;
         i++;
     }
-    tmp_ECEFZ[i+1] = '\0';
-    OS_printf("TEST ECEFZ: %s\n",tmp_ECEFZ);  
+    data_values[4][i+1] = '\0';
+    OS_printf("TEST ECEFZ: %s\n",data_values[4]);  
     token = strtok_r(NULL, ",; ", &saveptr); // P-Z (m)
     if (token != NULL)
-        device_data_struct->ECEFZ = atof(tmp_ECEFZ);
+        device_data_struct->ECEFZ = atof(data_values[4]);
     token = strtok_r(NULL, ",; ", &saveptr); // P-X sigma
     token = strtok_r(NULL, ",; ", &saveptr); // P-Y sigma
     token = strtok_r(NULL, ",; ", &saveptr); // P-Z sigma
@@ -439,45 +444,42 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
     token = strtok_r(NULL, ",; ", &saveptr); // vel type
 
     i = 0;
-    char tmp_VELX[16];
     while(saveptr[i] != ',')
     {
         char temp = (char)saveptr[i];
         
-        tmp_VELX[i] = temp;
+        data_values[5][i] = temp;
         i++;
     }
-    tmp_VELX[i+1] = '\0';
+    data_values[5][i+1] = '\0';
     token = strtok_r(NULL, ",; ", &saveptr); // V-X (m/s
     if (token != NULL)
-        device_data_struct->VelX = atof(tmp_VELX);
-    
+        device_data_struct->VelX = atof(data_values[5]);
+
     i = 0;
-    char tmp_VELY[16];
     while(saveptr[i] != ',')
     {
         char temp = (char)saveptr[i];
         
-        tmp_VELY[i] = temp;
+        data_values[6][i] = temp;
         i++;
     }
-    tmp_VELY[i+1] = '\0';
+    data_values[6][i+1] = '\0';
     token = strtok_r(NULL, ",; ", &saveptr); // V-Y (m/s)
     if (token != NULL)
-        device_data_struct->VelY = atof(tmp_VELY);
+        device_data_struct->VelY = atof(data_values[6]);
 
     i = 0;
-    char tmp_VELZ[16];
     while(saveptr[i] != ',')
     {
         char temp = (char)saveptr[i];
-        tmp_VELZ[i] = temp;
+        data_values[7][i] = temp;
         i++;
     }
-    tmp_VELZ[i+1] = '\0';
+    data_values[7][i+1] = '\0';
     token = strtok_r(NULL, ",; ", &saveptr); // V-Z (m/s)
     if (token != NULL)
-        device_data_struct->VelZ = atof(tmp_VELZ);
+        device_data_struct->VelZ = atof(data_values[7]);
 
 #ifdef NOVATEL_OEM615_CFG_DEBUG
     OS_printf("  Weeks = %d\n", device_data_struct->Weeks);
