@@ -342,47 +342,24 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
     device_data_struct->VelY            = 0.0;
     device_data_struct->VelZ            = 0.0;
     char *token;
-    char *data_values[8];
-    data_values[0] = malloc(8);
-    data_values[1] = malloc(16);
-    data_values[2] = malloc(16);
-    data_values[3] = malloc(16);
-    data_values[4] = malloc(16);
-    data_values[5] = malloc(16);
-    data_values[6] = malloc(16);
-    data_values[7] = malloc(16);
-
+    char temp_buff[16];
 
     token = strtok_r(NULL, ",; ", &saveptr); // Port
     token = strtok_r(NULL, ",; ", &saveptr); // Sequence #
     token = strtok_r(NULL, ",; ", &saveptr); // % Idle Time
     token = strtok_r(NULL, ",; ", &saveptr); // Time Status
     int i = 0;
-    while(saveptr[i] != ',')
-    {
-        char temp = (char)saveptr[i];
-        data_values[0][i] = temp;
-        i++;
-    }
-    data_values[0][i+1] = '\0';
+
+    ParseString(temp_buff, saveptr);
     token = strtok_r(NULL, ",; ", &saveptr); // Week
     if (token != NULL)
-        device_data_struct->Weeks = atol(data_values[0]);
-        //device_data_struct->Weeks = atol(token);
+        device_data_struct->Weeks = atol(temp_buff);
 
-    i = 0;
-    while(saveptr[i] != ',')
-    {
-        char temp = (char)saveptr[i];
-        data_values[1][i] = temp;
-        i++;
-    }
-    data_values[1][i+1] = '\0';
-
+    ParseString(temp_buff, saveptr);
     token = strtok_r(NULL, ",; ", &saveptr); // Seconds
     if (token != NULL)
     {
-        device_data_struct->Fractions       = atof(data_values[1]);
+        device_data_struct->Fractions       = atof(temp_buff);
         device_data_struct->SecondsIntoWeek = (uint32_t)device_data_struct->Fractions;
         device_data_struct->Fractions -= device_data_struct->SecondsIntoWeek;
     }
@@ -394,89 +371,42 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
     token = strtok_r(NULL, ",; ", &saveptr); // P-sol status
     token = strtok_r(NULL, ",; ", &saveptr); // pos type
     
-    i = 0;
-    while(saveptr[i] != ',')
-    {
-        char temp = (char)saveptr[i];
-        
-        data_values[2][i] = temp;
-        i++;
-    }
-    data_values[2][i+1] = '\0';
+    ParseString(temp_buff, saveptr);
     token = strtok_r(NULL, ",; ", &saveptr); // P-X (m)
     if (token != NULL)
-        device_data_struct->ECEFX = atof(data_values[2]);
+        device_data_struct->ECEFX = atof(temp_buff);
 
-    i = 0;
-    while(saveptr[i] != ',')
-    {
-        char temp = (char)saveptr[i];
-        
-        data_values[3][i] = temp;
-        i++;
-    }
-    data_values[3][i+1] = '\0';
+    ParseString(temp_buff, saveptr);
     token = strtok_r(NULL, ",; ", &saveptr); // P-Y (m)
     if (token != NULL)
-        device_data_struct->ECEFY = atof(data_values[3]);
-
-    i = 0;
-    while(saveptr[i] != ',')
-    {
-        char temp = (char)saveptr[i];
-        
-        data_values[4][i] = temp;
-        i++;
-    }
-    data_values[4][i+1] = '\0';
+        device_data_struct->ECEFY = atof(temp_buff);
+    
+    char newtmpbuff[16];
+    ParseString(temp_buff, saveptr);
     token = strtok_r(NULL, ",; ", &saveptr); // P-Z (m)
     if (token != NULL)
-        device_data_struct->ECEFZ = atof(data_values[4]);
+        device_data_struct->ECEFZ = atof(temp_buff);
     token = strtok_r(NULL, ",; ", &saveptr); // P-X sigma
     token = strtok_r(NULL, ",; ", &saveptr); // P-Y sigma
     token = strtok_r(NULL, ",; ", &saveptr); // P-Z sigma
     token = strtok_r(NULL, ",; ", &saveptr); // V-sol status
     token = strtok_r(NULL, ",; ", &saveptr); // vel type
 
-    i = 0;
-    while(saveptr[i] != ',')
-    {
-        char temp = (char)saveptr[i];
-        
-        data_values[5][i] = temp;
-        i++;
-    }
-    data_values[5][i+1] = '\0';
+    ParseString(temp_buff, saveptr);
     token = strtok_r(NULL, ",; ", &saveptr); // V-X (m/s
     if (token != NULL)
-        device_data_struct->VelX = atof(data_values[5]);
+        device_data_struct->VelX = atof(temp_buff);
 
-    i = 0;
-    while(saveptr[i] != ',')
-    {
-        char temp = (char)saveptr[i];
-        
-        data_values[6][i] = temp;
-        i++;
-    }
-    data_values[6][i+1] = '\0';
+    ParseString(temp_buff, saveptr);
     token = strtok_r(NULL, ",; ", &saveptr); // V-Y (m/s)
     if (token != NULL)
-        device_data_struct->VelY = atof(data_values[6]);
+        device_data_struct->VelY = atof(temp_buff);
 
-    i = 0;
-    while(saveptr[i] != ',')
-    {
-        char temp = (char)saveptr[i];
-        data_values[7][i] = temp;
-        i++;
-    }
-    data_values[7][i+1] = '\0';
+    ParseString(temp_buff, saveptr);
     token = strtok_r(NULL, ",; ", &saveptr); // V-Z (m/s)
     if (token != NULL)
-        device_data_struct->VelZ = atof(data_values[7]);
-    for(int i = 0; i < 8; i++)
-        free(data_values[i]);
+        device_data_struct->VelZ = atof(temp_buff);
+
 
 #ifdef NOVATEL_OEM615_CFG_DEBUG
     OS_printf("  Weeks = %d\n", device_data_struct->Weeks);
@@ -636,4 +566,22 @@ void NOVATEL_OEM615_ParseBestGPGGA(NOVATEL_OEM615_Device_Data_tlm_t *device_data
     device_data_struct->lat = data.latitude;
     device_data_struct->lon = data.longitude;
     device_data_struct->alt = data.altitude;
+}
+
+void ParseString(char* a, char *b)
+{
+
+    for(int j = 0; j < 16; j++)
+    {
+        a[j] = '\0';
+    }
+
+    int i = 0;
+    while(b[i] != ',')
+    {
+        char temp = (char)b[i];
+        a[i] = temp;
+        i++;
+    }
+    a[i+1] = '\0';
 }

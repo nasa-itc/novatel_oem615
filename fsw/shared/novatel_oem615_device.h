@@ -101,5 +101,6 @@ int32_t NOVATEL_OEM615_RequestData(uart_info_t *uart_device, NOVATEL_OEM615_Devi
 int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OEM615_Device_Data_tlm_t *data);
 void    NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_struct);
 void    NOVATEL_OEM615_ParseBestGPGGA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_struct);
+void    ParseString(char * a, char *b);
 
 #endif /* _NOVATEL_OEM615_DEVICE_H_ */
