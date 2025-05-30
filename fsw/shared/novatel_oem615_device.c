@@ -278,7 +278,7 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
             }
             OS_printf(" DONE PRINTING ALL UART BYTES READ FROM BUFFER \n");
 #endif
-            OS_printf("temp_read_data = %s\n",temp_read_data);
+            //OS_printf("temp_read_data = %s\n",temp_read_data);
             int i = 0;
             while(temp_read_data[i] != ',')
             {
@@ -365,7 +365,6 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
         i++;
     }
     data_values[0][i+1] = '\0';
-    OS_printf("TEST Weeks: %s\n",data_values[0]);
     token = strtok_r(NULL, ",; ", &saveptr); // Week
     if (token != NULL)
         device_data_struct->Weeks = atol(data_values[0]);
@@ -379,7 +378,6 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
         i++;
     }
     data_values[1][i+1] = '\0';
-    OS_printf("TEST Seconds: %s\n",data_values[1]);
 
     token = strtok_r(NULL, ",; ", &saveptr); // Seconds
     if (token != NULL)
@@ -405,7 +403,6 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
         i++;
     }
     data_values[2][i+1] = '\0';
-    OS_printf("TEST ECEFX: %s\n",data_values[2]);
     token = strtok_r(NULL, ",; ", &saveptr); // P-X (m)
     if (token != NULL)
         device_data_struct->ECEFX = atof(data_values[2]);
@@ -419,7 +416,6 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
         i++;
     }
     data_values[3][i+1] = '\0';
-    OS_printf("TEST ECEFY: %s\n",data_values[3]);
     token = strtok_r(NULL, ",; ", &saveptr); // P-Y (m)
     if (token != NULL)
         device_data_struct->ECEFY = atof(data_values[3]);
@@ -433,7 +429,6 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
         i++;
     }
     data_values[4][i+1] = '\0';
-    OS_printf("TEST ECEFZ: %s\n",data_values[4]);  
     token = strtok_r(NULL, ",; ", &saveptr); // P-Z (m)
     if (token != NULL)
         device_data_struct->ECEFZ = atof(data_values[4]);
@@ -480,6 +475,8 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
     token = strtok_r(NULL, ",; ", &saveptr); // V-Z (m/s)
     if (token != NULL)
         device_data_struct->VelZ = atof(data_values[7]);
+    for(int i = 0; i < 8; i++)
+        free(data_values[i]);
 
 #ifdef NOVATEL_OEM615_CFG_DEBUG
     OS_printf("  Weeks = %d\n", device_data_struct->Weeks);
@@ -510,62 +507,111 @@ void NOVATEL_OEM615_ParseBestGPGGA(NOVATEL_OEM615_Device_Data_tlm_t *device_data
     char        *token;
     GPGGA_Data_t data;
 
+    char *data_values[14];
+    data_values[0] = malloc(16);
+    data_values[1] = malloc(16);
+    data_values[2] = malloc(16);
+    data_values[3] = malloc(16);
+    data_values[4] = malloc(16);
+    data_values[5] = malloc(16);
+    data_values[6] = malloc(16);
+    data_values[7] = malloc(16);
+    data_values[8] = malloc(16);
+    data_values[9] = malloc(16);
+    data_values[10] = malloc(16);
+    data_values[11] = malloc(16);
+    data_values[12] = malloc(16);
+    data_values[13] = malloc(16);
+    data_values[14] = malloc(16);
+
+
     // Parse each field
     int field = 0;
-    while ((token = strtok_r(NULL, ",", &saveptr)) != NULL)
+    int i = 0;
+    while(saveptr[i] != ',')
+    {
+        char temp = (char)saveptr[i];
+        data_values[0][i] = temp;
+        i++;
+    }
+    while ((token = strtok_r(NULL, ",", &saveptr)) != NULL && (field < 14))
     {
         field++;
+        i = 0;
+        while(saveptr[i] != ',')
+        {
+            char temp = (char)saveptr[i];
+            data_values[field][i] = temp;
+            i++;
+        }
         switch (field)
         {
             case 1: // UTC Time
-                strncpy(data.utc_time, token, sizeof(data.utc_time) - 1);
+                strncpy(data.utc_time, data_values[0], sizeof(data.utc_time) - 1);
+                //strncpy(data.utc_time, token, sizeof(data.utc_time) - 1);
                 data.utc_time[sizeof(data.utc_time) - 1] = '\0';
                 break;
             case 2: // Latitude
-                data.latitude = atof(token);
+                data.latitude = atof(data_values[1]);
+                //data.latitude = atof(token);
                 break;
             case 3: // N/S Indicator
-                data.lat_direction = token[0];
+                data.lat_direction = data_values[2][0];
+                //data.lat_direction = token[0];
                 break;
             case 4: // Longitude
-                data.longitude = atof(token);
+                data.longitude = atof(data_values[3]);
+                //data.longitude = atof(token);
                 break;
             case 5: // E/W Indicator
-                data.lon_direction = token[0];
+                data.lon_direction = data_values[4][0];
+                //data.lon_direction = token[0];
                 break;
             case 6: // Position Fix Indicator
-                data.fix_quality = atoi(token);
+                data.fix_quality = atoi(data_values[5]);
+                //data.fix_quality = atoi(token);
                 break;
             case 7: // Satellites Used
-                data.num_satellites = atoi(token);
+                data.num_satellites = atoi(data_values[6]);
+                //data.num_satellites = atoi(token);
                 break;
             case 8: // HDOP
-                data.hdop = atof(token);
+                data.hdop = atof(data_values[7]);
+                //data.hdop = atof(token);
                 break;
             case 9: // MSL Altitude
-                data.altitude = atof(token);
+                data.altitude = atof(data_values[8]);
+                //data.altitude = atof(token);
                 break;
             case 10: // Units (Altitude)
-                data.altitude_units = token[0];
+                data.altitude_units = data_values[9][0];
+                //data.altitude_units = token[0];
                 break;
             case 11: // Geoid Separation
-                data.geoid_separation = atof(token);
+                data.geoid_separation = atof(data_values[10]);
+                //data.geoid_separation = atof(token);
                 break;
             case 12: // Units (Geoid Separation)
-                data.geoid_units = token[0];
+                data.geoid_units = data_values[11][0];
+                //data.geoid_units = token[0];
                 break;
             case 13: // Age of Diff. Corr.
-                strncpy(data.dgps_age, token, sizeof(data.dgps_age) - 1);
+                //strncpy(data.dgps_age, token, sizeof(data.dgps_age) - 1);
+                strncpy(data.dgps_age, data_values[12], sizeof(data.dgps_age) - 1);
                 data.dgps_age[sizeof(data.dgps_age) - 1] = '\0';
                 break;
             case 14: // Diff. Ref. Station ID
-                strncpy(data.dgps_station_id, token, sizeof(data.dgps_station_id) - 1);
+                //strncpy(data.dgps_station_id, token, sizeof(data.dgps_station_id) - 1);
+                strncpy(data.dgps_station_id, data_values[13], sizeof(data.dgps_station_id) - 1);
                 data.dgps_station_id[sizeof(data.dgps_station_id) - 1] = '\0';
                 break;
             default:
                 break;
         }
     }
+
+    for(int i = 0; i < 14; i++)
+        free(data_values[i]);
 
     // Convert latitude and longitude from NMEA format to decimal degrees
     // NMEA latitude format is ddmm.mmmm
