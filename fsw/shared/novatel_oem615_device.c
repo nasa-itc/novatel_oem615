@@ -348,7 +348,6 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
     token = strtok_r(NULL, ",; ", &saveptr); // Sequence #
     token = strtok_r(NULL, ",; ", &saveptr); // % Idle Time
     token = strtok_r(NULL, ",; ", &saveptr); // Time Status
-    int i = 0;
 
     ParseString(temp_buff, saveptr);
     token = strtok_r(NULL, ",; ", &saveptr); // Week
@@ -381,7 +380,6 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
     if (token != NULL)
         device_data_struct->ECEFY = atof(temp_buff);
     
-    char newtmpbuff[16];
     ParseString(temp_buff, saveptr);
     token = strtok_r(NULL, ",; ", &saveptr); // P-Z (m)
     if (token != NULL)
@@ -437,29 +435,14 @@ void NOVATEL_OEM615_ParseBestGPGGA(NOVATEL_OEM615_Device_Data_tlm_t *device_data
     char        *token;
     GPGGA_Data_t data;
 
-    char data_values[14][16];
     char temp_buff[16];
 
     // Parse each field
     int field = 0;
-    int i = 0;
-    // while(saveptr[i] != ',')
-    // {
-    //     char temp = (char)saveptr[i];
-    //     data_values[0][i] = temp;
-    //     i++;
-    // }
     ParseString(temp_buff, saveptr);
     while ((token = strtok_r(NULL, ",", &saveptr)) != NULL && (field < 14))
     {
         field++;
-        i = 0;
-        // while(saveptr[i] != ',')
-        // {
-        //     char temp = (char)saveptr[i];
-        //     data_values[field][i] = temp;
-        //     i++;
-        // }
         switch (field)
         {
             case 1: // UTC Time
