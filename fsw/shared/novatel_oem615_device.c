@@ -447,60 +447,46 @@ void NOVATEL_OEM615_ParseBestGPGGA(NOVATEL_OEM615_Device_Data_tlm_t *device_data
         {
             case 1: // UTC Time
                 strncpy(data.utc_time, temp_buff, sizeof(data.utc_time) - 1);
-                //strncpy(data.utc_time, token, sizeof(data.utc_time) - 1);
                 data.utc_time[sizeof(data.utc_time) - 1] = '\0';
                 break;
             case 2: // Latitude
                 data.latitude = atof(temp_buff);
-                //data.latitude = atof(token);
                 break;
             case 3: // N/S Indicator
                 data.lat_direction = temp_buff[0];
-                //data.lat_direction = token[0];
                 break;
             case 4: // Longitude
                 data.longitude = atof(temp_buff);
-                //data.longitude = atof(token);
                 break;
             case 5: // E/W Indicator
                 data.lon_direction = temp_buff[0];
-                //data.lon_direction = token[0];
                 break;
             case 6: // Position Fix Indicator
                 data.fix_quality = atoi(temp_buff);
-                //data.fix_quality = atoi(token);
                 break;
             case 7: // Satellites Used
                 data.num_satellites = atoi(temp_buff);
-                //data.num_satellites = atoi(token);
                 break;
             case 8: // HDOP
                 data.hdop = atof(temp_buff);
-                //data.hdop = atof(token);
                 break;
             case 9: // MSL Altitude
                 data.altitude = atof(temp_buff);
-                //data.altitude = atof(token);
                 break;
             case 10: // Units (Altitude)
                 data.altitude_units = temp_buff[0];
-                //data.altitude_units = token[0];
                 break;
             case 11: // Geoid Separation
                 data.geoid_separation = atof(temp_buff);
-                //data.geoid_separation = atof(token);
                 break;
             case 12: // Units (Geoid Separation)
                 data.geoid_units = temp_buff[0];
-                //data.geoid_units = token[0];
                 break;
             case 13: // Age of Diff. Corr.
-                //strncpy(data.dgps_age, token, sizeof(data.dgps_age) - 1);
                 strncpy(data.dgps_age, temp_buff, sizeof(data.dgps_age) - 1);
                 data.dgps_age[sizeof(data.dgps_age) - 1] = '\0';
                 break;
             case 14: // Diff. Ref. Station ID
-                //strncpy(data.dgps_station_id, token, sizeof(data.dgps_station_id) - 1);
                 strncpy(data.dgps_station_id, temp_buff, sizeof(data.dgps_station_id) - 1);
                 data.dgps_station_id[sizeof(data.dgps_station_id) - 1] = '\0';
                 break;
