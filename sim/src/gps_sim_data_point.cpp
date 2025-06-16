@@ -55,7 +55,7 @@ namespace Nos3
     {
         try {
             std::string valid_key;
-            valid_key.append("SC[").append(std::to_string(_sc)).append("].AC.GPS[").append(std::to_string(_gps)).append("].");
+            valid_key.append("SC[").append(std::to_string(_sc)).append("].GPS[").append(std::to_string(_gps)).append("].");
             std::string rollover_key(valid_key), week_key(valid_key), sec_key(valid_key), posn_key(valid_key), veln_key(valid_key), posw_key(valid_key), velw_key(valid_key), lng_key(valid_key), lat_key(valid_key), alt_key(valid_key);
             valid_key.append("Valid");
             rollover_key.append("Rollover");
