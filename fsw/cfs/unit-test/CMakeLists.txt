@@ -17,13 +17,13 @@
 #    The primary objective is to get line/path coverage on the FSW 
 #    code units.
 #
- 
+
 # Use the UT assert public API, and allow direct
 # inclusion of source files that are normally private
 include_directories(${PROJECT_SOURCE_DIR}/fsw/src)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc)
 include_directories(${hwlib_MISSION_DIR}/fsw/public_inc)
-
+include_directories(${PROJECT_SOURCE_DIR}/../../../../fsw/osal/ut_assert/inc)
 
 # Add a coverage test executable called "novatel_oem615-ALL" that 
 # covers all of the functions in novatel_oem615_app.  
@@ -35,12 +35,6 @@ include_directories(${hwlib_MISSION_DIR}/fsw/public_inc)
 add_cfe_coverage_test(novatel_oem615 ALL 
     "coveragetest/coveragetest_novatel_oem615_app.c"
     "../src/novatel_oem615_app.c"
-    "../src/novatel_oem615_device.c"
-    "../../../../fsw/apps/hwlib/fsw/stubs/libuart.c"
+    "../../shared/novatel_oem615_device.c"
+    "../../../../../fsw/apps/hwlib/fsw/stubs/libuart.c"
 )
-
-# The novatel_oem615 uses library functions provided by novatel_oem615_lib so must be linked
-# with the novatel_oem615_lib stub library (this is mainly just an example of how this 
-# can be done).
-#add_cfe_coverage_dependency(novatel_oem615 ALL novatel_oem615_lib)
-
