@@ -10,6 +10,7 @@
 ** Include Files
 */
 #include "novatel_oem615_device.h"
+#include <string.h>
 
 static char *saveptr;
 
@@ -174,7 +175,6 @@ int32_t NOVATEL_OEM615_RequestData(uart_info_t *uart_device, NOVATEL_OEM615_Devi
     int32_t status          = OS_SUCCESS;
     int32_t bytes           = 0;
     int32_t bytes_available = 0;
-    char   *token;
 
     if (status == OS_SUCCESS)
     {
@@ -182,7 +182,7 @@ int32_t NOVATEL_OEM615_RequestData(uart_info_t *uart_device, NOVATEL_OEM615_Devi
         bytes_available = uart_bytes_available(uart_device);
         if (bytes_available > 0)
         {
-            uint8_t *temp_read_data = (uint8_t *)calloc(bytes_available, sizeof(uint8_t));
+            uint8_t *temp_read_data = (uint8_t *)calloc(bytes_available+1, sizeof(uint8_t));
             /* Read all existing data on uart port */
             bytes = uart_read_port(uart_device, temp_read_data, bytes_available);
             if (bytes != bytes_available)
@@ -204,12 +204,16 @@ int32_t NOVATEL_OEM615_RequestData(uart_info_t *uart_device, NOVATEL_OEM615_Devi
                 }
                 OS_printf(" DONE PRINTING ALL UART BYTES READ FROM BUFFER \n");
 #endif
-                token = strtok_r((char *)temp_read_data, ",", &saveptr);
-                if ((token != NULL) && (strncmp(token, "#BESTXYZA", 9) == 0))
+
+                temp_read_data[bytes] = '\0';
+                char* casted_trd = (char *)temp_read_data;
+
+                strtok_r(casted_trd, ",", &saveptr);
+                if ((casted_trd != NULL) && (strncmp(casted_trd, "#BESTXYZA", 9) == 0))
                 {
-#ifdef NOVATEL_OEM615_CFG_DEBUG
-                    OS_printf(" DATA TOKEN FOUND = %s\n", token);
-#endif
+// #ifdef NOVATEL_OEM615_CFG_DEBUG
+//                     OS_printf(" DATA TOKEN FOUND = %s\n", token);
+// #endif
 
                     NOVATEL_OEM615_ParseBestXYZA(data);
                 }
@@ -249,7 +253,7 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
     int32_t status          = OS_SUCCESS;
     int32_t bytes           = 0;
     int32_t bytes_available = 0;
-    char   *token;
+    char   *token = 0x0;
 
     /* check how many bytes are waiting on the uart */
     bytes_available = uart_bytes_available(uart_device);
@@ -332,16 +336,19 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
     device_data_struct->VelX            = 0.0;
     device_data_struct->VelY            = 0.0;
     device_data_struct->VelZ            = 0.0;
-    char *token;
+    char *token = 0x0;
 
     token = strtok_r(NULL, ",; ", &saveptr); // Port
     token = strtok_r(NULL, ",; ", &saveptr); // Sequence #
     token = strtok_r(NULL, ",; ", &saveptr); // % Idle Time
     token = strtok_r(NULL, ",; ", &saveptr); // Time Status
-    token = strtok_r(NULL, ",; ", &saveptr); // Week
+
+    token = saveptr;
+    strtok_r(token, ",; ", &saveptr); // Week
     if (token != NULL)
         device_data_struct->Weeks = atol(token);
-    token = strtok_r(NULL, ",; ", &saveptr); // Seconds
+    token = saveptr;
+    strtok_r(token, ",; ", &saveptr); // Seconds
     if (token != NULL)
     {
         device_data_struct->Fractions       = atof(token);
@@ -355,13 +362,19 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
     // Now the data
     token = strtok_r(NULL, ",; ", &saveptr); // P-sol status
     token = strtok_r(NULL, ",; ", &saveptr); // pos type
-    token = strtok_r(NULL, ",; ", &saveptr); // P-X (m)
+
+    token = saveptr;
+    strtok_r(token, ",; ", &saveptr); // P-X (m)
     if (token != NULL)
         device_data_struct->ECEFX = atof(token);
-    token = strtok_r(NULL, ",; ", &saveptr); // P-Y (m)
+    
+    token = saveptr;
+    strtok_r(token, ",; ", &saveptr); // P-Y (m)
     if (token != NULL)
         device_data_struct->ECEFY = atof(token);
-    token = strtok_r(NULL, ",; ", &saveptr); // P-Z (m)
+    
+    token = saveptr;
+    strtok_r(token, ",; ", &saveptr); // P-Z (m)
     if (token != NULL)
         device_data_struct->ECEFZ = atof(token);
     token = strtok_r(NULL, ",; ", &saveptr); // P-X sigma
@@ -369,13 +382,18 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
     token = strtok_r(NULL, ",; ", &saveptr); // P-Z sigma
     token = strtok_r(NULL, ",; ", &saveptr); // V-sol status
     token = strtok_r(NULL, ",; ", &saveptr); // vel type
-    token = strtok_r(NULL, ",; ", &saveptr); // V-X (m/s
+    token = saveptr;
+    strtok_r(token, ",; ", &saveptr); // V-X (m/s
     if (token != NULL)
         device_data_struct->VelX = atof(token);
-    token = strtok_r(NULL, ",; ", &saveptr); // V-Y (m/s)
+    
+    token = saveptr;
+    strtok_r(token, ",; ", &saveptr); // V-Y (m/s)
     if (token != NULL)
         device_data_struct->VelY = atof(token);
-    token = strtok_r(NULL, ",; ", &saveptr); // V-Z (m/s)
+    
+    token = saveptr;
+    strtok_r(token, ",; ", &saveptr); // V-Z (m/s)
     if (token != NULL)
         device_data_struct->VelZ = atof(token);
 
