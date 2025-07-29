@@ -30,10 +30,10 @@ Response formats are as follows:
   - uint16, 0xBEEF
 * Novatel Commands (ASCII)
   - LOG COM [log type] ONTIME [period options]
-    * [log types] = [BESTXYZA, GPGGAA, RANGECMPA, BESTXYZB, RANGECMPB]
+    * [log types] = [BESTXYZA, GPGGA, RANGECMPA, BESTXYZB, RANGECMPB]
     * [period options] = [ONCE, 0.05, 0.1, 0.2, 0.25, 0.5]
   - UNLOG COM [log type]
-    * [log types] = [BESTXYZA, GPGGAA, RANGECMPA, BESTXYZB, RANGECMPB]
+    * [log types] = [BESTXYZA, GPGGA, RANGECMPA, BESTXYZB, RANGECMPB]
   - UNLOGALL
   - SERIALCONFIG
 

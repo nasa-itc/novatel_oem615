@@ -90,7 +90,7 @@ namespace Nos3
             std::bind(&GPSSimHardwareModelOEM615::uart_read_callback, this, std::placeholders::_1, std::placeholders::_2));
 
         _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("BESTXYZA", &GPSSimHardwareModelOEM615::get_bestxyza_response));
-        _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("GPGGAA", &GPSSimHardwareModelOEM615::get_gpggaa_response));
+        _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("GPGGA", &GPSSimHardwareModelOEM615::get_gpgga_response));
         _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("RANGECMPA", &GPSSimHardwareModelOEM615::get_rangecmpa_response));
         _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("BESTXYZB", &GPSSimHardwareModelOEM615::get_bestxyzb_response));
         _get_log_data_map.insert(std::map<std::string, get_log_data_func>::value_type("RANGECMPB", &GPSSimHardwareModelOEM615::get_rangecmpb_response));
@@ -98,6 +98,7 @@ namespace Nos3
         // in the firmware of the STF-1 NovAtel OEM615 - Remove me and make me a configuration option and/or out of band commanding option
         _periodic_logs.insert(std::map<std::string, boost::tuple<double, double>>::value_type("RANGECMPA", boost::tuple<double, double>(_absolute_start_time + 10.0, 1.0)));
         _periodic_logs.insert(std::map<std::string, boost::tuple<double, double>>::value_type("BESTXYZA", boost::tuple<double, double>(_absolute_start_time + 10.0, 1.0)));
+        _periodic_logs.insert(std::map<std::string, boost::tuple<double, double>>::value_type("GPGGA", boost::tuple<double, double>(_absolute_start_time + 10.0, 1.0)));
     }
 
     GPSSimHardwareModelOEM615::~GPSSimHardwareModelOEM615(void)
@@ -108,144 +109,23 @@ namespace Nos3
     /*************************************************************************
      * Private helper methods
      *************************************************************************/
-/*
     void GPSSimHardwareModelOEM615::uart_read_callback(const uint8_t *buf, size_t len)
     {
         // Get the data out of the message bytes - Hardware independent
         std::vector<uint8_t> in_data(buf, buf + len);
+        std::vector<uint8_t> out_data;
 
         sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  REQUEST %s",
             SimIHardwareModel::uint8_vector_to_hex_string(in_data).c_str()); // log data in a man readable format
 
         // Get the hardware response for the request - Hardware and algorithm dependent
-        std::vector<uint8_t> out_data = determine_response_for_request(in_data);
+        determine_response_for_request(in_data, out_data);
 
         // Ship the message bytes off (we're done!) - Hardware independent
         sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  REPLY   %s\n",
             SimIHardwareModel::uint8_vector_to_hex_string(out_data).c_str()); // log data in a man readable format
 
         _uart_connection->write(&out_data[0], out_data.size());
-    }
-*/
-
-    void GPSSimHardwareModelOEM615::uart_read_callback(const uint8_t *buf, size_t len)
-    {
-        std::vector<uint8_t> out_data; 
-        std::uint8_t valid = NOVATEL_OEM615_SIM_SUCCESS;
-
-        // Retrieve data and log in man readable format
-        std::vector<uint8_t> in_data(buf, buf + len);
-        sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  REQUEST %s",
-            SimIHardwareModel::uint8_vector_to_hex_string(in_data).c_str());
-
-        // Check simulator is enabled
-        if (_enabled != NOVATEL_OEM615_SIM_SUCCESS)
-        {
-            sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  Novatel_oem615 sim disabled!");
-            valid = NOVATEL_OEM615_SIM_ERROR;
-        }
-        else
-        {
-            // Check if generic command using dead header / beef trailer (NOOP, Request HK, Request Data)
-            if (in_data.size() == 9 && ((in_data[0] == 0xDE) && (in_data[1] ==0xAD)))
-            {
-                // Check trailer - 0xBEEF
-                if ((in_data[7] != 0xBE) || (in_data[8] !=0xEF))
-                {
-                    sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  Trailer incorrect!");
-                    valid = NOVATEL_OEM615_SIM_ERROR;
-                }
-                else
-                {
-                    // Increment count as valid command format received
-                    _count++;
-                }
-                if (valid == NOVATEL_OEM615_SIM_SUCCESS)
-                {   
-                    // Process command
-                    switch (in_data[2])
-                    {
-                        case 0:
-                            // NOOP
-                            sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  NOOP command received!");
-                            break;
-
-                        case 1:
-                            // Request HK
-                            sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  Send HK command received!");
-                            create_novatel_oem615_hk(out_data);
-                            break;
-
-                        case 2:
-                            // Request data
-                            sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  Send data command received!");
-                            create_novatel_oem615_data(out_data);
-                            break;
-
-                        default:
-                            // Unused command code
-                            valid = NOVATEL_OEM615_SIM_ERROR;
-                            sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  Unused command %d received!", in_data[2]);
-                            break;
-                    }
-                }
-            }
-            // Otherwise, check for NOVATEL_OEM615 specific command
-            else
-            {
-
-                // Get the hardware response for the request - Hardware and algorithm dependent
-                valid = determine_response_for_request(in_data, out_data);
-            }
-        }
-
-        // Increment count and echo command since format valid
-        if (valid == NOVATEL_OEM615_SIM_SUCCESS)
-        {
-            _count++;
-            _uart_connection->write(&in_data[0], in_data.size());
-
-            // Send response if existing
-            if (out_data.size() > 0)
-            {
-                sim_logger->debug("GPSSimHardwareModelOEM615::uart_read_callback:  REPLY %s",
-                    SimIHardwareModel::uint8_vector_to_hex_string(out_data).c_str());
-                _uart_connection->write(&out_data[0], out_data.size());
-            }
-        }
-    }
-
-    // Custom function to prepare the Novatel_oem615 HK telemetry 
-    void GPSSimHardwareModelOEM615::create_novatel_oem615_hk(std::vector<uint8_t>& out_data)
-    {
-        // Prepare data size 
-        out_data.resize(16, 0x00);
-
-        // Streaming data header - 0xDEAD 
-        out_data[0] = 0xDE;
-        out_data[1] = 0xAD;
-        
-        // Sequence count 
-        out_data[2] = (_count >> 24) & 0x000000FF; 
-        out_data[3] = (_count >> 16) & 0x000000FF; 
-        out_data[4] = (_count >>  8) & 0x000000FF; 
-        out_data[5] =  _count & 0x000000FF;
-        
-        // Configuration 
-        out_data[6] = (_config >> 24) & 0x000000FF; 
-        out_data[7] = (_config >> 16) & 0x000000FF; 
-        out_data[8] = (_config >>  8) & 0x000000FF; 
-        out_data[9] =  _config & 0x000000FF;
-
-        // Device Status 
-        out_data[10] = (_status >> 24) & 0x000000FF; 
-        out_data[11] = (_status >> 16) & 0x000000FF; 
-        out_data[12] = (_status >>  8) & 0x000000FF; 
-        out_data[13] =  _status & 0x000000FF;
-
-        // Streaming data trailer - 0xBEEF 
-        out_data[14] = 0xBE;
-        out_data[15] = 0xEF;
     }
 
     void GPSSimHardwareModelOEM615::create_novatel_oem615_data(std::vector<uint8_t>& out_data)
@@ -395,25 +275,29 @@ namespace Nos3
             boost::dynamic_pointer_cast<GPSSimDataPoint>(_sim_data_provider->get_data_point());
 
         std::vector<uint8_t> data;
+        time = time;
 
-        double abs_time = _absolute_start_time + (double(time * _sim_microseconds_per_tick)) / 1000000.0;
+        // Periodic logging is currently disabled, seemed in consistent on whether it was workinn correctly?
+        // double abs_time = _absolute_start_time + (double(time * _sim_microseconds_per_tick)) / 1000000.0;
 
         for (std::map<std::string, boost::tuple<double, double>>::iterator it = _periodic_logs.begin(); it != _periodic_logs.end(); it++) {
-            boost::tuple<double, double> value = it->second;
-            double prev_time = boost::tuples::get<0>(value);
-            double period = boost::tuples::get<1>(value);
-            double next_time = prev_time + period - (_sim_microseconds_per_tick / 1000000.0) / 2; // within half a tick time period
-            if (next_time < abs_time) { // Time to send more data
-                it->second = boost::tuple<double, double>(abs_time, period);
-                std::map<std::string, get_log_data_func>::iterator search = _get_log_data_map.find(it->first);
+            // boost::tuple<double, double> value = it->second;
+            // double prev_time = boost::tuples::get<0>(value);
+            // double period = boost::tuples::get<1>(value);
+            // double next_time = prev_time + period - (_sim_microseconds_per_tick / 1000000.0) / 2; // within half a tick time period
+            // if (next_time < abs_time) { // Time to send more data
+            //     it->second = boost::tuple<double, double>(abs_time, period);
+            std::map<std::string, get_log_data_func>::iterator search = _get_log_data_map.find(it->first);
                 if (search != _get_log_data_map.end()) {
                     get_log_data_func f = search->second;
                     (this->*f)(*data_point, data);
                     _uart_connection->write(&data[0], data.size());
+                    // Reset vector, otherwise will append data
+                    data.clear();
                 }
             }
         }
-    }
+    // }
 
     /* Just reinterprets each character as its ASCII value */
     void GPSSimHardwareModelOEM615::string_to_uint8vector(const std::string& in_data, std::vector<uint8_t>& out_data)
@@ -691,7 +575,7 @@ namespace Nos3
     }
 
     // Reference:  Section 3.2.4, pp. 474-476, OEM6 Family Firmware Reference Manual, OM-20000129, Rev 8, January 2015 (file om-20000129.pdf)
-    void GPSSimHardwareModelOEM615::get_gpggaa_response(const GPSSimDataPoint& data_point, std::vector<uint8_t>& out_data)
+    void GPSSimHardwareModelOEM615::get_gpgga_response(const GPSSimDataPoint& data_point, std::vector<uint8_t>& out_data)
     {
         // Computations
         double abs_time = data_point.get_abs_time();
@@ -712,8 +596,8 @@ namespace Nos3
         SimCoordinateTransformations::ECEF2LLA(ecef_x, ecef_y, ecef_z, latitude, longitude, ellipsoid_height);
         msl_height = ellipsoid_height; // TODO - Fix this
         undulation = ellipsoid_height - msl_height; // Height of EGM96 geoid above WGS84 ellipsoid
-        latitude = latitude * 180.0 / M_PI;
-        longitude = longitude * 180.0 / M_PI;
+        // latitude = latitude * 180.0 / M_PI;
+        // longitude = longitude * 180.0 / M_PI;
         latitude_whole_degrees = int(latitude);
         latitude_fractional_degrees = latitude - latitude_whole_degrees;
         longitude_whole_degrees = int(longitude);
