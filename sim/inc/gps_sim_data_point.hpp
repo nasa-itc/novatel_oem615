@@ -62,7 +62,12 @@ namespace Nos3
          *  Sets all the data values.
          */
         GPSSimDataPoint(double abs_time, int16_t leap_seconds, int16_t gps_week, int32_t gps_sec_week, double gps_frac_sec, 
-            const std::vector<double>& ECEF, const std::vector<double>& ECEF_vel, const std::vector<double>& ECI, const std::vector<double>& ECI_vel); 
+            double ECEF[3], double ECEF_vel[3], double ECI[3], double ECI_vel[3]);
+        /** \brief Constructor explicit data values.
+         *  Sets all the data values.
+         */
+        GPSSimDataPoint(double abs_time, int16_t leap_seconds, int16_t gps_week, int32_t gps_sec_week, double gps_frac_sec, 
+            const std::vector<double>& ECEF, const std::vector<double>& ECEF_vel, const std::vector<double>& ECI, const std::vector<double>& ECI_vel);
         /** \brief Constructor from a 42 data point
          *  Just sets the data point... parsing done on demand later.  This is for efficiency so if no accessors are called, no parsing is done.
          */
