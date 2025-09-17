@@ -175,7 +175,7 @@ int32_t NOVATEL_OEM615_RequestData(uart_info_t *uart_device, NOVATEL_OEM615_Devi
     int32_t status          = OS_SUCCESS;
     int32_t bytes           = 0;
     int32_t bytes_available = 0;
-    char* token = 0x0;
+    char   *token           = 0x0;
 
     if (status == OS_SUCCESS)
     {
@@ -253,7 +253,7 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
     int32_t status          = OS_SUCCESS;
     int32_t bytes           = 0;
     int32_t bytes_available = 0;
-    char   *token = 0x0;
+    char   *token           = 0x0;
 
     /* check how many bytes are waiting on the uart */
     bytes_available = uart_bytes_available(uart_device);
@@ -337,7 +337,7 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
     device_data_struct->VelX            = 0.0;
     device_data_struct->VelY            = 0.0;
     device_data_struct->VelZ            = 0.0;
-    char *token = 0x0;
+    char *token                         = 0x0;
 
     token = strtok_r(NULL, ",; ", &saveptr); // Port
     token = strtok_r(NULL, ",; ", &saveptr); // Sequence #
@@ -368,12 +368,12 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
     strtok_r(token, ",; ", &saveptr); // P-X (m)
     if (token != NULL)
         device_data_struct->ECEFX = atof(token);
-    
+
     token = saveptr;
     strtok_r(token, ",; ", &saveptr); // P-Y (m)
     if (token != NULL)
         device_data_struct->ECEFY = atof(token);
-    
+
     token = saveptr;
     strtok_r(token, ",; ", &saveptr); // P-Z (m)
     if (token != NULL)
@@ -387,12 +387,12 @@ void NOVATEL_OEM615_ParseBestXYZA(NOVATEL_OEM615_Device_Data_tlm_t *device_data_
     strtok_r(token, ",; ", &saveptr); // V-X (m/s
     if (token != NULL)
         device_data_struct->VelX = atof(token);
-    
+
     token = saveptr;
     strtok_r(token, ",; ", &saveptr); // V-Y (m/s)
     if (token != NULL)
         device_data_struct->VelY = atof(token);
-    
+
     token = saveptr;
     strtok_r(token, ",; ", &saveptr); // V-Z (m/s)
     if (token != NULL)
@@ -428,7 +428,7 @@ void NOVATEL_OEM615_ParseBestGPGGA(NOVATEL_OEM615_Device_Data_tlm_t *device_data
     GPGGA_Data_t data;
 
     // Parse each field
-    for(int field = 1; field <= 15; field++)
+    for (int field = 1; field <= 15; field++)
     {
         token = saveptr;
         strtok_r(token, ",", &saveptr);
