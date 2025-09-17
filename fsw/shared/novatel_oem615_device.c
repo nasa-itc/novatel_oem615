@@ -175,6 +175,7 @@ int32_t NOVATEL_OEM615_RequestData(uart_info_t *uart_device, NOVATEL_OEM615_Devi
     int32_t status          = OS_SUCCESS;
     int32_t bytes           = 0;
     int32_t bytes_available = 0;
+    char* token = 0x0;
 
     if (status == OS_SUCCESS)
     {
@@ -182,7 +183,7 @@ int32_t NOVATEL_OEM615_RequestData(uart_info_t *uart_device, NOVATEL_OEM615_Devi
         bytes_available = uart_bytes_available(uart_device);
         if (bytes_available > 0)
         {
-            uint8_t *temp_read_data = (uint8_t *)calloc(bytes_available+1, sizeof(uint8_t));
+            uint8_t *temp_read_data = (uint8_t *)calloc(bytes_available, sizeof(uint8_t));
             /* Read all existing data on uart port */
             bytes = uart_read_port(uart_device, temp_read_data, bytes_available);
             if (bytes != bytes_available)
@@ -205,15 +206,14 @@ int32_t NOVATEL_OEM615_RequestData(uart_info_t *uart_device, NOVATEL_OEM615_Devi
                 OS_printf(" DONE PRINTING ALL UART BYTES READ FROM BUFFER \n");
 #endif
 
-                temp_read_data[bytes] = '\0';
-                char* casted_trd = (char *)temp_read_data;
+                token = (char *)temp_read_data;
 
-                strtok_r(casted_trd, ",", &saveptr);
-                if ((casted_trd != NULL) && (strncmp(casted_trd, "#BESTXYZA", 9) == 0))
+                strtok_r(token, ",", &saveptr);
+                if ((token != NULL) && (strncmp(token, "#BESTXYZA", 9) == 0))
                 {
-// #ifdef NOVATEL_OEM615_CFG_DEBUG
-//                     OS_printf(" DATA TOKEN FOUND = %s\n", token);
-// #endif
+#ifdef NOVATEL_OEM615_CFG_DEBUG
+                    OS_printf(" DATA TOKEN FOUND = %s\n", token);
+#endif
 
                     NOVATEL_OEM615_ParseBestXYZA(data);
                 }
@@ -281,7 +281,8 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
             }
             OS_printf(" DONE PRINTING ALL UART BYTES READ FROM BUFFER \n");
 #endif
-            token = strtok_r((char *)temp_read_data, ",", &saveptr);
+            token = (char *)temp_read_data;
+            strtok_r(token, ",", &saveptr);
             if ((token != NULL) && (strncmp(token, "#BESTXYZA", 9) == 0))
             {
 #ifdef NOVATEL_OEM615_CFG_DEBUG
@@ -427,10 +428,11 @@ void NOVATEL_OEM615_ParseBestGPGGA(NOVATEL_OEM615_Device_Data_tlm_t *device_data
     GPGGA_Data_t data;
 
     // Parse each field
-    int field = 0;
-    while ((token = strtok_r(NULL, ",", &saveptr)) != NULL)
+    for(int field = 1; field <= 15; field++)
     {
-        field++;
+        token = saveptr;
+        strtok_r(token, ",", &saveptr);
+
         switch (field)
         {
             case 1: // UTC Time

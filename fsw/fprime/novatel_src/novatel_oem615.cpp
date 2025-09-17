@@ -63,7 +63,7 @@ namespace Components {
   void novatel_oem615 :: REQUEST_DATA_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
     
     int32_t status = OS_SUCCESS;
-    status = NOVATEL_OEM615_RequestData(&Novatel_oem615Uart, &Novatel_oem615Data);
+    status = NOVATEL_OEM615_ChildProcessReadData(&Novatel_oem615Uart, &Novatel_oem615Data);
     if (status == OS_SUCCESS)
       {
         this->log_ACTIVITY_HI_TELEM("RequestData command success\n");
