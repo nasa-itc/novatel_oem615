@@ -16,6 +16,7 @@ set(gps_sim_src
     src/gps_sim_data_file_provider.cpp
     src/gps_sim_data_42socket_provider.cpp
     src/gps_sim_data_point.cpp
+    src/gps_sim_data_shmem_provider.cpp
 )
 
 # For Code::Blocks and other IDEs
