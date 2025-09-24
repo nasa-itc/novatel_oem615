@@ -33,27 +33,8 @@ namespace Nos3
      *************************************************************************/
 
     GPSSimDataPoint::GPSSimDataPoint(double abs_time, int16_t leap_seconds, int16_t gps_week, int32_t gps_sec_week, double gps_frac_sec, 
-        double ECEF[3], double ECEF_vel[3], double ECI[3], double ECI_vel[3]) : 
-        _leap_seconds(leap_seconds), _not_parsed(false), _abs_time(abs_time), _gps_week(gps_week), _gps_sec_week(gps_sec_week), _gps_frac_sec(gps_frac_sec)
-    {
-        _ECEF.resize(3); _ECEF_vel.resize(3); _ECI.resize(3); _ECI_vel.resize(3);
-        _ECEF[0] = ECEF[0];
-        _ECEF[1] = ECEF[1];
-        _ECEF[2] = ECEF[2];
-        _ECEF_vel[0] = ECEF_vel[0];
-        _ECEF_vel[1] = ECEF_vel[1];
-        _ECEF_vel[2] = ECEF_vel[2];
-        _ECI[0] = ECI[0];
-        _ECI[1] = ECI[1];
-        _ECI[2] = ECI[2];
-        _ECI_vel[0] = ECI_vel[0];
-        _ECI_vel[1] = ECI_vel[1];
-        _ECI_vel[2] = ECI_vel[2];
-    }
-
-    GPSSimDataPoint::GPSSimDataPoint(double abs_time, int16_t leap_seconds, int16_t gps_week, int32_t gps_sec_week, double gps_frac_sec, 
-      const std::vector<double>& ECEF, const std::vector<double>& ECEF_vel, const std::vector<double>& ECI, const std::vector<double>& ECI_vel) :
-        _leap_seconds(leap_seconds), _not_parsed(false), _abs_time(abs_time), _gps_week(gps_week), _gps_sec_week(gps_sec_week), _gps_frac_sec(gps_frac_sec),
+        const std::vector<double>& ECEF, const std::vector<double>& ECEF_vel, const std::vector<double>& ECI, const std::vector<double>& ECI_vel) : 
+        _leap_seconds(leap_seconds), _not_parsed(false), _abs_time(abs_time), _gps_week(gps_week), _gps_sec_week(gps_sec_week), _gps_frac_sec(gps_frac_sec), 
         _ECEF(ECEF), _ECEF_vel(ECEF_vel), _ECI(ECI), _ECI_vel(ECI_vel)
     {
     }
