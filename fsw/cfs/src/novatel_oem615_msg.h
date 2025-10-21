@@ -25,6 +25,8 @@
 #define NOVATEL_OEM615_UNLOGALL_CC       6
 #define NOVATEL_OEM615_SERIALCONFIG_CC   7
 
+#define NOVATEL_OEM615_SPOOFING_CC       8
+
 /*
 ** Telemetry Request Command Codes
 ** TODO: Add additional commands required by the specific component

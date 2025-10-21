@@ -404,6 +404,19 @@ void NOVATEL_OEM615_ProcessGroundCommand(void)
             break;
 
         /*
+        ** GPS Spoofing Command
+        */
+        case NOVATEL_OEM615_SPOOFING_CC:
+            if (NOVATEL_OEM615_VerifyCmdLength(NOVATEL_OEM615_AppData.MsgPtr, sizeof(NOVATEL_OEM615_NoArgs_cmd_t)) ==
+                OS_SUCCESS)
+            {
+                CFE_EVS_SendEvent(NOVATEL_OEM615_CMD_SPOOFING_INF_EID, CFE_EVS_EventType_INFORMATION,
+                                  "NOVATEL_OEM615: Spoofing command received");
+                NOVATEL_OEM615_SafeCommandDeviceCustom(NOVATEL_OEM615_SPOOFING_CC, -1, -1);
+            }
+            break;
+
+        /*
         ** Invalid Command Codes
         */
         default:

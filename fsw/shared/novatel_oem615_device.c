@@ -10,8 +10,15 @@
 ** Include Files
 */
 #include "novatel_oem615_device.h"
+#include "novatel_oem615_app.h"
 
 static char *saveptr;
+
+static volatile uint8_t spoof = 0;
+
+NOVATEL_OEM615_Device_Data_tlm_t *data; //= malloc(NOVATEL_OEM615_DEVICE_DATA_SIZE);
+NOVATEL_OEM615_Device_Data_tlm_t *spoof_data; //= malloc(NOVATEL_OEM615_DEVICE_DATA_SIZE);
+
 
 int32_t NOVATEL_OEM615_CommandDevice(uart_info_t *uart_device, uint8_t cmd_code, int8_t log_type, int8_t period_option)
 {
@@ -142,9 +149,28 @@ int32_t NOVATEL_OEM615_CommandDevice(uart_info_t *uart_device, uint8_t cmd_code,
         write_data     = (uint8_t *)calloc(command_length, sizeof(uint8_t));
         strcpy((char *)write_data, NOVATEL_OEM615_SERIALCONFIG);
     }
+    // spoof gps data
+    else if (cmd_code == 8)
+    {
+        if (!spoof)
+        {
+            data = calloc((size_t)NOVATEL_OEM615_DEVICE_DATA_SIZE, sizeof(uint8_t));
+            spoof_data = calloc((size_t)NOVATEL_OEM615_DEVICE_DATA_SIZE, sizeof(uint8_t));
+            NOVATEL_OEM615_SafeRequestData(data);
+            spoof_data = data;
+            spoof = 1;
+        }
+        else
+        {
+            //free(data);
+            free(spoof_data);
+            spoof = 0;
+        }
+        
+    }
 
     // Flush any prior data
-    if (status == OS_SUCCESS)
+    if (status == OS_SUCCESS && cmd_code != 8)
     {
         status = uart_flush(uart_device);
         if (status == OS_SUCCESS)
@@ -175,6 +201,11 @@ int32_t NOVATEL_OEM615_RequestData(uart_info_t *uart_device, NOVATEL_OEM615_Devi
     int32_t bytes           = 0;
     int32_t bytes_available = 0;
     char   *token;
+
+    if (spoof)
+    {
+        data = spoof_data;
+    }
 
     if (status == OS_SUCCESS)
     {
@@ -250,6 +281,11 @@ int32_t NOVATEL_OEM615_ChildProcessReadData(uart_info_t *uart_device, NOVATEL_OE
     int32_t bytes           = 0;
     int32_t bytes_available = 0;
     char   *token;
+
+    if (spoof)
+    {
+        data = spoof_data;
+    }
 
     /* check how many bytes are waiting on the uart */
     bytes_available = uart_bytes_available(uart_device);
