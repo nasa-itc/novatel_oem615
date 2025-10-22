@@ -45,6 +45,37 @@ namespace Nos3
         _enabled = 0;
         _status = 0;
         _count = 0;
+        _spoof = 0;
+        _spoof_data_point = 
+            // Data point over WV (approx)
+            GPSSimDataPoint(
+                814254953.88600016,  // abs_time
+                37,                         // leap_sec
+                341,                        // week
+                151023,                     // whole_sec
+                0.070017399993957952,          // frac_sec
+                {   // ECEF
+                    914026.47647200001,
+                    -5231388.8992649997,
+                    4193848.5522989999,
+                },
+                {   // ECEF Vel
+                    5043.4599651839999,
+                    3896.6748762520001,
+                    3723.517689407,
+                },
+                {   // ECI
+                    -4162135.9441709998,
+                    -3284878.8064580001,
+                    4204454.2456520004,
+                },
+                {   // ECI Vel
+                    6070.9469386930004,
+                    -2897.288006192,
+                    3708.3458621939999,
+                }
+            );
+
         std::string connection_string = config.get("common.nos-connection-string", "tcp://127.0.0.1:12001");
 
         // Set up the time node which is **required** for this model
@@ -132,6 +163,51 @@ namespace Nos3
     {
         boost::shared_ptr<GPSSimDataPoint> data_point = boost::dynamic_pointer_cast<GPSSimDataPoint>(_sim_data_provider->get_data_point());
         get_bestxyza_response(*data_point, out_data);
+    }
+
+    /* Automagically set up by the base class to be called */
+    void GPSSimHardwareModelOEM615::command_callback(NosEngine::Common::Message msg)
+    {
+        /* Get the data out of the message */
+        NosEngine::Common::DataBufferOverlay dbf(const_cast<NosEngine::Utility::Buffer&>(msg.buffer));
+        sim_logger->info("GPSSimHardwareModelOEM615::command_callback:  Received command: %s.", dbf.data);
+
+        /* Do something with the data */
+        std::string command = dbf.data;
+        std::string response = "GPSSimHardwareModelOEM615::command_callback:  INVALID COMMAND! (Try HELP)";
+        boost::to_upper(command);
+        if (command.compare("ENABLE") == 0) 
+        {
+            _enabled = 1;
+            response = "GPSSimHardwareModelOEM615::command_callback:  Enabled";
+        }
+        else if (command.compare("DISABLE") == 0) 
+        {
+            _enabled = 0;
+            response = "GPSSimHardwareModelOEM615::command_callback:  Disabled";
+        }
+        else if (command.compare("SPOOF") == 0) 
+        {
+            sim_logger->debug("GPSSimHardwareModelOEM615::determine_response_for_request:  Toggle GPS Sensor Spoofing Command Received");
+            if (_spoof == 0)
+            {
+                _spoof = 1;
+                response = "GPSSimHardwareModelOEM615::command_callback:  Spoof Enabled";
+            }
+            else
+            {
+                _spoof = 0;
+                response = "GPSSimHardwareModelOEM615::command_callback:  Spoof Disabled";
+            }
+        }
+        else
+        {
+            response = "GPSSimHardwareModelOEM615::command_callback:  Unrecognized Command!";
+        }
+
+        /* Send a reply */
+        sim_logger->info("GPSSimHardwareModelOEM615::command_callback:  Sending reply: %s.", response.c_str());
+        _command_node->send_reply_message_async(msg, response.size(), response.c_str());
     }
 
 
@@ -492,12 +568,79 @@ namespace Nos3
     // Reference:  Section 1.1.1, p. 24, OEM6 Family Firmware Reference Manual, OM-20000129, Rev 8, January 2015 (file om-20000129.pdf)
     void GPSSimHardwareModelOEM615::get_ascii_header_string(const std::string& message, const GPSSimDataPoint& data_point, std::string& out_data)
     {
+        // Prevent unused variable
+        double unused_time = data_point.get_abs_time();
+        sim_logger->trace("unused_time %f", unused_time);
+
+        GPSSimDataPoint dp = GPSSimDataPoint();
+
+        if (_spoof == 1)
+        {
+            dp = GPSSimDataPoint(
+                _spoof_data_point.get_abs_time(), 
+                _spoof_data_point.get_gps_leap_seconds(), 
+                _spoof_data_point.get_gps_week(), 
+                _spoof_data_point.get_gps_sec_week(),
+                _spoof_data_point.get_gps_frac_sec(),
+                {
+                    _spoof_data_point.get_ECEF_x(),
+                    _spoof_data_point.get_ECEF_y(),
+                    _spoof_data_point.get_ECEF_z(),
+                },
+                {
+                    _spoof_data_point.get_ECEF_vx(),
+                    _spoof_data_point.get_ECEF_vy(),
+                    _spoof_data_point.get_ECEF_vz(),
+                },
+                {
+                    _spoof_data_point.get_ECI_x(),
+                    _spoof_data_point.get_ECI_y(),
+                    _spoof_data_point.get_ECI_z(),
+                },
+                {
+                    _spoof_data_point.get_ECI_vx(),
+                    _spoof_data_point.get_ECI_vy(),
+                    _spoof_data_point.get_ECI_vz(),
+                }
+            );
+
+        } else {
+
+            dp = GPSSimDataPoint(
+                data_point.get_abs_time(), 
+                data_point.get_gps_leap_seconds(), 
+                data_point.get_gps_week(), 
+                data_point.get_gps_sec_week(),
+                data_point.get_gps_frac_sec(),
+                {
+                    data_point.get_ECEF_x(),
+                    data_point.get_ECEF_y(),
+                    data_point.get_ECEF_z(),
+                },
+                {
+                    data_point.get_ECEF_vx(),
+                    data_point.get_ECEF_vy(),
+                    data_point.get_ECEF_vz(),
+                },
+                {
+                    data_point.get_ECI_x(),
+                    data_point.get_ECI_y(),
+                    data_point.get_ECI_z(),
+                },
+                {
+                    data_point.get_ECI_vx(),
+                    data_point.get_ECI_vy(),
+                    data_point.get_ECI_vz(),
+                }
+            );
+        }
+
         String port("COM1"); // - TODO FIX ME - Just an example
         Long sequence_num = 0; // - TODO FIX ME - Just an example
         Float pct_idle_time = 0.0; // - TODO FIX ME - Just an example
         Enum time_status("FINESTEERING"); // - TODO FIX ME - Just an example
-        ULong week = data_point.get_gps_week();
-        float gpsec = data_point.get_gps_sec_week() + data_point.get_gps_frac_sec();
+        ULong week = dp.get_gps_week();
+        float gpsec = dp.get_gps_sec_week() + dp.get_gps_frac_sec();
         ULong receiver_status = 0x00000040; // - TODO FIX ME - Just an example
         ULong header_reserved = 0xD821;
         ULong receiver_sw_version = 2724;
@@ -527,8 +670,75 @@ namespace Nos3
     // Reference:  Section 1.1.3, pp. 26-27, OEM6 Family Firmware Reference Manual, OM-20000129, Rev 8, January 2015 (file om-20000129.pdf)
     void GPSSimHardwareModelOEM615::get_binary_header_bytes(uint16_t message, uint16_t length, const GPSSimDataPoint& data_point, std::vector<uint8_t>& out)
     {
-        uint16_t week = data_point.get_gps_week();
-        uint32_t gpsec = (data_point.get_gps_sec_week() * 1000) + (data_point.get_gps_frac_sec() * 1000.0);
+        // Prevent unused variable
+        double unused_time = data_point.get_abs_time();
+        sim_logger->trace("unused_time %f", unused_time);
+
+        GPSSimDataPoint dp = GPSSimDataPoint();
+
+        if (_spoof == 1)
+        {
+            dp = GPSSimDataPoint(
+                _spoof_data_point.get_abs_time(), 
+                _spoof_data_point.get_gps_leap_seconds(), 
+                _spoof_data_point.get_gps_week(), 
+                _spoof_data_point.get_gps_sec_week(),
+                _spoof_data_point.get_gps_frac_sec(),
+                {
+                    _spoof_data_point.get_ECEF_x(),
+                    _spoof_data_point.get_ECEF_y(),
+                    _spoof_data_point.get_ECEF_z(),
+                },
+                {
+                    _spoof_data_point.get_ECEF_vx(),
+                    _spoof_data_point.get_ECEF_vy(),
+                    _spoof_data_point.get_ECEF_vz(),
+                },
+                {
+                    _spoof_data_point.get_ECI_x(),
+                    _spoof_data_point.get_ECI_y(),
+                    _spoof_data_point.get_ECI_z(),
+                },
+                {
+                    _spoof_data_point.get_ECI_vx(),
+                    _spoof_data_point.get_ECI_vy(),
+                    _spoof_data_point.get_ECI_vz(),
+                }
+            );
+
+        } else {
+
+            dp = GPSSimDataPoint(
+                data_point.get_abs_time(), 
+                data_point.get_gps_leap_seconds(), 
+                data_point.get_gps_week(), 
+                data_point.get_gps_sec_week(),
+                data_point.get_gps_frac_sec(),
+                {
+                    data_point.get_ECEF_x(),
+                    data_point.get_ECEF_y(),
+                    data_point.get_ECEF_z(),
+                },
+                {
+                    data_point.get_ECEF_vx(),
+                    data_point.get_ECEF_vy(),
+                    data_point.get_ECEF_vz(),
+                },
+                {
+                    data_point.get_ECI_x(),
+                    data_point.get_ECI_y(),
+                    data_point.get_ECI_z(),
+                },
+                {
+                    data_point.get_ECI_vx(),
+                    data_point.get_ECI_vy(),
+                    data_point.get_ECI_vz(),
+                }
+            );
+        }
+
+        uint16_t week = dp.get_gps_week();
+        uint32_t gpsec = (dp.get_gps_sec_week() * 1000) + (dp.get_gps_frac_sec() * 1000.0);
 
         //Sync Bytes
         out.push_back(0xAA);
@@ -577,8 +787,75 @@ namespace Nos3
     // Reference:  Section 3.2.4, pp. 474-476, OEM6 Family Firmware Reference Manual, OM-20000129, Rev 8, January 2015 (file om-20000129.pdf)
     void GPSSimHardwareModelOEM615::get_gpgga_response(const GPSSimDataPoint& data_point, std::vector<uint8_t>& out_data)
     {
+        // Prevent unused variable
+        double unused_time = data_point.get_abs_time();
+        sim_logger->trace("unused_time %f", unused_time);
+
+        GPSSimDataPoint dp = GPSSimDataPoint();
+
+        if (_spoof == 1)
+        {
+            dp = GPSSimDataPoint(
+                _spoof_data_point.get_abs_time(), 
+                _spoof_data_point.get_gps_leap_seconds(), 
+                _spoof_data_point.get_gps_week(), 
+                _spoof_data_point.get_gps_sec_week(),
+                _spoof_data_point.get_gps_frac_sec(),
+                {
+                    _spoof_data_point.get_ECEF_x(),
+                    _spoof_data_point.get_ECEF_y(),
+                    _spoof_data_point.get_ECEF_z(),
+                },
+                {
+                    _spoof_data_point.get_ECEF_vx(),
+                    _spoof_data_point.get_ECEF_vy(),
+                    _spoof_data_point.get_ECEF_vz(),
+                },
+                {
+                    _spoof_data_point.get_ECI_x(),
+                    _spoof_data_point.get_ECI_y(),
+                    _spoof_data_point.get_ECI_z(),
+                },
+                {
+                    _spoof_data_point.get_ECI_vx(),
+                    _spoof_data_point.get_ECI_vy(),
+                    _spoof_data_point.get_ECI_vz(),
+                }
+            );
+
+        } else {
+
+            dp = GPSSimDataPoint(
+                data_point.get_abs_time(), 
+                data_point.get_gps_leap_seconds(), 
+                data_point.get_gps_week(), 
+                data_point.get_gps_sec_week(),
+                data_point.get_gps_frac_sec(),
+                {
+                    data_point.get_ECEF_x(),
+                    data_point.get_ECEF_y(),
+                    data_point.get_ECEF_z(),
+                },
+                {
+                    data_point.get_ECEF_vx(),
+                    data_point.get_ECEF_vy(),
+                    data_point.get_ECEF_vz(),
+                },
+                {
+                    data_point.get_ECI_x(),
+                    data_point.get_ECI_y(),
+                    data_point.get_ECI_z(),
+                },
+                {
+                    data_point.get_ECI_vx(),
+                    data_point.get_ECI_vy(),
+                    data_point.get_ECI_vz(),
+                }
+            );
+        }
+
         // Computations
-        double abs_time = data_point.get_abs_time();
+        double abs_time = dp.get_abs_time();
         int year, month, day, hour, minute;
         double second;
 
@@ -588,9 +865,9 @@ namespace Nos3
             abs_time, year, month, day, hour, minute, second);
 
         // Position computations
-        double ecef_x = data_point.get_ECEF_x();
-        double ecef_y = data_point.get_ECEF_y();
-        double ecef_z = data_point.get_ECEF_z();
+        double ecef_x = dp.get_ECEF_x();
+        double ecef_y = dp.get_ECEF_y();
+        double ecef_z = dp.get_ECEF_z();
 
         double latitude, longitude, ellipsoid_height, msl_height, undulation, latitude_whole_degrees, latitude_fractional_degrees, longitude_whole_degrees, longitude_fractional_degrees;
         SimCoordinateTransformations::ECEF2LLA(ecef_x, ecef_y, ecef_z, latitude, longitude, ellipsoid_height);
@@ -659,21 +936,88 @@ namespace Nos3
     // Reference:  Section 3.2.17, pp. 420-422, OEM6 Family Firmware Reference Manual, OM-20000129, Rev 8, January 2015 (file om-20000129.pdf)
     void GPSSimHardwareModelOEM615::get_bestxyza_response(const GPSSimDataPoint& data_point, std::vector<uint8_t>& out_data)
     {
+        // Prevent unused variable
+        double unused_time = data_point.get_abs_time();
+        sim_logger->trace("unused_time %f", unused_time);
+
+        GPSSimDataPoint dp = GPSSimDataPoint();
+
+        if (_spoof == 1)
+        {
+            dp = GPSSimDataPoint(
+                _spoof_data_point.get_abs_time(), 
+                _spoof_data_point.get_gps_leap_seconds(), 
+                _spoof_data_point.get_gps_week(), 
+                _spoof_data_point.get_gps_sec_week(),
+                _spoof_data_point.get_gps_frac_sec(),
+                {
+                    _spoof_data_point.get_ECEF_x(),
+                    _spoof_data_point.get_ECEF_y(),
+                    _spoof_data_point.get_ECEF_z(),
+                },
+                {
+                    _spoof_data_point.get_ECEF_vx(),
+                    _spoof_data_point.get_ECEF_vy(),
+                    _spoof_data_point.get_ECEF_vz(),
+                },
+                {
+                    _spoof_data_point.get_ECI_x(),
+                    _spoof_data_point.get_ECI_y(),
+                    _spoof_data_point.get_ECI_z(),
+                },
+                {
+                    _spoof_data_point.get_ECI_vx(),
+                    _spoof_data_point.get_ECI_vy(),
+                    _spoof_data_point.get_ECI_vz(),
+                }
+            );
+
+        } else {
+
+            dp = GPSSimDataPoint(
+                data_point.get_abs_time(), 
+                data_point.get_gps_leap_seconds(), 
+                data_point.get_gps_week(), 
+                data_point.get_gps_sec_week(),
+                data_point.get_gps_frac_sec(),
+                {
+                    data_point.get_ECEF_x(),
+                    data_point.get_ECEF_y(),
+                    data_point.get_ECEF_z(),
+                },
+                {
+                    data_point.get_ECEF_vx(),
+                    data_point.get_ECEF_vy(),
+                    data_point.get_ECEF_vz(),
+                },
+                {
+                    data_point.get_ECI_x(),
+                    data_point.get_ECI_y(),
+                    data_point.get_ECI_z(),
+                },
+                {
+                    data_point.get_ECI_vx(),
+                    data_point.get_ECI_vy(),
+                    data_point.get_ECI_vz(),
+                }
+            );
+        }
+
         // Computations
 
         Enum p_sol_status("SOL_COMPUTED"); // - TODO FIX ME - Just an example
         Enum pos_type("NARROW_INT"); // - TODO FIX ME - Just an example
-        Double p_x = data_point.get_ECEF_x();
-        Double p_y = data_point.get_ECEF_y();
-        Double p_z = data_point.get_ECEF_z();
+        Double p_x = dp.get_ECEF_x();
+        Double p_y = dp.get_ECEF_y();
+        Double p_z = dp.get_ECEF_z();
         Float p_x_sigma = 0.0; // - TODO FIX ME - Just an example
         Float p_y_sigma = 0.0; // - TODO FIX ME - Just an example
         Float p_z_sigma = 0.0; // - TODO FIX ME - Just an example
         Enum v_sol_status("SOL_COMPUTED"); // - TODO FIX ME - Just an example
         Enum vel_type("NARROW_INT"); // - TODO FIX ME - Just an example
-        Double v_x = data_point.get_ECEF_vx();
-        Double v_y = data_point.get_ECEF_vy();
-        Double v_z = data_point.get_ECEF_vz();
+        Double v_x = dp.get_ECEF_vx();
+        Double v_y = dp.get_ECEF_vy();
+        Double v_z = dp.get_ECEF_vz();
         Double v_x_sigma = 0.0; // - TODO FIX ME - Just an example
         Double v_y_sigma = 0.0; // - TODO FIX ME - Just an example
         Double v_z_sigma = 0.0; // - TODO FIX ME - Just an example
@@ -746,19 +1090,86 @@ namespace Nos3
     // Reference:  Section 3.2.17, pp. 420-422, OEM6 Family Firmware Reference Manual, OM-20000129, Rev 8, January 2015 (file om-20000129.pdf)
     void GPSSimHardwareModelOEM615::get_bestxyzb_response(const GPSSimDataPoint& data_point, std::vector<uint8_t>& out)
     {
+        // Prevent unused variable
+        double unused_time = data_point.get_abs_time();
+        sim_logger->trace("unused_time %f", unused_time);
+
+        GPSSimDataPoint dp = GPSSimDataPoint();
+
+        if (_spoof == 1)
+        {
+            dp = GPSSimDataPoint(
+                _spoof_data_point.get_abs_time(), 
+                _spoof_data_point.get_gps_leap_seconds(), 
+                _spoof_data_point.get_gps_week(), 
+                _spoof_data_point.get_gps_sec_week(),
+                _spoof_data_point.get_gps_frac_sec(),
+                {
+                    _spoof_data_point.get_ECEF_x(),
+                    _spoof_data_point.get_ECEF_y(),
+                    _spoof_data_point.get_ECEF_z(),
+                },
+                {
+                    _spoof_data_point.get_ECEF_vx(),
+                    _spoof_data_point.get_ECEF_vy(),
+                    _spoof_data_point.get_ECEF_vz(),
+                },
+                {
+                    _spoof_data_point.get_ECI_x(),
+                    _spoof_data_point.get_ECI_y(),
+                    _spoof_data_point.get_ECI_z(),
+                },
+                {
+                    _spoof_data_point.get_ECI_vx(),
+                    _spoof_data_point.get_ECI_vy(),
+                    _spoof_data_point.get_ECI_vz(),
+                }
+            );
+
+        } else {
+
+            dp = GPSSimDataPoint(
+                data_point.get_abs_time(), 
+                data_point.get_gps_leap_seconds(), 
+                data_point.get_gps_week(), 
+                data_point.get_gps_sec_week(),
+                data_point.get_gps_frac_sec(),
+                {
+                    data_point.get_ECEF_x(),
+                    data_point.get_ECEF_y(),
+                    data_point.get_ECEF_z(),
+                },
+                {
+                    data_point.get_ECEF_vx(),
+                    data_point.get_ECEF_vy(),
+                    data_point.get_ECEF_vz(),
+                },
+                {
+                    data_point.get_ECI_x(),
+                    data_point.get_ECI_y(),
+                    data_point.get_ECI_z(),
+                },
+                {
+                    data_point.get_ECI_vx(),
+                    data_point.get_ECI_vy(),
+                    data_point.get_ECI_vz(),
+                }
+            );
+        }
+
         std::vector<uint8_t> bytes;
         get_binary_header_bytes(241, 112, data_point, out); // BESTXYZ header
 
         out.push_back(0); out.push_back(0); out.push_back(0); out.push_back(0); // P-sol status
         out.push_back(0); out.push_back(0); out.push_back(0); out.push_back(50); // pos type
 
-        double_to_uint8vector(data_point.get_ECEF_x(), bytes); // P-X
+        double_to_uint8vector(dp.get_ECEF_x(), bytes); // P-X
         out.insert(out.end(), bytes.begin(), bytes.end());
         bytes.clear();
-        double_to_uint8vector(data_point.get_ECEF_y(), bytes); // P-Y
+        double_to_uint8vector(dp.get_ECEF_y(), bytes); // P-Y
         out.insert(out.end(), bytes.begin(), bytes.end());
         bytes.clear();
-        double_to_uint8vector(data_point.get_ECEF_z(), bytes); // P-Z
+        double_to_uint8vector(dp.get_ECEF_z(), bytes); // P-Z
         out.insert(out.end(), bytes.begin(), bytes.end());
         bytes.clear();
 
@@ -769,13 +1180,13 @@ namespace Nos3
         out.push_back(0); out.push_back(0); out.push_back(0); out.push_back(0); // V-sol status
         out.push_back(0); out.push_back(0); out.push_back(0); out.push_back(50); // vel type
 
-        double_to_uint8vector(data_point.get_ECEF_vx(), bytes); // V-X
+        double_to_uint8vector(dp.get_ECEF_vx(), bytes); // V-X
         out.insert(out.end(), bytes.begin(), bytes.end());
         bytes.clear();
-        double_to_uint8vector(data_point.get_ECEF_vy(), bytes); // V-Y
+        double_to_uint8vector(dp.get_ECEF_vy(), bytes); // V-Y
         out.insert(out.end(), bytes.begin(), bytes.end());
         bytes.clear();
-        double_to_uint8vector(data_point.get_ECEF_vz(), bytes); // V-Z
+        double_to_uint8vector(dp.get_ECEF_vz(), bytes); // V-Z
         out.insert(out.end(), bytes.begin(), bytes.end());
         bytes.clear();
 

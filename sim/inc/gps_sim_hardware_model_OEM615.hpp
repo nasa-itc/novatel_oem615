@@ -78,6 +78,8 @@ namespace Nos3
         void get_rangecmpa_response(const GPSSimDataPoint& data_point, std::vector<uint8_t>& response);
         void get_rangecmpb_response(const GPSSimDataPoint& data_point, std::vector<uint8_t>& response);
 
+        void command_callback(NosEngine::Common::Message msg);
+
         typedef uint32_t    Hex4;
         Hex4 CRC32Value(int i);
         Hex4 CalculateBlockCRC32(unsigned long ulCount /* Number of bytes in the data block */, const char *ucBuffer ) /* Data block */;
@@ -97,6 +99,9 @@ namespace Nos3
         std::uint32_t                                       _count;
         std::uint32_t                                       _config;
         std::uint32_t                                       _status;
+
+        std::uint8_t                                        _spoof;
+        GPSSimDataPoint                                     _spoof_data_point;
     };
 }
 

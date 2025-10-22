@@ -87,12 +87,19 @@ namespace Nos3
         int16_t get_gps_week(void) const {parse_data_point(); return _gps_week;}
         int32_t get_gps_sec_week(void) const {parse_data_point(); return _gps_sec_week;}
         double get_gps_frac_sec(void) const {parse_data_point(); return _gps_frac_sec;}
+        int16_t get_gps_leap_seconds(void) const {parse_data_point(); return _leap_seconds;}
         double get_ECEF_x(void) const {parse_data_point(); return _ECEF[0];}
         double get_ECEF_y(void) const {parse_data_point(); return _ECEF[1];}
         double get_ECEF_z(void) const {parse_data_point(); return _ECEF[2];}
         double get_ECEF_vx(void) const {parse_data_point(); return _ECEF_vel[0];}
         double get_ECEF_vy(void) const {parse_data_point(); return _ECEF_vel[1];}
         double get_ECEF_vz(void) const {parse_data_point(); return _ECEF_vel[2];}
+        double get_ECI_x(void) const {parse_data_point(); return _ECI[0];}
+        double get_ECI_y(void) const {parse_data_point(); return _ECI[1];}
+        double get_ECI_z(void) const {parse_data_point(); return _ECI[2];}
+        double get_ECI_vx(void) const {parse_data_point(); return _ECI_vel[0];}
+        double get_ECI_vy(void) const {parse_data_point(); return _ECI_vel[1];}
+        double get_ECI_vz(void) const {parse_data_point(); return _ECI_vel[2];}
         double get_abs_time(void) const {parse_data_point(); return _abs_time;}
         //@}
     private:

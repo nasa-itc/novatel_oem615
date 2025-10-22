@@ -16,8 +16,8 @@ static char *saveptr;
 
 static volatile uint8_t spoof = 0;
 
-NOVATEL_OEM615_Device_Data_tlm_t *data; //= malloc(NOVATEL_OEM615_DEVICE_DATA_SIZE);
-NOVATEL_OEM615_Device_Data_tlm_t *spoof_data; //= malloc(NOVATEL_OEM615_DEVICE_DATA_SIZE);
+NOVATEL_OEM615_Device_Data_tlm_t *data;
+NOVATEL_OEM615_Device_Data_tlm_t *spoof_data;
 
 
 int32_t NOVATEL_OEM615_CommandDevice(uart_info_t *uart_device, uint8_t cmd_code, int8_t log_type, int8_t period_option)
