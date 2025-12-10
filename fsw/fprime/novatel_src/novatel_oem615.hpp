@@ -38,7 +38,7 @@ namespace Components {
       //! Destroy novatel_oem615 object
       ~novatel_oem615();
 
-    PRIVATE:
+    private:
 
 
       // ----------------------------------------------------------------------

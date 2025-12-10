@@ -6,7 +6,10 @@
 
 #include "novatel_src/novatel_oem615.hpp"
 #include <Fw/Logger/Logger.hpp>
-#include "FpConfig.hpp"
+#include <Fw/Log/LogString.hpp>
+// #include "FpConfig.hpp"
+#include "Fw/FPrimeBasicTypes.hpp"
+
 
 
 namespace Components {
@@ -39,7 +42,6 @@ namespace Components {
     if (status == OS_SUCCESS)
     {
       OS_printf("UART device %s configured with baudrate %d \n", Novatel_oem615Uart.deviceString, Novatel_oem615Uart.baud);
-      //Novatel_oem615HK.DeviceCounter++;
     }
     else
     {
@@ -66,7 +68,8 @@ namespace Components {
     status = NOVATEL_OEM615_ChildProcessReadData(&Novatel_oem615Uart, &Novatel_oem615Data);
     if (status == OS_SUCCESS)
       {
-        this->log_ACTIVITY_HI_TELEM("RequestData command success\n");
+        Fw::LogStringArg log_msg("RequestData command success\n");
+        this->log_ACTIVITY_HI_TELEM(log_msg);
         tlmWrite_Weeks(Novatel_oem615Data.Weeks);
         tlmWrite_SecondsIntoWeek(Novatel_oem615Data.SecondsIntoWeek);
         tlmWrite_ECEFX(Novatel_oem615Data.ECEFX);
@@ -81,7 +84,8 @@ namespace Components {
       }
     else
       {
-        this->log_ACTIVITY_HI_TELEM("RequestData command failed!\n");
+        Fw::LogStringArg log_msg("RequestData command failed!\n");
+        this->log_ACTIVITY_HI_TELEM(log_msg);
       }
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
   }
@@ -92,11 +96,13 @@ namespace Components {
     status = NOVATEL_OEM615_CommandDevice(&Novatel_oem615Uart, 7, log_type, 0);
     if (status == OS_SUCCESS)
       {
-        this->log_ACTIVITY_HI_TELEM("Configuration command success");
+        Fw::LogStringArg log_msg("Configuration command success");
+        this->log_ACTIVITY_HI_TELEM(log_msg);
       }
       else
       {
-        this->log_ACTIVITY_HI_TELEM("Configuration command failed!\n");
+        Fw::LogStringArg log_msg("Configuration command failed!\n");
+        this->log_ACTIVITY_HI_TELEM(log_msg);
       }
  
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
@@ -110,11 +116,13 @@ namespace Components {
 
     if (status == OS_SUCCESS)
       {
-        this->log_ACTIVITY_HI_TELEM("Configuration command success");
+        Fw::LogStringArg log_msg("Configuration command success");
+        this->log_ACTIVITY_HI_TELEM(log_msg);
       }
       else
       {
-        this->log_ACTIVITY_HI_TELEM("Configuration command failed!\n");
+        Fw::LogStringArg log_msg("Configuration command failed!\n");
+        this->log_ACTIVITY_HI_TELEM(log_msg);
       }
  
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
@@ -127,11 +135,13 @@ namespace Components {
 
     if (status == OS_SUCCESS)
       {
-        this->log_ACTIVITY_HI_TELEM("Configuration command success"); 
+        Fw::LogStringArg log_msg("Configuration command success");
+        this->log_ACTIVITY_HI_TELEM(log_msg); 
       }
       else
       {
-        this->log_ACTIVITY_HI_TELEM("Configuration command failed!\n");
+        Fw::LogStringArg log_msg("Configuration command failed!\n");
+        this->log_ACTIVITY_HI_TELEM(log_msg);
       }
  
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
@@ -149,11 +159,13 @@ namespace Components {
 
     if (status == OS_SUCCESS)        
       {
-        this->log_ACTIVITY_HI_TELEM("UNLOG_ALL command success!\n");
+        Fw::LogStringArg log_msg("UNLOG_ALL command success!\n");
+        this->log_ACTIVITY_HI_TELEM(log_msg);
       }
     else
       {
-        this->log_ACTIVITY_HI_TELEM("UNLOG_ALL command failed!\n");
+        Fw::LogStringArg log_msg("UNLOG_ALL command failed!\n");
+        this->log_ACTIVITY_HI_TELEM(log_msg);
       }
 
 
