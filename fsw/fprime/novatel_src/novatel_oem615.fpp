@@ -2,6 +2,15 @@ module Components {
     @ GPS
     active component novatel_oem615 {
 
+        @ GPS output port
+        output port GPSout: GPSDataPort
+
+        @ Periodic Data PGS
+        async input port updateData: Svc.Sched
+
+        @ Periodic Tlm GPS
+        async input port updateTlm: Svc.Sched
+
         @ Request Data Cmd
         async command REQUEST_DATA(
         )

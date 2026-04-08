@@ -62,6 +62,45 @@ namespace Components {
   // Handler implementations for commands
   // ----------------------------------------------------------------------
   
+  void novatel_oem615 :: updateData_handler(const FwIndexType portNum, U32 context)
+  {
+    int32_t status = OS_SUCCESS;
+
+    status = NOVATEL_OEM615_ChildProcessReadData(&Novatel_oem615Uart, &Novatel_oem615Data);
+    if (status == OS_SUCCESS)
+    {
+      this->GPSout_out(0, 
+                      Novatel_oem615Data.Weeks, 
+                      Novatel_oem615Data.SecondsIntoWeek, 
+                      Novatel_oem615Data.Fractions,
+                      Novatel_oem615Data.ECEFX, 
+                      Novatel_oem615Data.ECEFY, 
+                      Novatel_oem615Data.ECEFZ, 
+                      Novatel_oem615Data.VelX, 
+                      Novatel_oem615Data.VelY, 
+                      Novatel_oem615Data.VelZ, 
+                      Novatel_oem615Data.lat, 
+                      Novatel_oem615Data.lon, 
+                      Novatel_oem615Data.alt);
+    }
+  }
+
+  void novatel_oem615 :: updateTlm_handler(const FwIndexType portNum, U32 context)
+  {
+    this->tlmWrite_Weeks(Novatel_oem615Data.Weeks);
+    this->tlmWrite_SecondsIntoWeek(Novatel_oem615Data.SecondsIntoWeek);
+    this->tlmWrite_Fractions(Novatel_oem615Data.Fractions);
+    this->tlmWrite_ECEFX(Novatel_oem615Data.ECEFX);
+    this->tlmWrite_ECEFY(Novatel_oem615Data.ECEFY);
+    this->tlmWrite_ECEFZ(Novatel_oem615Data.ECEFZ);
+    this->tlmWrite_VelX(Novatel_oem615Data.VelX);
+    this->tlmWrite_VelY(Novatel_oem615Data.VelY);
+    this->tlmWrite_VelZ(Novatel_oem615Data.VelZ);
+    this->tlmWrite_lat(Novatel_oem615Data.lat);
+    this->tlmWrite_lon(Novatel_oem615Data.lon);
+    this->tlmWrite_alt(Novatel_oem615Data.alt);
+  }
+
   void novatel_oem615 :: REQUEST_DATA_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
     
     int32_t status = OS_SUCCESS;
@@ -70,17 +109,18 @@ namespace Components {
       {
         Fw::LogStringArg log_msg("RequestData command success\n");
         this->log_ACTIVITY_HI_TELEM(log_msg);
-        tlmWrite_Weeks(Novatel_oem615Data.Weeks);
-        tlmWrite_SecondsIntoWeek(Novatel_oem615Data.SecondsIntoWeek);
-        tlmWrite_ECEFX(Novatel_oem615Data.ECEFX);
-        tlmWrite_ECEFY(Novatel_oem615Data.ECEFY);
-        tlmWrite_ECEFZ(Novatel_oem615Data.ECEFZ);
-        tlmWrite_VelX(Novatel_oem615Data.VelX);
-        tlmWrite_VelY(Novatel_oem615Data.VelY);
-        tlmWrite_VelZ(Novatel_oem615Data.VelZ);
-        tlmWrite_lat(Novatel_oem615Data.lat);
-        tlmWrite_lon(Novatel_oem615Data.lon);
-        tlmWrite_alt(Novatel_oem615Data.alt);
+        this->tlmWrite_Weeks(Novatel_oem615Data.Weeks);
+        this->tlmWrite_SecondsIntoWeek(Novatel_oem615Data.SecondsIntoWeek);
+        this->tlmWrite_Fractions(Novatel_oem615Data.Fractions);
+        this->tlmWrite_ECEFX(Novatel_oem615Data.ECEFX);
+        this->tlmWrite_ECEFY(Novatel_oem615Data.ECEFY);
+        this->tlmWrite_ECEFZ(Novatel_oem615Data.ECEFZ);
+        this->tlmWrite_VelX(Novatel_oem615Data.VelX);
+        this->tlmWrite_VelY(Novatel_oem615Data.VelY);
+        this->tlmWrite_VelZ(Novatel_oem615Data.VelZ);
+        this->tlmWrite_lat(Novatel_oem615Data.lat);
+        this->tlmWrite_lon(Novatel_oem615Data.lon);
+        this->tlmWrite_alt(Novatel_oem615Data.alt);
       }
     else
       {
