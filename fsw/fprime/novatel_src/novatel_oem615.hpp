@@ -73,6 +73,16 @@ namespace Components {
         FwOpcodeType opCode,
         U32 cmdSeq
       ) override;
+
+      void updateData_handler(
+        const FwIndexType portNum, //!< The port number
+        U32 context //!< The call order
+      ) override;
+
+      void updateTlm_handler(
+        const FwIndexType portNum, //!< The port number
+        U32 context //!< The call order
+      ) override;
       
 
   };

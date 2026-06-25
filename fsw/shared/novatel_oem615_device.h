@@ -64,9 +64,9 @@ typedef struct
     double   VelX;
     double   VelY;
     double   VelZ;
-    float    lat;
-    float    lon;
-    float    alt;
+    double   lat;
+    double   lon;
+    double   alt;
 
 } __attribute__((packed)) NOVATEL_OEM615_Device_Data_tlm_t;
 #define NOVATEL_OEM615_DEVICE_DATA_LNGTH sizeof(NOVATEL_OEM615_Device_Data_tlm_t)
