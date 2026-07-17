@@ -1,5 +1,6 @@
 import sys
 import glob
+import time
 
 for p in glob.glob('/gems/gems/openc3-cosmos-nos3-*/targets/NOVATEL_OEM615/scripts'):
     if p not in sys.path:
@@ -36,6 +37,8 @@ def run_novatel_oem615_device_test():
 
         # Enable
         enable_gps()
+
+        time.sleep(1)
 
         get_gps_hk()
 
