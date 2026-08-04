@@ -7,7 +7,7 @@ for p in glob.glob('/gems/gems/openc3-cosmos-nos3-*/targets/NOVATEL_OEM615/scrip
         sys.path.append(p)
 
 try:
-    from openc3.script import cmd, tlm, check
+    from openc3.script import cmd, tlm, wait_check
     from nos3.gps_lib import *
 except ImportError:
     pass
@@ -32,8 +32,8 @@ def run_novatel_oem615_device_test():
         cmd_err_cnt = tlm("NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM CMD_ERR_COUNT")
         cmd("NOVATEL_OEM615_DEBUG NOVATEL_OEM615_DISABLE_CC")
         get_gps_hk()
-        check(f"NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM CMD_COUNT == {cmd_cnt}")
-        check(f"NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM CMD_ERR_COUNT == {cmd_err_cnt+1}")
+        wait_check(f"NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM CMD_COUNT == {cmd_cnt}", 5)
+        wait_check(f"NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM CMD_ERR_COUNT == {cmd_err_cnt+1}", 5)
 
         # Enable
         enable_gps()
@@ -50,8 +50,8 @@ def run_novatel_oem615_device_test():
         cmd_err_cnt = tlm("NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM CMD_ERR_COUNT")
         cmd("NOVATEL_OEM615_DEBUG NOVATEL_OEM615_ENABLE_CC")
         get_gps_hk()
-        check(f"NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM CMD_COUNT == {cmd_cnt}")
-        check(f"NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM CMD_ERR_COUNT == {cmd_err_cnt+1}")
+        wait_check(f"NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM CMD_COUNT == {cmd_cnt}", 5)
+        wait_check(f"NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM CMD_ERR_COUNT == {cmd_err_cnt+1}", 5)
 
         # Reconfirm data remains as expected
         confirm_gps_data_loop()

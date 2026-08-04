@@ -7,7 +7,7 @@ for p in glob.glob('/gems/gems/openc3-cosmos-nos3-*/targets/NOVATEL_OEM615/scrip
         sys.path.append(p)
 
 try:
-    from openc3.script import cmd, tlm, check, wait_check_packet, wait_check_tolerance
+    from openc3.script import cmd, tlm, check, wait_check, wait_check_packet, wait_check_tolerance
     import time
 except ImportError:
     pass
@@ -50,19 +50,19 @@ def gps_cmd(command_string):
             get_gps_hk()
             current = tlm("NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM CMD_COUNT")
             
-    check(f"NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM CMD_COUNT >= {count}")
+    wait_check(f"NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM CMD_COUNT >= {count}", NOVATEL_OEM615_RESPONSE_TIMEOUT)
 
 def enable_gps():
     # Send command
     gps_cmd("NOVATEL_OEM615_DEBUG NOVATEL_OEM615_ENABLE_CC")
     # Confirm
-    check("NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM DEVICE_ENABLED == 'ENABLED'")
+    wait_check("NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM DEVICE_ENABLED == 'ENABLED'", NOVATEL_OEM615_RESPONSE_TIMEOUT)
 
 def disable_gps():
     # Send command
     gps_cmd("NOVATEL_OEM615_DEBUG NOVATEL_OEM615_DISABLE_CC")
     # Confirm
-    check("NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM DEVICE_ENABLED == 'DISABLED'")
+    wait_check("NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM DEVICE_ENABLED == 'DISABLED'", NOVATEL_OEM615_RESPONSE_TIMEOUT)
 
 def safe_gps():
     time.sleep(2)
@@ -84,8 +84,8 @@ def confirm_gps_data():
     wait_check_tolerance("NOVATEL_OEM615_DEBUG NOVATEL_OEM615_DATA_TLM VEL_Z", tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA VELOCITY_W_2"), NOVATEL_OEM615_VELOCITY_DIFF, NOVATEL_OEM615_RESPONSE_TIMEOUT)
 
     get_gps_hk()
-    check(f"NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM DEVICE_COUNT >= {dev_cmd_cnt}")
-    check(f"NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM DEVICE_ERR_COUNT == {dev_cmd_err_cnt}")
+    wait_check(f"NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM DEVICE_COUNT >= {dev_cmd_cnt}", NOVATEL_OEM615_RESPONSE_TIMEOUT)
+    wait_check(f"NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM DEVICE_ERR_COUNT == {dev_cmd_err_cnt}", NOVATEL_OEM615_RESPONSE_TIMEOUT)
 
 def confirm_gps_data_loop():
     for n in range(NOVATEL_OEM615_DEVICE_LOOP_COUNT):
