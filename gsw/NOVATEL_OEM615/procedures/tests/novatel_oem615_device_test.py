@@ -56,5 +56,7 @@ def run_novatel_oem615_device_test():
         # Reconfirm data remains as expected
         confirm_gps_data_loop()
 
+        time.sleep(2)
+
         # Disable
         disable_gps()
