@@ -65,7 +65,7 @@ def disable_gps():
     wait_check("NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM DEVICE_ENABLED == 'DISABLED'", NOVATEL_OEM615_RESPONSE_TIMEOUT)
 
 def safe_gps():
-    time.sleep(2)
+    wait_check_packet("NOVATEL_OEM615_DEBUG", "NOVATEL_OEM615_HK_TLM", 1, 60)
     get_gps_hk()
     state = tlm("NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM DEVICE_ENABLED")
     if (state != "DISABLED"):
