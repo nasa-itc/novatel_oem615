@@ -21,14 +21,26 @@ NOVATEL_OEM615_TEST_LOOP_COUNT = 1
 NOVATEL_OEM615_DEVICE_LOOP_COUNT = 5
 NOVATEL_OEM615_POSITION_DIFF = 25000
 NOVATEL_OEM615_VELOCITY_DIFF = 100
+NOVATEL_OEM615_HK_MAX_ATTEMPTS = 5
+NOVATEL_OEM615_HK_RETRY_SLEEP = 3
 
 #
 # Functions
 #
 def get_gps_hk():
-    cmd("NOVATEL_OEM615_DEBUG NOVATEL_OEM615_REQ_HK")
-    wait_check_packet("NOVATEL_OEM615_DEBUG", "NOVATEL_OEM615_HK_TLM", 1, NOVATEL_OEM615_RESPONSE_TIMEOUT)
-    time.sleep(NOVATEL_OEM615_CMD_SLEEP)
+    for attempt in range(NOVATEL_OEM615_HK_MAX_ATTEMPTS):
+        try:
+            cmd("NOVATEL_OEM615_DEBUG NOVATEL_OEM615_REQ_HK")
+            wait_check_packet("NOVATEL_OEM615_DEBUG", "NOVATEL_OEM615_HK_TLM", 1, NOVATEL_OEM615_RESPONSE_TIMEOUT)
+            time.sleep(NOVATEL_OEM615_CMD_SLEEP)
+            return  # success
+
+        except Exception as e:
+            if attempt == NOVATEL_OEM615_HK_MAX_ATTEMPTS - 1:
+                raise RuntimeError(f"Failed to receive GPS HK telemetry after {NOVATEL_OEM615_HK_MAX_ATTEMPTS} attempts: {e}")
+            else:
+                print(f"REQ_HK attempt {attempt + 1} failed ({e}), retrying...")
+                time.sleep(NOVATEL_OEM615_HK_RETRY_SLEEP)
 
 def gps_cmd(command_string):
     count = tlm("NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM CMD_COUNT") + 1

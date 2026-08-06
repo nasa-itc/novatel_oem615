@@ -35,10 +35,12 @@ def run_novatel_oem615_device_test():
         wait_check(f"NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM CMD_COUNT == {cmd_cnt}", 5)
         wait_check(f"NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM CMD_ERR_COUNT == {cmd_err_cnt+1}", 5)
 
+        time.sleep(3)
+
         # Enable
         enable_gps()
 
-        time.sleep(1)
+        time.sleep(3)
 
         get_gps_hk()
 
@@ -53,10 +55,12 @@ def run_novatel_oem615_device_test():
         wait_check(f"NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM CMD_COUNT == {cmd_cnt}", 5)
         wait_check(f"NOVATEL_OEM615_DEBUG NOVATEL_OEM615_HK_TLM CMD_ERR_COUNT == {cmd_err_cnt+1}", 5)
 
+        time.sleep(3)
+
         # Reconfirm data remains as expected
         confirm_gps_data_loop()
 
-        time.sleep(2)
+        time.sleep(3)
 
         # Disable
         disable_gps()
