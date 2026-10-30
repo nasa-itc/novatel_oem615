@@ -64,7 +64,7 @@ typedef struct
     double   VelX;
     double   VelY;
     double   VelZ;
-    float    lat:
+    float    lat;
     float    lon;
     float    alt;
 
